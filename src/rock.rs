@@ -10,8 +10,14 @@ pub struct RockAssets {
     current: usize,
 }
 
+pub fn plugin(app: &mut App)
+{
+    app
+        .add_systems(Startup, setup_rocks)
+        .add_systems(Update, cycle_rocks);
+}
 
-pub fn setup_rocks(mut commands: Commands, asset_server: Res<AssetServer>) {
+fn setup_rocks(mut commands: Commands, asset_server: Res<AssetServer>) {
     let mut scenes = Vec::new();
     for i in 0..10 {
         let path = format!("Rock{}.glb#Scene0", i);
@@ -29,7 +35,7 @@ pub fn setup_rocks(mut commands: Commands, asset_server: Res<AssetServer>) {
     ));
 }
 
-pub fn cycle_rocks(
+fn cycle_rocks(
     mut commands: Commands,
     keyboard: Res<ButtonInput<KeyCode>>,
     mut assets: ResMut<RockAssets>,
