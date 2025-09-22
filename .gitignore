@@ -24,3 +24,8 @@ bevy_game
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 .idea/
 .vscode/
+
+# Assets - ignore only large assets, like 3d models and textures - they will be pulled from a second repository via `make assets`
+assets/*.glb
+assets/*.hdr
+assets/.git
