@@ -6,8 +6,25 @@ use bevy::{
 
 use std::f32::consts::FRAC_PI_2;
 use std::env;
+use crate::game_states::GameState;
 
 
+
+
+pub fn plugin(app: &mut App)
+{
+    app.add_systems(OnEnter(GameState::Game), grab_mouse);
+    app.add_systems(Update, 
+        (player_cam_system, player_system)
+        .in_set(GameSystemSet)
+        .run_if(in_state(GameState::Game))
+    );
+}
+
+
+
+#[derive(SystemSet, Debug, Clone, PartialEq, Eq, Hash)]
+struct GameSystemSet;
 
 #[derive(Component)]
 pub struct Player;
@@ -15,10 +32,14 @@ pub struct Player;
 #[derive(Component)]
 pub struct PlayerCam;
 
-
-
 #[derive(Debug, Component, Deref, DerefMut)]
 pub struct CameraSensitivity(Vec2);
+
+
+
+
+
+
 
 impl Default for CameraSensitivity {
     fn default() -> Self {
@@ -29,7 +50,7 @@ impl Default for CameraSensitivity {
 
 
 
-pub fn grab_mouse(mut window: Single<&mut Window>) {
+fn grab_mouse(mut window: Single<&mut Window>) {
     window.cursor_options.visible = !window.cursor_options.visible;
     window.cursor_options.grab_mode = match cfg!(target_os = "macos") {
         true => CursorGrabMode::Locked,
@@ -37,7 +58,7 @@ pub fn grab_mouse(mut window: Single<&mut Window>) {
     }
 }
 
-pub fn player_system(
+fn player_system(
     keyboard_input: Res<ButtonInput<KeyCode>>,
     time: Res<Time>,
     player: Single<(&mut Transform, &CameraSensitivity), With<Player>>,
@@ -75,7 +96,7 @@ pub fn player_system(
 }
 
 
-pub fn player_cam_system(
+fn player_cam_system(
     accumulated_mouse_motion: Res<AccumulatedMouseMotion>,
     mut windows: Query<&mut Window, With<PrimaryWindow>>,
     player: Single<(&mut Transform, &CameraSensitivity), With<PlayerCam>>,
