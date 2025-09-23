@@ -15,24 +15,23 @@ use game_states::GameState;
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
-        .init_state::<GameState>()
+        .add_systems(Startup, setup)
         .add_plugins((
             menu::menu_plugin,
             skybox::plugin,
             controller::plugin,
             rock::plugin
         ))
-        .add_systems(Startup, setup)
-        // .add_systems(Startup, setup_rocks)
-        // .add_systems(Update, cycle_rocks)
-        .add_systems(Update, print_state)
+        .init_state::<GameState>()
+
+        // .add_systems(Update, print_state)
         .run();
 }
 
 
-fn print_state(current_state: Res<State<game_states::GameState>>) {
-    println!("État courant : {:?}", current_state.get());
-}
+// fn print_state(current_state: Res<State<game_states::GameState>>) {
+//     println!("État courant : {:?}", current_state.get());
+// }
 
 fn setup(
     mut commands: Commands,
