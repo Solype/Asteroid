@@ -15,6 +15,7 @@ use setup::*;
 pub fn menu_plugin(app: &mut App)
 {
     app.add_systems(OnEnter(GameState::Menu), setup_menu);
+    app.add_event::<MenuPlaneCursorCastEvent>();
     app.add_systems(
         Update,
         (menu_system, spawn_menu_plane, cast_ray_from_click).in_set(MenuSystemSet).run_if(in_state(GameState::Menu)),

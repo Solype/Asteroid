@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 use bevy::render::camera::RenderTarget;
 use bevy::render::render_resource::{Extent3d, TextureDescriptor, TextureDimension, TextureFormat, TextureUsages};
+use bevy::render::view::RenderLayers;
 use crate::controller::PlayerCam;
 
 use crate::menu::structs::*;
@@ -16,7 +17,6 @@ pub fn setup_menu(mut commands: Commands, images: ResMut<Assets<Image>>, menu_te
 pub fn menu_cleanup(mut commands: Commands, query: Query<Entity, With<MenuCameraComponent>>) {
     for entity in query.iter() {
         commands.entity(entity).despawn();
-        info!("MenuCamera supprimée avec tous ses enfants {:?}", entity);
     }
 }
 
@@ -30,28 +30,67 @@ pub fn menu_cleanup(mut commands: Commands, query: Query<Entity, With<MenuCamera
 ////////////////////////////////////////////////////////////////////////////////////////////
 
 
-fn setup_menu_camera(mut commands: Commands, image_handle: Handle<Image>)
-{
-    let root_cam = commands.spawn((
-        Camera2d::default(),
-        Camera {
-            target: RenderTarget::Image(image_handle.clone().into()),
-            ..default()
-        },
-        MenuCameraComponent
-    )).id();
+fn setup_menu_camera(mut commands: Commands, image_handle: Handle<Image>) {
+    let menu_layer = RenderLayers::layer(1);
 
-
-    let square = commands.spawn((
-        Sprite {
-                color: Color::WHITE,
-                custom_size: Some(Vec2::new(100.0, 100.0)), // taille du carré
+    // Caméra qui rend dans la texture
+    let root_cam = commands
+        .spawn((
+            Camera2d::default(),
+            Camera {
+                target: RenderTarget::Image(image_handle.clone().into()),
                 ..default()
-        },
-        CameraSquareElement
-    )).id();
+            },
+            MenuCameraComponent,
+            menu_layer.clone(),
+        ))
+        .id();
 
-    commands.entity(root_cam).add_child(square);
+    // Fond du menu
+    let background = commands
+        .spawn((
+            Sprite {
+                color: Color::srgba(0.1, 0.1, 0.1, 0.8), // gris semi-transparent
+                custom_size: Some(Vec2::new(400.0, 200.0)),
+                ..default()
+            },
+            menu_layer.clone(),
+        ))
+        .id();
+
+    // Bouton Start
+    let start_button = commands
+        .spawn((
+            Sprite {
+                color: Color::srgb(0.2, 0.8, 0.2),
+                custom_size: Some(Vec2::new(150.0, 50.0)),
+                ..default()
+            },
+            Transform::from_translation(Vec3::new(0.0, 40.0, 1.0)),
+            MenuButton {
+                action: MenuAction::Start,
+            },
+            menu_layer.clone(),
+        ))
+        .id();
+
+    // Bouton Quit
+    let quit_button = commands
+        .spawn((
+            Sprite {
+                color: Color::srgb(0.8, 0.2, 0.2),
+                custom_size: Some(Vec2::new(150.0, 50.0)),
+                ..default()
+            },
+            Transform::from_translation(Vec3::new(0.0, -40.0, 1.0)),
+            MenuButton {
+                action: MenuAction::Quit,
+            },
+            menu_layer.clone(),
+        ))
+        .id();
+
+    commands.entity(root_cam).add_children(&[background, start_button, quit_button]);
 }
 
 pub fn spawn_menu_plane(
@@ -85,7 +124,7 @@ pub fn spawn_menu_plane(
                 rotation: look_at,
                 ..default()
             },
-            MenuPlane
+            MenuPlane { height: 2.0, width: 4.0 }
         ));
         commands.remove_resource::<SpawnMenuPlane>();
     }
