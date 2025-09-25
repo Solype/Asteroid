@@ -32,7 +32,8 @@ pub fn cast_ray_from_click(
                 cursor_x: local_point.x,
                 cursor_y: local_point.y,
                 width: menu_plane.width,
-                height: menu_plane.height
+                height: menu_plane.height,
+                menu_id: menu_plane.menu_id
             });
         }
     }
