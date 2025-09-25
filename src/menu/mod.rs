@@ -18,7 +18,7 @@ pub fn menu_plugin(app: &mut App)
     app.add_event::<MenuPlaneCursorCastEvent>();
     app.add_systems(
         Update,
-        (menu_system, spawn_menu_plane, cast_ray_from_click).in_set(MenuSystemSet).run_if(in_state(GameState::Menu)),
+        (menu_system, spawn_menu_plane, cast_ray_from_click, menu_button_collision_system).in_set(MenuSystemSet).run_if(in_state(GameState::Menu)),
     );
     app.add_systems(
     OnExit(GameState::Menu),

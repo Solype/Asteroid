@@ -1,17 +1,17 @@
 use bevy::prelude::*;
 use bevy::render::camera::RenderTarget;
 use bevy::render::render_resource::{Extent3d, TextureDescriptor, TextureDimension, TextureFormat, TextureUsages};
-use bevy::render::view::RenderLayers;
 use crate::controller::PlayerCam;
 
-use crate::menu::structs::*;
+use crate::menu::{structs::*};
 
 
 pub fn setup_menu(mut commands: Commands, images: ResMut<Assets<Image>>, menu_texture: Option<Res<MenuCameraTarget>>)
 {
     commands.insert_resource(SpawnMenuPlane);
     let handle = setup_texture_camera(&mut commands, images, menu_texture);
-    setup_menu_camera(commands, handle);
+    let root_came = setup_menu_camera(&mut commands, handle);
+    setup_2d_scene(&mut commands, MenuTypes::MainMenu, root_came);
 }
 
 pub fn menu_cleanup(mut commands: Commands, query: Query<Entity, With<MenuCameraComponent>>) {
@@ -30,21 +30,9 @@ pub fn menu_cleanup(mut commands: Commands, query: Query<Entity, With<MenuCamera
 ////////////////////////////////////////////////////////////////////////////////////////////
 
 
-fn setup_menu_camera(mut commands: Commands, image_handle: Handle<Image>) {
-    let menu_layer = RenderLayers::layer(1);
-
-    // Caméra qui rend dans la texture
-    let root_cam = commands
-        .spawn((
-            Camera2d::default(),
-            Camera {
-                target: RenderTarget::Image(image_handle.clone().into()),
-                ..default()
-            },
-            MenuCameraComponent,
-            menu_layer.clone(),
-        ))
-        .id();
+fn setup_2d_scene(commands: &mut Commands, menu_id: MenuTypes, camera_entity: Entity)
+{
+    let menu_layer = MenuTypes::layer(menu_id);
 
     // Fond du menu
     let background = commands
@@ -90,7 +78,26 @@ fn setup_menu_camera(mut commands: Commands, image_handle: Handle<Image>) {
         ))
         .id();
 
-    commands.entity(root_cam).add_children(&[background, start_button, quit_button]);
+    commands.entity(camera_entity).add_children(&[background, start_button, quit_button]);
+}
+
+
+fn setup_menu_camera(commands: &mut Commands, image_handle: Handle<Image>) -> Entity
+{
+    let menu_layer = MenuTypes::layer(MenuTypes::MainMenu);
+
+    // Caméra qui rend dans la texture
+    return commands
+        .spawn((
+            Camera2d::default(),
+            Camera {
+                target: RenderTarget::Image(image_handle.clone().into()),
+                ..default()
+            },
+            MenuCameraComponent,
+            menu_layer.clone(),
+        ))
+        .id();
 }
 
 pub fn spawn_menu_plane(
@@ -124,7 +131,7 @@ pub fn spawn_menu_plane(
                 rotation: look_at,
                 ..default()
             },
-            MenuPlane { height: 2.0, width: 4.0 }
+            MenuPlane { height: 2.0, width: 4.0, menu_id: MenuTypes::MainMenu }
         ));
         commands.remove_resource::<SpawnMenuPlane>();
     }
