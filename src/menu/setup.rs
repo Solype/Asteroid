@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy::render::camera::RenderTarget;
 use bevy::render::render_resource::{Extent3d, TextureDescriptor, TextureDimension, TextureFormat, TextureUsages};
-use crate::controller::PlayerCam;
+// use crate::controller::Player;
 
 use crate::menu::{structs::*};
 
@@ -98,43 +98,6 @@ fn setup_menu_camera(commands: &mut Commands, image_handle: Handle<Image>) -> En
             menu_layer.clone(),
         ))
         .id();
-}
-
-pub fn spawn_menu_plane(
-    mut commands: Commands,
-    player_cam_query: Query<&GlobalTransform, With<PlayerCam>>,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
-    menu_texture: Res<MenuCameraTarget>,
-    trigger: Option<Res<SpawnMenuPlane>>,
-) {
-    if trigger.is_none() {
-        return;
-    }
-    if let Ok(cam_transform) = player_cam_query.single() {
-        let distance = 3.0;
-        let position = cam_transform.translation() + cam_transform.forward() * distance;
-        let look_at = Quat::from_rotation_arc(
-            Vec3::Y,
-            (-cam_transform.forward()).into(),
-        );
-        let mesh = meshes.add(Plane3d::default().mesh().size(4.0, 2.0));
-        let material = materials.add(StandardMaterial {
-            base_color_texture: Some(menu_texture.image.clone()),
-            ..default()
-        });
-        commands.spawn((
-            Mesh3d(mesh),
-            MeshMaterial3d(material),
-            Transform {
-                translation: position,
-                rotation: look_at,
-                ..default()
-            },
-            MenuPlane { height: 2.0, width: 4.0, menu_id: MenuTypes::MainMenu }
-        ));
-        commands.remove_resource::<SpawnMenuPlane>();
-    }
 }
 
 fn setup_texture_camera(commands: &mut Commands, mut images: ResMut<Assets<Image>>, menu_texture: Option<Res<MenuCameraTarget>>) -> Handle<Image>
