@@ -64,19 +64,29 @@ fn check_button_collision(
 pub fn menu_button_collision_system(
     mut events: EventReader<MenuPlaneCursorCastEvent>,
     buttons: Query<(&Transform, &Sprite, &MenuButton, &RenderLayers)>,
+    texture: Res<MenuCameraTarget>,
+    images: Res<Assets<Image>>
 ) {
     for event in events.read() {
         let cursor_x = event.cursor_x;
         let cursor_y = event.cursor_y;
+        let Some(image) = images.get(&texture.image) else {
+            continue;
+        };
 
         for (transform, sprite, button, layer) in buttons.iter() {
             // Filtrer sur le layer correspondant à ce menu
             let event_layer = MenuTypes::layer(event.menu_id);
             if !layer.intersects(&event_layer) {
                 info!("No layer intersects");
-                continue; // ignorer les boutons d'un autre menu
+                continue; // ignorer les boutons d'un aut   re menu
             }
-            check_button_collision(cursor_x, cursor_y, transform, sprite, button);
+            let cursor_px = (cursor_x / event.width) * image.width() as f32;
+            let cursor_py = (cursor_y / event.height) * image.height() as f32;
+            info!("event.height {}, cursor_y {}, image.height() {}", event.height, cursor_y, image.height());
+            info!("event.width {}, cursor_x {}, image.width() {}", event.width, cursor_x, image.width());
+            info!("px {} py {}", cursor_px, cursor_py);
+            check_button_collision(cursor_px, cursor_py, transform, sprite, button);
         }
     }
 }

@@ -24,10 +24,8 @@ pub fn cast_ray_from_click(
         if let Some(world_point) =
             ray_plane_intersection(ray.origin, ray.direction.into(), plane_transform)
         {
-            let local_point =
-                plane_transform.compute_matrix().inverse().transform_point3(world_point);
+            let local_point = world_to_plane_coords(world_point, plane_transform);
 
-            // émet l’event
             writer.write(MenuPlaneCursorCastEvent {
                 cursor_x: local_point.x,
                 cursor_y: local_point.y,
@@ -38,6 +36,8 @@ pub fn cast_ray_from_click(
         }
     }
 }
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////
 /// 
@@ -45,6 +45,29 @@ pub fn cast_ray_from_click(
 /// 
 ////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////
+
+fn world_to_plane_coords(world_point: Vec3, plane_transform: &GlobalTransform) -> Vec2
+{
+    let plane_origin = plane_transform.translation();
+    let plane_normal = plane_transform.rotation() * Vec3::Y; // Y local = normal
+
+    let rel_point = world_point - plane_origin;
+
+    let arbitrary = if plane_normal.abs_diff_eq(Vec3::Y, 1e-3) {
+        Vec3::X
+    } else {
+        Vec3::Y
+    };
+    let right = plane_normal.cross(arbitrary).normalize();
+
+    let up = plane_normal.cross(right).normalize();
+
+    let u = rel_point.dot(right);
+    let v = rel_point.dot(up);
+
+    Vec2::new(u, v)
+}
+
 
 fn ray_from_cursor(
     camera: &Camera,
