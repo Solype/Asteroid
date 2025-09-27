@@ -1,7 +1,5 @@
 use bevy::{
-    prelude::*,
-    window::{PrimaryWindow, CursorGrabMode},
-    input::mouse::AccumulatedMouseMotion,
+    input::mouse::AccumulatedMouseMotion, prelude::*, window::{CursorGrabMode, PrimaryWindow}
 };
 
 use std::f32::consts::FRAC_PI_2;
@@ -69,16 +67,16 @@ fn player_system(
     let mut delta_pitch = 0.0;
 
     if keyboard_input.pressed(KeyCode::KeyW) {
-        delta_pitch -= 20.0;
+        delta_pitch -= 200.0;
     }
     if keyboard_input.pressed(KeyCode::KeyS) {
-        delta_pitch += 20.0;
+        delta_pitch += 200.0;
     }
     if keyboard_input.pressed(KeyCode::KeyA) {
-        delta_yaw += 20.0;
+        delta_yaw += 200.0;
     }
     if keyboard_input.pressed(KeyCode::KeyD) {
-        delta_yaw -= 20.0;
+        delta_yaw -= 200.0;
     }
 
     if delta_yaw != 0.0 || delta_pitch != 0.0 {
