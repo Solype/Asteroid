@@ -33,7 +33,7 @@ pub struct MenuPlaneCursorCastEvent {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum MenuTypes {
     MainMenu = 1,
-    StatMenu = 2
+    // StatMenu = 2
 }
 
 impl Default for MenuTypes {
