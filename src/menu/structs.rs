@@ -7,10 +7,6 @@ use bevy::render::view::RenderLayers;
 #[derive(SystemSet, Debug, Clone, PartialEq, Eq, Hash)]
 pub struct MenuSystemSet;
 
-#[derive(Resource)]
-pub struct SpawnMenuPlane;
-
-
 // 3D components
 
 #[derive(Component, Default)]

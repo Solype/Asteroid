@@ -14,17 +14,21 @@ use setup::*;
 
 pub fn menu_plugin(app: &mut App)
 {
-    app.add_systems(OnEnter(GameState::Menu), setup_menu);
+    app.add_systems(Startup, setup_texture_camera);
+    app.add_systems(PostStartup, apply_texture_to_quad);
     app.add_event::<MenuPlaneCursorCastEvent>();
     app.add_systems(
+        OnEnter(GameState::Menu), 
+        setup_menu
+    );
+    app.add_systems(
         Update,
-        (menu_system, /*spawn_menu_plane,*/ cast_ray_from_click, menu_button_collision_system).in_set(MenuSystemSet).run_if(in_state(GameState::Menu)),
+        (menu_system, cast_ray_from_click, menu_button_collision_system).in_set(MenuSystemSet).run_if(in_state(GameState::Menu)),
     );
     app.add_systems(
     OnExit(GameState::Menu),
     menu_cleanup
     );
-    app.add_systems(Update, print_all_entities.run_if(in_state(GameState::Game)));
 }
 
 
