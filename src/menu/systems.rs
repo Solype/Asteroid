@@ -14,22 +14,6 @@ pub fn menu_system(
     }
 }
 
-// pub fn 
-
-pub fn print_all_entities(query: Query<Entity, With<MenuCameraComponent>>) {
-    for entity in query.iter() {
-        let mut comps = vec![];
-        comps.push("MenuCameraComponent");
-        info!("Entity {:?} components: {:?}", entity, comps);
-    }
-}
-
-
-
-
-
-
-
 fn point_in_button(cursor_x: f32, cursor_y: f32, pos: Vec3, size: Vec2) -> bool
 {
     let half_w = size.x / 2.0;
@@ -75,11 +59,10 @@ pub fn menu_button_collision_system(
         };
 
         for (transform, sprite, button, layer) in buttons.iter() {
-            // Filtrer sur le layer correspondant à ce menu
             let event_layer = MenuTypes::layer(event.menu_id);
             if !layer.intersects(&event_layer) {
                 info!("No layer intersects");
-                continue; // ignorer les boutons d'un aut   re menu
+                continue;
             }
             let cursor_px = (cursor_x / event.width) * image.width() as f32;
             let cursor_py = (cursor_y / event.height) * image.height() as f32;
