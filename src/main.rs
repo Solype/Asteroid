@@ -1,9 +1,10 @@
 use bevy::prelude::*;
 use bevy::asset::RenderAssetUsages;
+use bevy::render::mesh::{Indices, Mesh};
+use bevy::render::render_resource::PrimitiveTopology;
 
 
 mod controller;
-// mod rock;
 mod menu;
 mod game_states;
 mod skybox;
@@ -24,56 +25,16 @@ fn main() {
             // rock::plugin
         ))
         .init_state::<GameState>()
+        .add_systems(Update, start_after_startup.run_if(in_state(GameState::Startup)))
 
         // .add_systems(Update, print_state)
         .run();
 }
 
-// fn create_quad(
-//     top_left: Vec3,
-//     top_right: Vec3,
-//     bottom_right: Vec3,
-//     bottom_left: Vec3,
-// ) -> (Plane3d, Transform) {
-//     let bottom = (bottom_left - bottom_right).length();
-//     let top = (top_left - top_right).length();
-//     let right = (top_right - bottom_right).length();
-//     let left = (top_left - bottom_left).length();
-//     let mut center = (top_left + top_right + bottom_right + bottom_left) / 4.0;
-
-//     let width = top.max(bottom);
-//     let height = left.max(right);
-
-//     let normal = -(top_right - top_left).cross(bottom_left - top_left).normalize();
-
-//     let mut plane = Plane3d::default();
-//     plane.half_size = Vec2::new(width / 2.0, height / 2.0);
-//     plane.normal = Dir3::new(normal).unwrap();
-
-//     // Décaler légèrement le plan le long de la normale
-//     let offset = 0.01; // ajuster selon ton besoin
-//     center += normal * offset;
-
-//     let rotation = Quat::default();
-//     let mut transform = Transform::from_translation(center).with_rotation(rotation);
-
-//     // Axe local du plane qui correspond à son "haut"
-//     let local_up = transform.rotation * Vec3::Y; // ici Y au lieu de X
-//     let mut target_up = (top_right - top_left).normalize();
-//     target_up -= normal * target_up.dot(normal); // projection sur le plan
-
-//     let cos = local_up.dot(target_up).clamp(-1.0, 1.0);
-//     let angle = cos.acos();
-//     let sign = local_up.cross(target_up).dot(normal);
-//     let signed_angle = if sign < 0.0 { -angle } else { angle };
-
-//     transform.rotate_local_axis(plane.normal, signed_angle);
-
-//     (plane, transform)
-// }
-
-use bevy::render::mesh::{Indices, Mesh};
-use bevy::render::render_resource::PrimitiveTopology;
+fn start_after_startup(mut next_state: ResMut<NextState<GameState>>)
+{
+    next_state.set(GameState::Menu);
+}
 
 fn create_quad(
     top_left: Vec3,
@@ -129,12 +90,21 @@ fn setup_left_screen(
     let middle_mesh = create_quad(middle_points[0], middle_points[1], middle_points[2], middle_points[3]);
     let right_mesh = create_quad(right_points[0], right_points[1], right_points[2], right_points[3]);
 
+
     let left_id = commands.spawn((
         Mesh3d(meshes.add(Mesh::from(left_mesh))),
         menu::structs::MenuPlane { width: 3.0, height: 2.0, menu_id: menu::structs::MenuTypes::MainMenu }
     )).id();
-    let middle_id = commands.spawn((Mesh3d(meshes.add(Mesh::from(middle_mesh))))).id();
-    let right_id = commands.spawn((Mesh3d(meshes.add(Mesh::from(right_mesh))))).id();
+
+
+    let middle_id = commands.spawn((
+        Mesh3d(meshes.add(Mesh::from(middle_mesh))),
+    )).id();
+
+
+    let right_id = commands.spawn((
+        Mesh3d(meshes.add(Mesh::from(right_mesh))),
+    )).id();
 
     return (left_id, middle_id, right_id);
 }
@@ -145,7 +115,6 @@ fn setup(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     meshes: ResMut<Assets<Mesh>>,
-    materials: ResMut<Assets<StandardMaterial>>,
 ) {
     let player_entity = commands
         .spawn((
