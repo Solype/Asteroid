@@ -1,121 +1,169 @@
-use bevy::{
-    asset::LoadState,
-    core_pipeline::Skybox,
-    prelude::*,
-    render::{
-        render_resource::TextureViewDimension,
-    },
-    image::{ImageSampler, ImageSamplerDescriptor},
-};
+use bevy::prelude::*;
+use bevy::asset::RenderAssetUsages;
+use bevy::render::mesh::{Indices, Mesh};
+use bevy::render::render_resource::PrimitiveTopology;
 
 
 mod controller;
-mod rock;
-use controller::*;
-use rock::*;
+mod menu;
+mod game_states;
+mod skybox;
 
-/// Ressource pour suivre le chargement du cubemap
-#[derive(Resource)]
-pub struct SkyCubeMap {
-    pub image: Handle<Image>,
-    pub loaded: bool,
-}
+use game_states::GameState;
 
-/// Ressource pour stocker l'entité caméra
-#[derive(Resource)]
-struct CameraHolder(Entity);
+
+
 
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
         .add_systems(Startup, setup)
-        .add_systems(Startup, grab_mouse)
-        .add_systems(Startup, setup_rocks)
-        .add_systems(Update, reinterpret_cubemap)
-        .add_systems(Update, cycle_rocks)
-        .add_systems(Update, player_cam_system)
-        .add_systems(Update, player_system)
+        .add_plugins((
+            menu::menu_plugin,
+            skybox::plugin,
+            controller::plugin,
+            // rock::plugin
+        ))
+        .init_state::<GameState>()
+        .add_systems(Update, start_after_startup.run_if(in_state(GameState::Startup)))
         .run();
 }
 
-fn reinterpret_cubemap(
-    asset_server: Res<AssetServer>,
-    mut images: ResMut<Assets<Image>>,
-    mut cubemap: ResMut<SkyCubeMap>,
-    mut commands: Commands,
-    camera_holder: Res<CameraHolder>,
-) {
-    if !cubemap.loaded
-        && matches!(
-            asset_server.get_load_state(&cubemap.image),
-            Some(LoadState::Loaded)
-        )
-    {
-        cubemap.loaded = true;
-
-        let image = images.get_mut(&cubemap.image).unwrap();
-
-        let layers = image.height() / image.width();
-        if layers == 6 {
-            image.reinterpret_stacked_2d_as_array(layers);
-            image.sampler = ImageSampler::Descriptor(ImageSamplerDescriptor::nearest());
-            image.texture_view_descriptor = Some(bevy::render::render_resource::TextureViewDescriptor {
-                dimension: Some(TextureViewDimension::Cube),
-                ..Default::default()
-            });
-
-            commands.entity(camera_holder.0).insert(Skybox {
-                image: cubemap.image.clone(),
-                brightness: 1000.0,
-                rotation: Quat::IDENTITY,
-            });
-        } else {
-            warn!(
-                "Skybox image must be 6xN pixels. Got {} layers.",
-                layers
-            );
-        }
-    }
+fn start_after_startup(mut next_state: ResMut<NextState<GameState>>)
+{
+    next_state.set(GameState::Menu);
 }
 
-/// Setup initial : joueur, caméra, lumière, cockpit et cubemap
+fn create_quad(
+    top_left: Vec3,
+    top_right: Vec3,
+    bottom_right: Vec3,
+    bottom_left: Vec3,
+) -> (Mesh, Vec3) {
+    let normal = (top_right - top_left).cross(bottom_left - top_left).normalize();
+
+    let mut mesh = Mesh::new(
+        PrimitiveTopology::TriangleList,
+        RenderAssetUsages::all(),
+    );
+
+    let epsilon = 0.001;
+    let offset = normal * epsilon;
+
+    let positions = vec![
+        top_left - offset,
+        top_right - offset,
+        bottom_right - offset,
+        bottom_left - offset,
+    ];
+
+    let u_axis = (top_right - top_left).normalize();
+    let v_axis = (bottom_left - top_left).normalize();
+
+    let width = (top_right - top_left).length();
+    let height = (bottom_left - top_left).length();
+
+    let uvs: Vec<[f32; 2]> = positions
+        .iter()
+        .map(|p| {
+            let local = *p - top_left;
+            [
+                local.dot(u_axis) / width,
+                local.dot(v_axis) / height,
+            ]
+        })
+        .collect();
+
+    let normals = vec![normal; 4];
+    let indices = Indices::U32(vec![0, 2, 1, 0, 3, 2]);
+
+    mesh.insert_attribute(Mesh::ATTRIBUTE_POSITION, positions);
+    mesh.insert_attribute(Mesh::ATTRIBUTE_NORMAL, normals);
+    mesh.insert_attribute(Mesh::ATTRIBUTE_UV_0, uvs);
+    mesh.insert_indices(indices);
+
+    (mesh, normal)
+}
+
+
+fn setup_left_screen(
+    commands: &mut Commands,
+    mut meshes: ResMut<Assets<Mesh>>,
+) -> (Entity, Entity, Entity)
+{
+    let left_points: Vec<Vec3> = vec![
+        Vec3::new(-0.610449, 0.755574, -0.205797),
+        Vec3::new(-0.502950, 0.752438, -0.251174),
+        Vec3::new(-0.502971, 0.657055, -0.211015),
+        Vec3::new(-0.610428, 0.681590, -0.174664),
+    ];
+    let right_points : Vec<Vec3> = vec![
+        Vec3::new(0.502982, 0.752438, -0.251174),
+        Vec3::new(0.610481, 0.755575, -0.205797),
+        Vec3::new(0.610460, 0.681590, -0.174664),
+        Vec3::new(0.503003, 0.657055, -0.211015),
+    ];
+    let middle_points : Vec<Vec3> = vec![
+        Vec3::new(-0.216544, 0.777080, -0.318808),
+        Vec3::new(0.216575, 0.777080, -0.318808),
+        Vec3::new(0.216575, 0.640333, -0.261248),
+        Vec3::new(-0.216544, 0.640333, -0.261248),
+    ];
+    
+    let (left_mesh, _left_normal) = create_quad(left_points[0], left_points[1], left_points[2], left_points[3]);
+    let (middle_mesh, _middle_normal) = create_quad(middle_points[0], middle_points[1], middle_points[2], middle_points[3]);
+    let (right_mesh, _right_normal) = create_quad(right_points[0], right_points[1], right_points[2], right_points[3]);
+
+
+    let left_id = commands.spawn((
+        Mesh3d(meshes.add(Mesh::from(left_mesh))),
+    )).id();
+    
+    
+    let middle_id = commands.spawn((
+        Mesh3d(meshes.add(Mesh::from(middle_mesh))),
+        menu::structs::MenuPlane { width: 3.0, height: 2.0, menu_id: menu::structs::MenuTypes::MainMenu }
+    )).id();
+
+
+    let right_id = commands.spawn((
+        Mesh3d(meshes.add(Mesh::from(right_mesh))),
+    )).id();
+
+    return (left_id, middle_id, right_id);
+}
+
+
+
 fn setup(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
+    meshes: ResMut<Assets<Mesh>>,
 ) {
-    // Parent du joueur
     let player_entity = commands
         .spawn((
-            Player,
-            CameraSensitivity::default(),
-            Transform::from_xyz(0.0, 2.0, 10.0).looking_at(Vec3::ZERO, Vec3::Y),
+            SceneRoot(asset_server.load("Spaceship.glb#Scene0")),
+            controller::Player,
+            controller::CameraSensitivity::default(),
+            Transform::from_xyz(0.0, 0.0, 0.0).looking_at(Vec3::ZERO, Vec3::Y),
         ))
         .id();
 
-    // Charger l'image du skybox (6 faces verticales)
-    let sky_image = asset_server.load("skybox.png");
-
-    // Ressource pour suivre le chargement
-    commands.insert_resource(SkyCubeMap {
-        image: sky_image.clone(),
-        loaded: false,
-    });
-
-    // Créer la caméra sans skybox pour l'instant
     let camera_entity = commands
         .spawn((
             Camera3d::default(),
             Camera { order: 0, ..default() },
-            Transform::from_xyz(0.0, 0.0, 10.0).looking_at(Vec3::ZERO, Vec3::Y),
-            PlayerCam,
-            CameraSensitivity::default(),
+            Transform::from_xyz(0.0, 1.1, 0.3).looking_at(Vec3::new(-0.216544, 0.777080, -0.318808), Vec3::Y),
+            controller::PlayerCam,
+            controller::CameraSensitivity::default(),
         ))
         .id();
 
-    commands.entity(player_entity).add_child(camera_entity);
-    commands.insert_resource(CameraHolder(camera_entity));
 
-    // Lumière directionnelle
+    let (left_screen, middle_screen, right_screen) = setup_left_screen(&mut commands, meshes);
+    commands.entity(player_entity).add_children(&[camera_entity, left_screen, middle_screen, right_screen]);
+    commands.insert_resource(skybox::CameraHolder(camera_entity));
+
     commands.spawn((
         DirectionalLight {
             illuminance: 20_000.0,
@@ -130,22 +178,4 @@ fn setup(
         )),
         GlobalTransform::default(),
     ));
-
-    // Cockpit / scènes
-    let positions: [[f32; 3]; 6] = [
-        [0.0, 0.0, 20.0],
-        [0.0, 0.0, 0.0],
-        [-10.0, 0.0, 10.0],
-        [10.0, 0.0, 10.0],
-        [0.0, -10.0, 10.0],
-        [0.0, 10.0, 10.0],
-    ];
-
-    for pos in positions {
-        commands.spawn((
-            SceneRoot(asset_server.load("CockpitCentered.glb#Scene0")),
-            Transform::from_xyz(pos[0], pos[1], pos[2]),
-            GlobalTransform::default(),
-        ));
-    }
 }
