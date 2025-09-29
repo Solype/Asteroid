@@ -11,26 +11,28 @@ pub fn setup_menu(mut commands: Commands, menu_texture: Res<MenuCameraTarget>)
     let handle = menu_texture.image.clone();
     let root_came = setup_menu_camera(&mut commands, handle);
     setup_2d_scene(&mut commands, MenuTypes::MainMenu, root_came);
+    info!("Menu setup !");
 }
 
-pub fn menu_cleanup(mut commands: Commands, query: Query<Entity, With<MenuCameraComponent>>) {
-    for entity in query.iter() {
-        commands.entity(entity).despawn();
-    }
-}
+// pub fn menu_cleanup(mut commands: Commands, query: Query<Entity, With<MenuCameraComponent>>) {
+//     for entity in query.iter() {
+//         commands.entity(entity).despawn();
+//     }
+// }
 
 pub fn apply_texture_to_quad(mut commands: Commands, screens: Query<(&MenuPlane, Entity)>, mut materials: ResMut<Assets<StandardMaterial>>, menu_texture: Res<MenuCameraTarget>)
 {
     let mat_handler = materials.add(StandardMaterial {
         base_color_texture: Some(menu_texture.image.clone()),
         reflectance: 0.02,
-        unlit: false,
+        unlit: true,
         ..default()
     });
 
     for (planes, entity) in screens.iter() {
         if planes.menu_id == MenuTypes::MainMenu {
             commands.entity(entity).insert(MeshMaterial3d(mat_handler));
+            info!("Texture applied");
             return;
         }
     }
@@ -60,6 +62,7 @@ pub fn setup_texture_camera(mut commands: Commands, mut images: ResMut<Assets<Im
     image.resize(Extent3d { width: x, height: y, depth_or_array_layers: 1 });
 
     commands.insert_resource(MenuCameraTarget { image: images.add(image) });
+    info!("Texture set !")
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////

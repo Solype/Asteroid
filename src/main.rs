@@ -26,8 +26,6 @@ fn main() {
         ))
         .init_state::<GameState>()
         .add_systems(Update, start_after_startup.run_if(in_state(GameState::Startup)))
-
-        // .add_systems(Update, print_state)
         .run();
 }
 
@@ -41,7 +39,7 @@ fn create_quad(
     top_right: Vec3,
     bottom_right: Vec3,
     bottom_left: Vec3,
-) -> Mesh {
+) -> (Mesh, Vec3) {
     let normal = (top_right - top_left).cross(bottom_left - top_left).normalize();
 
     let mut mesh = Mesh::new(
@@ -49,16 +47,42 @@ fn create_quad(
         RenderAssetUsages::all(),
     );
 
-    let positions = vec![ top_left, top_right, bottom_right, bottom_left ];
+    let epsilon = 0.001;
+    let offset = normal * epsilon;
+
+    let positions = vec![
+        top_left - offset,
+        top_right - offset,
+        bottom_right - offset,
+        bottom_left - offset,
+    ];
+
+    let u_axis = (top_right - top_left).normalize();
+    let v_axis = (bottom_left - top_left).normalize();
+
+    let width = (top_right - top_left).length();
+    let height = (bottom_left - top_left).length();
+
+    let uvs: Vec<[f32; 2]> = positions
+        .iter()
+        .map(|p| {
+            let local = *p - top_left;
+            [
+                local.dot(u_axis) / width,
+                local.dot(v_axis) / height,
+            ]
+        })
+        .collect();
 
     let normals = vec![normal; 4];
-    let indices = Indices::U32(vec![ 0, 2, 1,    0, 3, 2 ]);
-    let uvs = vec![ [0.0, 1.0], [1.0, 1.0], [1.0, 0.0], [0.0, 0.0] ];
+    let indices = Indices::U32(vec![0, 2, 1, 0, 3, 2]);
+
     mesh.insert_attribute(Mesh::ATTRIBUTE_POSITION, positions);
     mesh.insert_attribute(Mesh::ATTRIBUTE_NORMAL, normals);
     mesh.insert_attribute(Mesh::ATTRIBUTE_UV_0, uvs);
     mesh.insert_indices(indices);
-    return mesh
+
+    (mesh, normal)
 }
 
 
@@ -86,19 +110,19 @@ fn setup_left_screen(
         Vec3::new(-0.216544, 0.640333, -0.261248),
     ];
     
-    let left_mesh = create_quad(left_points[0], left_points[1], left_points[2], left_points[3]);
-    let middle_mesh = create_quad(middle_points[0], middle_points[1], middle_points[2], middle_points[3]);
-    let right_mesh = create_quad(right_points[0], right_points[1], right_points[2], right_points[3]);
+    let (left_mesh, _left_normal) = create_quad(left_points[0], left_points[1], left_points[2], left_points[3]);
+    let (middle_mesh, _middle_normal) = create_quad(middle_points[0], middle_points[1], middle_points[2], middle_points[3]);
+    let (right_mesh, _right_normal) = create_quad(right_points[0], right_points[1], right_points[2], right_points[3]);
 
 
     let left_id = commands.spawn((
         Mesh3d(meshes.add(Mesh::from(left_mesh))),
-        menu::structs::MenuPlane { width: 3.0, height: 2.0, menu_id: menu::structs::MenuTypes::MainMenu }
     )).id();
-
-
+    
+    
     let middle_id = commands.spawn((
         Mesh3d(meshes.add(Mesh::from(middle_mesh))),
+        menu::structs::MenuPlane { width: 3.0, height: 2.0, menu_id: menu::structs::MenuTypes::MainMenu }
     )).id();
 
 
