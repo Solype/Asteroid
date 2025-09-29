@@ -52,8 +52,8 @@ pub fn menu_button_collision_system(
     images: Res<Assets<Image>>
 ) {
     for event in events.read() {
-        let cursor_x = event.cursor_x;
-        let cursor_y = event.cursor_y;
+        let cursor_x = event.cursor_coordinates.x;
+        let cursor_y = event.cursor_coordinates.y;
         let Some(image) = images.get(&texture.image) else {
             continue;
         };
@@ -64,10 +64,10 @@ pub fn menu_button_collision_system(
                 info!("No layer intersects");
                 continue;
             }
-            let cursor_px = (cursor_x / event.width) * image.width() as f32;
-            let cursor_py = (cursor_y / event.height) * image.height() as f32;
-            info!("event.height {}, cursor_y {}, image.height() {}", event.height, cursor_y, image.height());
-            info!("event.width {}, cursor_x {}, image.width() {}", event.width, cursor_x, image.width());
+            let cursor_px = (cursor_x / event.screen_dimensions.x) * image.width() as f32;
+            let cursor_py = (cursor_y / event.screen_dimensions.y) * image.height() as f32;
+            info!("event.screen_dimensions.y {}, cursor_y {}, image.height() {}", event.screen_dimensions.y, cursor_y, image.height());
+            info!("event.screen_dimensions.x {}, cursor_x {}, image.width() {}", event.screen_dimensions.x, cursor_x, image.width());
             info!("px {} py {}", cursor_px, cursor_py);
             check_button_collision(cursor_px, cursor_py, transform, sprite, button);
         }

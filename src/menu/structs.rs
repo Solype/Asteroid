@@ -11,18 +11,17 @@ pub struct MenuSystemSet;
 
 #[derive(Component, Default)]
 pub struct MenuPlane {
-    pub width: f32,
-    pub height: f32,
+    pub dimensions: Vec2,
+    pub center: Vec3,
+    pub normal: Vec3,
     pub menu_id: MenuTypes
 }
 
 #[derive(Event, Default)]
 pub struct MenuPlaneCursorCastEvent {
     pub menu_id: MenuTypes,
-    pub cursor_x: f32,
-    pub cursor_y: f32,
-    pub width: f32,
-    pub height: f32,
+    pub cursor_coordinates: Vec2,
+    pub screen_dimensions: Vec2,
 }
 
 #[repr(u8)]

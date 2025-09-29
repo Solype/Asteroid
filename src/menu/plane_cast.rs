@@ -22,15 +22,13 @@ pub fn cast_ray_from_click(
 
     for (plane_transform, menu_plane) in planes.iter_mut() {
         if let Some(world_point) =
-            ray_plane_intersection(ray.origin, ray.direction.into(), plane_transform)
+            ray_plane_intersection(ray.origin, ray.direction.into(), menu_plane.center, menu_plane.normal, plane_transform)
         {
-            let local_point = world_to_plane_coords(world_point, plane_transform);
+            let local_point = world_to_plane_coords(world_point, menu_plane.normal, menu_plane.center, plane_transform);
 
             writer.write(MenuPlaneCursorCastEvent {
-                cursor_x: local_point.x,
-                cursor_y: local_point.y,
-                width: menu_plane.width,
-                height: menu_plane.height,
+                cursor_coordinates: local_point,
+                screen_dimensions: menu_plane.dimensions,
                 menu_id: menu_plane.menu_id
             });
         }
@@ -46,22 +44,31 @@ pub fn cast_ray_from_click(
 ////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-fn world_to_plane_coords(world_point: Vec3, plane_transform: &GlobalTransform) -> Vec2
-{
-    let plane_origin = plane_transform.translation();
-    let plane_normal = plane_transform.rotation() * Vec3::Y; // Y local = normal
+fn world_to_plane_coords(
+    world_point: Vec3,
+    normal: Vec3,
+    center: Vec3,
+    plane_transform: &GlobalTransform,
+) -> Vec2 {
+    // Position et normale du plan dans le monde
+    let plane_origin = plane_transform.translation() + center;
+    let plane_normal = (plane_transform.rotation() * normal).normalize();
 
+    // Point relatif au centre du plan
     let rel_point = world_point - plane_origin;
 
+    // Choisir un vecteur qui n’est pas colinéaire à la normale
     let arbitrary = if plane_normal.abs_diff_eq(Vec3::Y, 1e-3) {
         Vec3::X
     } else {
         Vec3::Y
     };
+
+    // Construire un repère orthonormal (right, up) dans le plan
     let right = plane_normal.cross(arbitrary).normalize();
+    let up = right.cross(plane_normal).normalize();
 
-    let up = plane_normal.cross(right).normalize();
-
+    // Projeter le point relatif sur les axes du plan
     let u = rel_point.dot(right);
     let v = rel_point.dot(up);
 
@@ -78,10 +85,10 @@ fn ray_from_cursor(
 }
 
 
-fn ray_plane_intersection(ray_origin: Vec3, ray_dir: Vec3, plane_transform: &GlobalTransform) -> Option<Vec3>
+fn ray_plane_intersection(ray_origin: Vec3, ray_dir: Vec3, plane_center: Vec3, plane_normal: Vec3, plane_transform: &GlobalTransform) -> Option<Vec3>
 {
-    let plane_pos = plane_transform.translation();
-    let plane_normal = plane_transform.rotation() * Vec3::Y;
+    let plane_pos = plane_transform.translation() + plane_center;
+    let plane_normal = plane_transform.rotation() * plane_normal;
 
     let denom = ray_dir.dot(plane_normal);
     if denom.abs() < 1e-6 {
