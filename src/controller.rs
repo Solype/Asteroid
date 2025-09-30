@@ -60,8 +60,13 @@ fn player_system(
     keyboard_input: Res<ButtonInput<KeyCode>>,
     time: Res<Time>,
     player: Single<(&mut Transform, &CameraSensitivity), With<Player>>,
+    mut next_state: ResMut<NextState<GameState>>
 ) {
     let (mut transform, camera_sensitivity) = player.into_inner();
+
+    if keyboard_input.just_pressed(KeyCode::KeyR) {
+        next_state.set(GameState::Menu);
+    }
 
     let mut delta_yaw = 0.0;
     let mut delta_pitch = 0.0;
@@ -78,6 +83,7 @@ fn player_system(
     if keyboard_input.pressed(KeyCode::KeyD) {
         delta_yaw -= 200.0;
     }
+    
 
     if delta_yaw != 0.0 || delta_pitch != 0.0 {
         let delta_yaw = delta_yaw * camera_sensitivity.x * time.delta_secs();

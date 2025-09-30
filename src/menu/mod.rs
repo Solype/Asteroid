@@ -17,13 +17,16 @@ pub fn menu_plugin(app: &mut App)
     app.add_systems(Startup, setup_texture_camera);
     app.add_systems(PostStartup, (setup_menu, apply_texture_to_quad));
     app.add_event::<MenuPlaneCursorCastEvent>();
-    // app.add_systems(
-    //     OnEnter(GameState::Menu), 
-    //     setup_menu
-    // );
+    app.add_systems(
+        OnEnter(GameState::Menu), 
+        (on_enter_menu, release_mouse)
+    );
     app.add_systems(
         Update,
-        (menu_system, cast_ray_from_click, menu_button_collision_system).in_set(MenuSystemSet).run_if(in_state(GameState::Menu)),
+        (
+            menu_system, cast_ray_from_click, menu_button_collision_system, smooth_look_at_system
+        ).in_set(MenuSystemSet)
+        .run_if(in_state(GameState::Menu)),
     );
     // app.add_systems(
     // OnExit(GameState::Menu),

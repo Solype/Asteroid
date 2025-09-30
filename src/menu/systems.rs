@@ -1,5 +1,7 @@
 use bevy::prelude::*;
 use bevy::render::view::RenderLayers;
+use bevy::window::CursorGrabMode;
+use crate::controller::PlayerCam;
 use crate::game_states::GameState;
 use crate::menu::structs::*;
 
@@ -13,6 +15,55 @@ pub fn menu_system(
         next_state.set(GameState::Game);
     }
 }
+
+pub fn release_mouse(mut window: Single<&mut Window>)
+{
+    window.cursor_options.visible = true;
+    window.cursor_options.grab_mode = CursorGrabMode::None;
+}
+
+pub fn on_enter_menu(mut command: Commands, entity: Single<Entity, With<PlayerCam>>)
+{
+    let player = entity.into_inner();
+
+    command.entity(player).insert(SmoothLookAt {
+        target_world: Vec3 { x: 0.0, y: 0.7087065, z: -0.29002798 },
+        speed: 1.0,
+        up: Vec3::Y,
+    });
+
+
+}
+
+pub fn smooth_look_at_system(
+    time: Res<Time>,
+    mut commands: Commands,
+    mut q: Query<(Entity, &mut Transform, &SmoothLookAt), With<Camera>>,
+) {
+    let dt = time.delta_secs();
+
+    for (entity, mut transform, params) in q.iter_mut() {
+        let to_target = params.target_world - transform.translation;
+        if to_target.length_squared() < 1e-8 {
+            continue;
+        }
+
+        let mut tmp_world = Transform::from_translation(transform.translation);
+        tmp_world.look_at(params.target_world, params.up);
+        let target_world_rot = tmp_world.rotation;
+
+        let t = 1.0 - (-params.speed * dt).exp();
+        transform.rotation = transform.rotation.slerp(target_world_rot, t);
+
+        let angle = transform.rotation.angle_between(target_world_rot);
+        if angle < 1e-3 {
+            transform.rotation = target_world_rot;
+            commands.entity(entity).remove::<SmoothLookAt>();
+        }
+    }
+}
+
+
 
 fn point_in_button(cursor_x: f32, cursor_y: f32, pos: Vec3, size: Vec2) -> bool
 {

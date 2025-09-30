@@ -63,3 +63,10 @@ pub enum MenuAction {
     Start,
     Quit,
 }
+
+#[derive(Component)]
+pub struct SmoothLookAt {
+    pub target_world: Vec3,
+    pub speed: f32,
+    pub up: Vec3,
+}
