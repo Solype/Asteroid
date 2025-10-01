@@ -31,8 +31,6 @@ pub fn on_enter_menu(mut command: Commands, entity: Single<Entity, With<PlayerCa
         speed: 1.0,
         up: Vec3::Y,
     });
-
-
 }
 
 pub fn smooth_look_at_system(
