@@ -80,25 +80,33 @@ fn check_button_collision(
     transform: &Transform,
     sprite: &Sprite,
     button: &MenuButton,
+    inputs: &ButtonInput<MouseButton>,
 ) {
     if let Some(size) = sprite.custom_size {
         if point_in_button(cursor_x, cursor_y, transform.translation, size) {
-            info!("✅ Collision avec bouton {:?}", button.action);
-            match button.action {
-                MenuAction::Start => info!("🚀 Lancer le jeu !"),
-                MenuAction::Quit => info!("👋 Quitter le jeu !"),
+            info!("🟡 Hover bouton {:?}", button.action);
+
+            if inputs.just_pressed(MouseButton::Left) {
+                info!("🖱️ Click gauche sur {:?}", button.action);
+                match button.action {
+                    MenuAction::Start => info!("🚀 Lancer le jeu !"),
+                    MenuAction::Quit => info!("👋 Quitter le jeu !"),
+                }
+            }
+
+            if inputs.just_pressed(MouseButton::Right) {
+                info!("🖱️ Click droit sur {:?}", button.action);
             }
         }
     }
 }
 
-
-
 pub fn menu_button_collision_system(
     mut events: EventReader<MenuPlaneCursorCastEvent>,
     buttons: Query<(&Transform, &Sprite, &MenuButton, &RenderLayers)>,
     texture: Res<MenuCameraTarget>,
-    images: Res<Assets<Image>>
+    images: Res<Assets<Image>>,
+    inputs: Res<ButtonInput<MouseButton>>, // <-- déjà présent
 ) {
     for event in events.read() {
         let cursor_x = event.cursor_coordinates.x;
@@ -110,15 +118,13 @@ pub fn menu_button_collision_system(
         for (transform, sprite, button, layer) in buttons.iter() {
             let event_layer = MenuTypes::layer(event.menu_id);
             if !layer.intersects(&event_layer) {
-                info!("No layer intersects");
                 continue;
             }
             let cursor_px = (cursor_x / event.screen_dimensions.x) * image.width() as f32;
             let cursor_py = (cursor_y / event.screen_dimensions.y) * image.height() as f32;
-            info!("event.screen_dimensions.y {}, cursor_y {}, image.height() {}", event.screen_dimensions.y, cursor_y, image.height());
-            info!("event.screen_dimensions.x {}, cursor_x {}, image.width() {}", event.screen_dimensions.x, cursor_x, image.width());
-            info!("px {} py {}", cursor_px, cursor_py);
-            check_button_collision(cursor_px, cursor_py, transform, sprite, button);
+
+            // Passe les inputs ici
+            check_button_collision(cursor_px, cursor_py, transform, sprite, button, &inputs);
         }
     }
 }
