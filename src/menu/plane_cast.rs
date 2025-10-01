@@ -1,18 +1,21 @@
 use bevy::prelude::*;
+use bevy::input::mouse::MouseMotion;
 use crate::controller::PlayerCam;
 use crate::menu::structs::*;
 
 
-pub fn cast_ray_from_click(
+pub fn cast_ray_from_cursor(
     mut writer: EventWriter<MenuPlaneCursorCastEvent>,
     windows: Query<&Window>,
     cameras: Query<(&Camera, &GlobalTransform), With<PlayerCam>>,
-    mut planes: Query<(&GlobalTransform, &MenuPlane)>,
-    buttons: Res<ButtonInput<MouseButton>>,
+    planes: Query<(&GlobalTransform, &MenuPlane)>,
+    inputs: Res<ButtonInput<MouseButton>>,
+    mut mouse_motion: EventReader<MouseMotion>,
 ) {
-    if !buttons.just_pressed(MouseButton::Left) {
+    if mouse_motion.is_empty() && !inputs.just_pressed(MouseButton::Left) && !inputs.just_pressed(MouseButton::Right) {
         return;
     }
+    mouse_motion.clear();
 
     let window = windows.single().unwrap();
     let Some(cursor_pos) = window.cursor_position() else { return; };
@@ -20,10 +23,8 @@ pub fn cast_ray_from_click(
     let Ok((camera, cam_transform)) = cameras.single() else { return; };
     let Some(ray) = ray_from_cursor(camera, cam_transform, cursor_pos) else { return; };
 
-    for (plane_transform, menu_plane) in planes.iter_mut() {
-        if let Some(world_point) =
-            ray_plane_intersection(ray.origin, ray.direction.into(), menu_plane.center, menu_plane.normal, plane_transform)
-        {
+    for (plane_transform, menu_plane) in planes.iter() {
+        if let Some(world_point) = ray_plane_intersection(ray.origin, ray.direction.into(), menu_plane.center, menu_plane.normal, plane_transform) {
             let local_point = world_to_plane_coords(world_point, menu_plane.normal, menu_plane.center, plane_transform);
 
             writer.write(MenuPlaneCursorCastEvent {
