@@ -1,13 +1,23 @@
 use bevy::prelude::*;
 use bevy::render::view::RenderLayers;
 
+////////////////////////////////////////////////////
+///
+/// Initialisation
+/// 
+////////////////////////////////////////////////////
 
-// Initialisation
 
 #[derive(SystemSet, Debug, Clone, PartialEq, Eq, Hash)]
 pub struct MenuSystemSet;
 
-// 3D components
+
+
+////////////////////////////////////////////////////
+/// 
+/// 3D components
+/// 
+////////////////////////////////////////////////////
 
 #[derive(Component, Default)]
 pub struct MenuPlane {
@@ -17,12 +27,12 @@ pub struct MenuPlane {
     pub menu_id: MenuTypes
 }
 
-#[derive(Event, Default)]
-pub struct MenuPlaneCursorCastEvent {
-    pub menu_id: MenuTypes,
-    pub cursor_coordinates: Vec2,
-    pub screen_dimensions: Vec2,
+
+#[derive(Resource)]
+pub struct MenuCameraTarget {
+    pub image: Handle<Image>,
 }
+
 
 #[repr(u8)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -30,7 +40,6 @@ pub enum MenuTypes {
     MainMenu = 1,
     // StatMenu = 2
 }
-
 impl Default for MenuTypes {
     fn default() -> Self {
         MenuTypes::MainMenu
@@ -43,15 +52,29 @@ impl MenuTypes {
 }
 
 
-// 2D menu elements
+////////////////////////////////////////////////////
+/// 
+/// Events
+/// 
+////////////////////////////////////////////////////
 
-#[derive(Resource)]
-pub struct MenuCameraTarget {
-    pub image: Handle<Image>,
+#[derive(Event, Default)]
+pub struct MenuPlaneCursorCastEvent {
+    pub menu_id: MenuTypes,
+    pub cursor_coordinates: Vec2,
+    pub screen_dimensions: Vec2,
 }
+
+
+////////////////////////////////////////////////////
+/// 
+/// 2D menu elements
+/// 
+////////////////////////////////////////////////////
 
 #[derive(Component)]
 pub struct MenuCameraComponent;
+
 
 #[derive(Component)]
 pub struct MenuButton {
