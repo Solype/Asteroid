@@ -5,12 +5,14 @@ use bevy::render::render_resource::{Extent3d, TextureDescriptor, TextureDimensio
 
 use crate::menu::{structs::*};
 
+static SCREEN_WIDTH : u32 = 512;
+static SCREEN_HEIGHT : u32 = 256;
 
-pub fn setup_menu(mut commands: Commands, menu_texture: Res<MenuCameraTarget>)
+pub fn setup_menu(mut commands: Commands, menu_texture: Res<MenuCameraTarget>, asset_server: Res<AssetServer>)
 {
     let handle = menu_texture.image.clone();
     let root_came = setup_menu_camera(&mut commands, handle);
-    setup_2d_scene(&mut commands, MenuTypes::MainMenu, root_came);
+    setup_2d_scene(&mut commands, MenuTypes::MainMenu, root_came, asset_server);
     info!("Menu setup !");
 }
 
@@ -40,13 +42,10 @@ pub fn apply_texture_to_quad(mut commands: Commands, screens: Query<(&MenuPlane,
 
 pub fn setup_texture_camera(mut commands: Commands, mut images: ResMut<Assets<Image>>)
 {
-    let x: u32 = 512;
-    let y: u32 = 256;
-
     let mut image = Image {
         texture_descriptor: TextureDescriptor {
             label: Some("menu_camera_target"),
-            size: Extent3d { width: x, height: y, depth_or_array_layers: 1 },
+            size: Extent3d { width: SCREEN_WIDTH, height: SCREEN_HEIGHT, depth_or_array_layers: 1 },
             dimension: TextureDimension::D2,
             format: TextureFormat::Bgra8UnormSrgb,
             mip_level_count: 1,
@@ -59,7 +58,7 @@ pub fn setup_texture_camera(mut commands: Commands, mut images: ResMut<Assets<Im
         ..default()
     };
 
-    image.resize(Extent3d { width: x, height: y, depth_or_array_layers: 1 });
+    image.resize(Extent3d { width: SCREEN_WIDTH, height: SCREEN_HEIGHT, depth_or_array_layers: 1 });
 
     commands.insert_resource(MenuCameraTarget { image: images.add(image) });
     info!("Texture set !")
@@ -74,16 +73,17 @@ pub fn setup_texture_camera(mut commands: Commands, mut images: ResMut<Assets<Im
 ////////////////////////////////////////////////////////////////////////////////////////////
 
 
-fn setup_2d_scene(commands: &mut Commands, menu_id: MenuTypes, camera_entity: Entity)
+fn setup_2d_scene(commands: &mut Commands, menu_id: MenuTypes, camera_entity: Entity, asset_server: Res<AssetServer>)
 {
     let menu_layer = MenuTypes::layer(menu_id);
+    let background_texture: Handle<Image> = asset_server.load("menu_background.jpg");
 
     // Fond du menu
     let background = commands
         .spawn((
             Sprite {
-                color: Color::srgba(0.1, 0.1, 0.1, 0.8), // gris semi-transparent
-                custom_size: Some(Vec2::new(400.0, 200.0)),
+                image: background_texture,
+                custom_size: Some(Vec2::new(SCREEN_WIDTH as f32, SCREEN_HEIGHT as f32)),
                 ..default()
             },
             menu_layer.clone(),

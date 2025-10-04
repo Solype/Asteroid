@@ -75,29 +75,27 @@ fn point_in_button(cursor_x: f32, cursor_y: f32, pos: Vec3, size: Vec2) -> bool
 }
 
 fn check_button_collision(
-    cursor_x: f32,
-    cursor_y: f32,
+    cursor: Vec2, 
     transform: &Transform,
     sprite: &Sprite,
     button: &MenuButton,
     inputs: &ButtonInput<MouseButton>,
 ) {
-    if let Some(size) = sprite.custom_size {
-        if point_in_button(cursor_x, cursor_y, transform.translation, size) {
-            info!("🟡 Hover bouton {:?}", button.action);
+    let Some(size) = sprite.custom_size else { return; };
+    if !point_in_button(cursor.x, cursor.y, transform.translation, size) { return; }
 
-            if inputs.just_pressed(MouseButton::Left) {
-                info!("🖱️ Click gauche sur {:?}", button.action);
-                match button.action {
-                    MenuAction::Start => info!("🚀 Lancer le jeu !"),
-                    MenuAction::Quit => info!("👋 Quitter le jeu !"),
-                }
-            }
+    info!("🟡 Hover bouton {:?}", button.action);
 
-            if inputs.just_pressed(MouseButton::Right) {
-                info!("🖱️ Click droit sur {:?}", button.action);
-            }
+    if inputs.just_pressed(MouseButton::Left) {
+        info!("🖱️ Click gauche sur {:?}", button.action);
+        match button.action {
+            MenuAction::Start => info!("🚀 Lancer le jeu !"),
+            MenuAction::Quit => info!("👋 Quitter le jeu !"),
         }
+    }
+
+    if inputs.just_pressed(MouseButton::Right) {
+        info!("🖱️ Click droit sur {:?}", button.action);
     }
 }
 
@@ -106,11 +104,9 @@ pub fn menu_button_collision_system(
     buttons: Query<(&Transform, &Sprite, &MenuButton, &RenderLayers)>,
     texture: Res<MenuCameraTarget>,
     images: Res<Assets<Image>>,
-    inputs: Res<ButtonInput<MouseButton>>, // <-- déjà présent
+    inputs: Res<ButtonInput<MouseButton>>,
 ) {
     for event in events.read() {
-        let cursor_x = event.cursor_coordinates.x;
-        let cursor_y = event.cursor_coordinates.y;
         let Some(image) = images.get(&texture.image) else {
             continue;
         };
@@ -120,11 +116,13 @@ pub fn menu_button_collision_system(
             if !layer.intersects(&event_layer) {
                 continue;
             }
-            let cursor_px = (cursor_x / event.screen_dimensions.x) * image.width() as f32;
-            let cursor_py = (cursor_y / event.screen_dimensions.y) * image.height() as f32;
+            let cursor_cast = Vec2::new(
+                (event.cursor_coordinates.x / event.screen_dimensions.x) * image.width() as f32,
+                (event.cursor_coordinates.y / event.screen_dimensions.y) * image.height() as f32
+            );
 
             // Passe les inputs ici
-            check_button_collision(cursor_px, cursor_py, transform, sprite, button, &inputs);
+            check_button_collision(cursor_cast, transform, sprite, button, &inputs);
         }
     }
 }
