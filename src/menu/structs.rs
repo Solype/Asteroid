@@ -58,9 +58,18 @@ impl MenuTypes {
 /// 
 ////////////////////////////////////////////////////
 
+#[repr(u8)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum CursorEventType {
+    #[default]
+    Move = 0,
+    Click = 1
+}
+
 #[derive(Event, Default)]
 pub struct MenuPlaneCursorCastEvent {
     pub menu_id: MenuTypes,
+    pub event_type: CursorEventType,
     pub cursor_coordinates: Vec2,
     pub screen_dimensions: Vec2,
 }

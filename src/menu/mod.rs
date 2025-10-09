@@ -24,7 +24,7 @@ pub fn menu_plugin(app: &mut App)
     app.add_systems(
         Update,
         (
-            menu_system, cast_ray_from_cursor, menu_button_collision_system, smooth_look_at_system
+            cast_ray_from_cursor, menu_button_collision_system, smooth_look_at_system
         ).in_set(MenuSystemSet)
         .run_if(in_state(GameState::Menu)),
     );

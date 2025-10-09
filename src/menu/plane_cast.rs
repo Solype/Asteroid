@@ -12,7 +12,9 @@ pub fn cast_ray_from_cursor(
     inputs: Res<ButtonInput<MouseButton>>,
     mut mouse_motion: EventReader<MouseMotion>,
 ) {
-    if mouse_motion.is_empty() && !inputs.just_pressed(MouseButton::Left) && !inputs.just_pressed(MouseButton::Right) {
+    let pressed = inputs.just_pressed(MouseButton::Left);
+
+    if mouse_motion.is_empty() && !pressed {
         return;
     }
     mouse_motion.clear();
@@ -26,11 +28,12 @@ pub fn cast_ray_from_cursor(
     for (plane_transform, menu_plane) in planes.iter() {
         if let Some(world_point) = ray_plane_intersection(ray.origin, ray.direction.into(), menu_plane.center, menu_plane.normal, plane_transform) {
             let local_point = world_to_plane_coords(world_point, menu_plane.normal, menu_plane.center, plane_transform);
-
+            info!("local_point {}", local_point);
             writer.write(MenuPlaneCursorCastEvent {
                 cursor_coordinates: local_point,
                 screen_dimensions: menu_plane.dimensions,
-                menu_id: menu_plane.menu_id
+                menu_id: menu_plane.menu_id,
+                event_type: if pressed { CursorEventType::Click } else { CursorEventType::Move }
             });
         }
     }
@@ -55,7 +58,7 @@ fn world_to_plane_coords(
     let tmp_point_transformed = plane_transform.transform_point(tmp_point);
     let plane_origin = plane_transform.transform_point(center);
 
-    let plane_normal = tmp_point_transformed - plane_origin;
+    let plane_normal = (tmp_point_transformed - plane_origin).normalize();
 
     let rel_point = world_point - plane_origin;
 
