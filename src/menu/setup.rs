@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use bevy::render::camera::RenderTarget;
+use bevy::camera::RenderTarget;
 use bevy::render::render_resource::{Extent3d, TextureDescriptor, TextureDimension, TextureFormat, TextureUsages};
 // use crate::controller::Player;
 

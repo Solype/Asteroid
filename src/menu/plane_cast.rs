@@ -5,12 +5,12 @@ use crate::menu::structs::*;
 
 
 pub fn cast_ray_from_cursor(
-    mut writer: EventWriter<MenuPlaneCursorCastEvent>,
+    mut writer: MessageWriter<MenuPlaneCursorCastEvent>,
     windows: Query<&Window>,
     cameras: Query<(&Camera, &GlobalTransform), With<PlayerCam>>,
     planes: Query<(&GlobalTransform, &MenuPlane)>,
     inputs: Res<ButtonInput<MouseButton>>,
-    mut mouse_motion: EventReader<MouseMotion>,
+    mut mouse_motion: MessageReader<MouseMotion>,
 ) {
     let pressed = inputs.just_pressed(MouseButton::Left);
 

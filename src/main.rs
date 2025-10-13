@@ -1,8 +1,8 @@
 use bevy::prelude::*;
 use bevy::asset::RenderAssetUsages;
-use bevy::render::mesh::{Indices, Mesh};
+use bevy::mesh::{Indices, Mesh};
 use bevy::render::render_resource::PrimitiveTopology;
-
+use bevy::light::DirectionalLightShadowMap;
 
 mod controller;
 mod menu;
@@ -16,6 +16,7 @@ use game_states::GameState;
 
 fn main() {
     App::new()
+        .insert_resource(DirectionalLightShadowMap { size: 4096 })
         .add_plugins(DefaultPlugins)
         .add_systems(Startup, setup)
         .add_plugins((
@@ -110,7 +111,7 @@ fn setup_left_screen(
         Vec3::new(0.216575, 0.640333, -0.261248),
         Vec3::new(-0.216544, 0.640333, -0.261248),
     ];
-    
+
     let (left_mesh, _left_normal, _left_center) = create_quad(left_points[0], left_points[1], left_points[2], left_points[3]);
     let (middle_mesh, middle_normal, middle_center) = create_quad(middle_points[0], middle_points[1], middle_points[2], middle_points[3]);
     let (right_mesh, _right_normal, _right_center) = create_quad(right_points[0], right_points[1], right_points[2], right_points[3]);
@@ -119,17 +120,17 @@ fn setup_left_screen(
     let left_id = commands.spawn((
         Mesh3d(meshes.add(Mesh::from(left_mesh))),
     )).id();
-    
-    
+
+
     let middle_id = commands.spawn((
         Mesh3d(meshes.add(Mesh::from(middle_mesh))),
-        menu::structs::MenuPlane { 
+        menu::structs::MenuPlane {
             dimensions: Vec2 {
                 x: (middle_points[0] - middle_points[1]).length(),
-                y: (middle_points[1] - middle_points[2]).length() 
+                y: (middle_points[1] - middle_points[2]).length()
             },
             normal: middle_normal, center:middle_center,
-            menu_id: menu::structs::MenuTypes::MainMenu 
+            menu_id: menu::structs::MenuTypes::MainMenu
         }
     )).id();
 
@@ -172,9 +173,12 @@ fn setup(
     commands.entity(player_entity).add_children(&[camera_entity, left_screen, middle_screen, right_screen]);
     commands.insert_resource(skybox::CameraHolder(camera_entity));
 
-    commands.spawn((
-        DirectionalLight {
-            illuminance: 20_000.0,
+    // commands.spawn((
+    //     Camera3d::default(),
+    //     Transform::from_xyz(0., 1.5, 6.).looking_at(Vec3::ZERO, Vec3::Y),
+    //     CameraController::default(),
+    // ));
+    commands.spawn((DirectionalLight {
             shadows_enabled: true,
             ..default()
         },

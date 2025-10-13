@@ -1,31 +1,20 @@
 use bevy::{
-    input::mouse::AccumulatedMouseMotion,
     prelude::*,
-    window::{CursorGrabMode, CursorOptions, PrimaryWindow},
+    window::{PrimaryWindow, CursorGrabMode},
+    input::mouse::AccumulatedMouseMotion,
 };
 
-use crate::game_states::GameState;
-use std::env;
 use std::f32::consts::FRAC_PI_2;
 
-pub fn plugin(app: &mut App) {
-    app.add_systems(OnEnter(GameState::Game), grab_mouse);
-    app.add_systems(
-        Update,
-        (player_cam_system, player_system)
-            .in_set(GameSystemSet)
-            .run_if(in_state(GameState::Game)),
-    );
-}
 
-#[derive(SystemSet, Debug, Clone, PartialEq, Eq, Hash)]
-struct GameSystemSet;
 
 #[derive(Component)]
 pub struct Player;
 
 #[derive(Component)]
 pub struct PlayerCam;
+
+
 
 #[derive(Debug, Component, Deref, DerefMut)]
 pub struct CameraSensitivity(Vec2);
@@ -36,45 +25,39 @@ impl Default for CameraSensitivity {
     }
 }
 
-fn grab_mouse(mut windows: Query<(&Window, &mut CursorOptions)>) {
-    for (window, mut cursor_options) in &mut windows {
-        if !window.focused {
-            continue;
-        }
-        cursor_options.visible = !cursor_options.visible;
-        cursor_options.grab_mode = match cfg!(target_os = "macos") {
-            true => CursorGrabMode::Locked,
-            false => CursorGrabMode::Confined,
-        }
-    }
+
+
+
+pub fn grab_mouse(mut window: Single<&mut Window>) {
+    window.cursor_options.visible = !window.cursor_options.visible;
+    window.cursor_options.grab_mode = match window.cursor_options.grab_mode {
+        CursorGrabMode::None => CursorGrabMode::Locked,
+        CursorGrabMode::Locked | CursorGrabMode::Confined => CursorGrabMode::None,
+    };
 }
 
-fn player_system(
+
+pub fn player_system(
     keyboard_input: Res<ButtonInput<KeyCode>>,
     time: Res<Time>,
     player: Single<(&mut Transform, &CameraSensitivity), With<Player>>,
-    mut next_state: ResMut<NextState<GameState>>,
 ) {
     let (mut transform, camera_sensitivity) = player.into_inner();
-
-    if keyboard_input.just_pressed(KeyCode::KeyR) {
-        next_state.set(GameState::Menu);
-    }
 
     let mut delta_yaw = 0.0;
     let mut delta_pitch = 0.0;
 
     if keyboard_input.pressed(KeyCode::KeyW) {
-        delta_pitch -= 200.0;
+        delta_pitch -= 20.0;
     }
     if keyboard_input.pressed(KeyCode::KeyS) {
-        delta_pitch += 200.0;
+        delta_pitch += 20.0;
     }
     if keyboard_input.pressed(KeyCode::KeyA) {
-        delta_yaw += 200.0;
+        delta_yaw += 20.0;
     }
     if keyboard_input.pressed(KeyCode::KeyD) {
-        delta_yaw -= 200.0;
+        delta_yaw -= 20.0;
     }
 
     if delta_yaw != 0.0 || delta_pitch != 0.0 {
@@ -91,7 +74,8 @@ fn player_system(
     }
 }
 
-fn player_cam_system(
+
+pub fn player_cam_system(
     accumulated_mouse_motion: Res<AccumulatedMouseMotion>,
     mut windows: Query<&mut Window, With<PrimaryWindow>>,
     player: Single<(&mut Transform, &CameraSensitivity), With<PlayerCam>>,
@@ -111,10 +95,8 @@ fn player_cam_system(
         yaw = yaw.clamp(-YAW_LIMIT, YAW_LIMIT);
         transform.rotation = Quat::from_euler(EulerRot::YXZ, yaw, pitch, roll);
         if let Ok(mut window) = windows.single_mut() {
-            if env::var("WAYLAND_DISPLAY").is_ok() {
-                let center = window.resolution.size() / 2.0;
-                let _ = window.set_cursor_position(Some(center));
-            }
+            let center = window.resolution.size() / 2.0;
+            let _ = window.set_cursor_position(Some(center));
         }
     }
 }

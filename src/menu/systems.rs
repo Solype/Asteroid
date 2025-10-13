@@ -1,25 +1,30 @@
-use bevy::prelude::*;
-use bevy::app::AppExit;
-use bevy::render::view::RenderLayers;
-use bevy::window::CursorGrabMode;
 use crate::controller::PlayerCam;
 use crate::game_states::GameState;
 use crate::menu::structs::*;
+use bevy::app::AppExit;
+use bevy::camera::visibility::RenderLayers;
+use bevy::prelude::*;
+use bevy::window::{CursorGrabMode, CursorOptions};
 
-
-
-pub fn release_mouse(mut window: Single<&mut Window>)
-{
-    window.cursor_options.visible = true;
-    window.cursor_options.grab_mode = CursorGrabMode::None;
+pub fn release_mouse(mut windows: Query<(&Window, &mut CursorOptions)>) {
+    for (window, mut cursor_options) in &mut windows {
+        if !window.focused {
+            continue;
+        }
+        cursor_options.visible = true;
+        cursor_options.grab_mode = CursorGrabMode::None;
+    }
 }
 
-pub fn on_enter_menu(mut command: Commands, entity: Single<Entity, With<PlayerCam>>)
-{
+pub fn on_enter_menu(mut command: Commands, entity: Single<Entity, With<PlayerCam>>) {
     let player = entity.into_inner();
 
     command.entity(player).insert(SmoothLookAt {
-        target_world: Vec3 { x: 0.0, y: 0.7087065, z: -0.29002798 },
+        target_world: Vec3 {
+            x: 0.0,
+            y: 0.7087065,
+            z: -0.29002798,
+        },
         speed: 1.0,
         up: Vec3::Y,
     });
@@ -54,12 +59,12 @@ pub fn smooth_look_at_system(
 }
 
 pub fn menu_button_collision_system(
-    mut events: EventReader<MenuPlaneCursorCastEvent>,
+    mut events: MessageReader<MenuPlaneCursorCastEvent>,
     buttons: Query<(&Transform, &Sprite, &MenuButton, &RenderLayers)>,
     texture: Res<MenuCameraTarget>,
     images: Res<Assets<Image>>,
     mut next_state: ResMut<NextState<GameState>>,
-    mut exit: EventWriter<AppExit>
+    mut exit: MessageWriter<AppExit>,
 ) {
     for event in events.read() {
         let Some(image) = images.get(&texture.image) else {
@@ -73,10 +78,11 @@ pub fn menu_button_collision_system(
             }
             let cursor_cast = Vec2::new(
                 (event.cursor_coordinates.x / event.screen_dimensions.x) * image.width() as f32,
-                (event.cursor_coordinates.y / event.screen_dimensions.y) * image.height() as f32
+                (event.cursor_coordinates.y / event.screen_dimensions.y) * image.height() as f32,
             );
 
-            let Some(action) = check_button_collision(cursor_cast, transform, sprite, button) else {
+            let Some(action) = check_button_collision(cursor_cast, transform, sprite, button)
+            else {
                 continue;
             };
             match action {
@@ -98,14 +104,13 @@ pub fn menu_button_collision_system(
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////
-/// 
+///
 /// PRIVATE METHODE
-/// 
+///
 ////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-fn point_in_button(cursor_x: f32, cursor_y: f32, pos: Vec3, size: Vec2) -> bool
-{
+fn point_in_button(cursor_x: f32, cursor_y: f32, pos: Vec3, size: Vec2) -> bool {
     let half_w = size.x / 2.0;
     let half_h = size.y / 2.0;
 
@@ -116,16 +121,20 @@ fn point_in_button(cursor_x: f32, cursor_y: f32, pos: Vec3, size: Vec2) -> bool
 }
 
 fn check_button_collision(
-    cursor: Vec2, 
+    cursor: Vec2,
     transform: &Transform,
     sprite: &Sprite,
     button: &MenuButton,
 ) -> Option<MenuAction> {
-    let Some(size) = sprite.custom_size else { return None; };
-    info!("cursor: {}; dimention bouton : coordinate : {}; size : {}", cursor, transform.translation, size);
-    if !point_in_button(cursor.x, cursor.y, transform.translation, size) { return None; }
+    let Some(size) = sprite.custom_size else {
+        return None;
+    };
+    info!(
+        "cursor: {}; dimention bouton : coordinate : {}; size : {}",
+        cursor, transform.translation, size
+    );
+    if !point_in_button(cursor.x, cursor.y, transform.translation, size) {
+        return None;
+    }
     return Some(button.action);
 }
-
-
-

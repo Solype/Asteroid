@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use bevy::render::view::RenderLayers;
+use bevy::camera::visibility::RenderLayers;
 
 ////////////////////////////////////////////////////
 ///
@@ -66,7 +66,7 @@ pub enum CursorEventType {
     Click = 1
 }
 
-#[derive(Event, Default)]
+#[derive(Message, Default)]
 pub struct MenuPlaneCursorCastEvent {
     pub menu_id: MenuTypes,
     pub event_type: CursorEventType,
