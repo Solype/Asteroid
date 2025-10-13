@@ -96,9 +96,12 @@ pub enum MenuAction {
     Quit,
 }
 
-#[derive(Component)]
-pub struct SmoothLookAt {
-    pub target_world: Vec3,
-    pub speed: f32,
-    pub up: Vec3,
+#[derive(Component, Default)]
+pub struct SmoothCamMove {
+    pub look_at: Option<Vec3>,
+    pub position: Option<Vec3>,
+    pub speed: Option<f32>,
+    pub up: Option<Vec3>,
+    pub width: Option<f32>,
+    pub height: Option<f32>,
 }

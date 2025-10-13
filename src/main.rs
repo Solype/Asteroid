@@ -159,6 +159,7 @@ fn setup(
 
     let camera_entity = commands
         .spawn((
+            Projection::from(PerspectiveProjection::default()),
             Camera3d::default(),
             Camera { order: 0, ..default() },
             Transform::from_xyz(0.0, 1.1, 0.3).looking_at(Vec3::new(-0.216544, 0.777080, -0.318808), Vec3::Y),

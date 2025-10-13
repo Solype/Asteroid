@@ -6,11 +6,13 @@ pub mod structs;
 mod plane_cast;
 mod systems;
 mod setup;
+mod camera_manipulation;
 
 use plane_cast::*;
 use structs::*;
 use systems::*;
 use setup::*;
+use camera_manipulation::*;
 
 pub fn menu_plugin(app: &mut App)
 {
@@ -24,10 +26,11 @@ pub fn menu_plugin(app: &mut App)
     app.add_systems(
         Update,
         (
-            cast_ray_from_cursor, menu_button_collision_system, smooth_look_at_system
+            cast_ray_from_cursor, menu_button_collision_system
         ).in_set(MenuSystemSet)
         .run_if(in_state(GameState::Menu)),
     );
+    app.add_systems(Update, smooth_look_at_system);
     // app.add_systems(
     // OnExit(GameState::Menu),
     // menu_cleanup

@@ -63,9 +63,9 @@ fn world_to_plane_coords(
     let rel_point = world_point - plane_origin;
 
     let arbitrary = if plane_normal.abs_diff_eq(Vec3::Y, 1e-3) {
-        Vec3::X
+        plane_transform.rotation() * Vec3::X
     } else {
-        Vec3::Y
+        plane_transform.rotation() * Vec3::Y
     };
 
     let right = plane_normal.cross(arbitrary).normalize();
