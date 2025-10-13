@@ -150,7 +150,7 @@ fn setup(
 ) {
     let player_entity = commands
         .spawn((
-            SceneRoot(asset_server.load("Spaceship.glb#Scene0")),
+            // SceneRoot(asset_server.load("Spaceship.glb#Scene0")),
             controller::Player,
             controller::CameraSensitivity::default(),
             Transform::from_xyz(0.0, 0.0, 0.0).looking_at(Vec3::ZERO, Vec3::Y),

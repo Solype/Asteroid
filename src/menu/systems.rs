@@ -23,12 +23,15 @@ pub fn on_enter_menu(mut command: Commands, entity: Single<Entity, With<PlayerCa
     //         Vec3::new(0.216575, 0.640333, -0.261248),
     //         Vec3::new(-0.216544, 0.640333, -0.261248),
     // ];
+    let tmp = Vec3 { x: 0.0, y: 0.7087065, z: -0.29002798 } - Vec3 { x: 0.0, y: 1.1, z: 0.3 };
+    let distance = tmp.length();
 
     command.entity(player).insert(SmoothCamMove {
         look_at: Some(Vec3 { x: 0.0, y: 0.7087065, z: -0.29002798 }),
         speed: Some(1.0),
         up: Some(Vec3::Y),
-        ..default()
+        view_rect : Some(ViewRect { width: 1.0, height: 1.5, distance: distance }),
+        ..Default::default()
     });
 }
 
@@ -101,7 +104,6 @@ fn check_button_collision(
     button: &MenuButton,
 ) -> Option<MenuAction> {
     let Some(size) = sprite.custom_size else { return None; };
-    info!("cursor: {}; dimention bouton : coordinate : {}; size : {}", cursor, transform.translation, size);
     if !point_in_button(cursor.x, cursor.y, transform.translation, size) { return None; }
     return Some(button.action);
 }

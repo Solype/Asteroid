@@ -1,4 +1,4 @@
-use bevy::{prelude::*, render::camera::CameraProjection};
+use bevy::prelude::*;
 use crate::menu::structs::*;
 
 pub fn smooth_look_at_system(
@@ -12,8 +12,6 @@ pub fn smooth_look_at_system(
         let up = params.up.unwrap_or(Vec3::Y);
         let speed = params.speed.unwrap_or(1.0);
         let t = 1.0 - (-speed * dt).exp();
-        let mut temp_width = params.width;
-        let mut temp_height = params.height;
 
         if end_of_camera_movement(&params) {
             commands.entity(entity).remove::<SmoothCamMove>();
@@ -21,10 +19,8 @@ pub fn smooth_look_at_system(
         }
         compute_change_look_at(&mut params.look_at, &mut transform, up, t);
         compute_change_pos(&mut params.position, &mut transform, t);
-        if let Projection::Perspective(ref mut proj) = *projection {
-            compute_change_dimensions(&mut temp_width, &mut temp_height,  proj, t);
-            params.width = temp_width;
-            params.height = temp_height;
+        if let Projection::Perspective(proj) = projection.as_mut() {
+            compute_change_dimensions(&mut params.view_rect,  proj, t);
         }
     }
 }
@@ -37,36 +33,28 @@ pub fn smooth_look_at_system(
 ////////////////////////////////////////////////////////////////////
 
 fn compute_change_dimensions(
-    width: &mut Option<f32>,
-    height: &mut Option<f32>,
+    view_rect: &mut Option<ViewRect>,
     proj: &mut PerspectiveProjection,
     t: f32,
 ) {
-    let current_height: f32 = 2.0 * proj.near * (proj.fov * 0.5).tan();
-    let current_width: f32 = current_height * proj.aspect_ratio;
+    // Hauteur et largeur actuelles à la near plane
+    let current_height = 2.0 * proj.near * (proj.fov * 0.5).tan();
+    let current_width = current_height * proj.aspect_ratio;
 
-    let new_width = if let Some(target_width) = width {
-        let tmp = current_width + (*target_width - current_width) * t;
-        if (tmp - *target_width).abs() < 1e-6 {
-            *width = None;
+    if let Some(vr) = view_rect {
+        let target_height = vr.height * (proj.near / vr.distance);
+        let target_width = vr.width * (proj.near / vr.distance);
+
+        let new_height = current_height + (target_height - current_height) * t;
+        let new_width = current_width + (target_width - current_width) * t;
+
+        proj.aspect_ratio = new_width / new_height;
+        proj.fov = 2.0 * (new_height / (2.0 * proj.near)).atan();
+
+        if (new_height - target_height).abs() < 1e-6 && (new_width - target_width).abs() < 1e-6 {
+            *view_rect = None;
         }
-        tmp
-    } else {
-        current_width
-    };
-
-
-    let new_height = if let Some(target_height) = height {
-        let tmp = current_height + (*target_height - current_height) * t;
-        if (tmp - *target_height).abs() < 1e-6 {
-            *height = None;
-        }
-        tmp
-    } else {
-        current_height
-    };
-
-    proj.update(new_width, new_height);
+    }
 }
 
 fn compute_change_pos(param: &mut Option<Vec3>, transform: &mut Transform, t: f32) {
@@ -102,11 +90,9 @@ fn compute_change_look_at(param : &mut Option<Vec3>, transform : &mut Transform,
 
 fn end_of_camera_movement(target : &SmoothCamMove) -> bool
 {
-    if target.height == None 
+    if target.view_rect == None 
     && target.look_at == None
-    && target.position == None
-    && target.width == None
-    && target.height == None {
+    && target.position == None {
         return true;
     }
     return false;

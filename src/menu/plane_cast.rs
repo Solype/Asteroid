@@ -28,7 +28,6 @@ pub fn cast_ray_from_cursor(
     for (plane_transform, menu_plane) in planes.iter() {
         if let Some(world_point) = ray_plane_intersection(ray.origin, ray.direction.into(), menu_plane.center, menu_plane.normal, plane_transform) {
             let local_point = world_to_plane_coords(world_point, menu_plane.normal, menu_plane.center, plane_transform);
-            info!("local_point {}", local_point);
             writer.write(MenuPlaneCursorCastEvent {
                 cursor_coordinates: local_point,
                 screen_dimensions: menu_plane.dimensions,
