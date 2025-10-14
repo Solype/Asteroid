@@ -14,7 +14,7 @@ pub fn release_mouse(mut window: Single<&mut Window>)
     window.cursor_options.grab_mode = CursorGrabMode::None;
 }
 
-pub fn on_exit_menu(mut command: Commands, entity: Single<Entity, With<PlayerCam>>)
+pub fn remove_focus_menu(mut command: Commands, entity: Single<Entity, With<PlayerCam>>)
 {
     let player = entity.into_inner();
 
@@ -25,9 +25,9 @@ pub fn on_exit_menu(mut command: Commands, entity: Single<Entity, With<PlayerCam
     });
 }
 
-pub fn on_enter_menu(mut command: Commands, entity: Single<Entity, With<PlayerCam>>)
+pub fn focus_main_screen(mut command: Commands, player_entity: Single<Entity, With<PlayerCam>>)
 {
-    let player = entity.into_inner();
+    let player = player_entity.into_inner();
 
     command.entity(player).insert(SmoothCamMove {
         look_at: Some(Vec3 { x: 0.0, y: 0.7087065, z: -0.29002798 }),
