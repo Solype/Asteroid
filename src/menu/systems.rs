@@ -31,7 +31,7 @@ pub fn on_enter_menu(mut command: Commands, entity: Single<Entity, With<PlayerCa
 
     command.entity(player).insert(SmoothCamMove {
         look_at: Some(Vec3 { x: 0.0, y: 0.7087065, z: -0.29002798 }),
-        speed: Some(1.0),
+        speed: Some(3.0),
         up: Some(Vec3::Y),
         fov : Some(20.0_f32.to_radians()),
         ..Default::default()
