@@ -96,18 +96,12 @@ pub enum MenuAction {
     Quit,
 }
 
-#[derive(Component, Default, PartialEq)]
-pub struct ViewRect {
-    pub width : f32,
-    pub height : f32,
-    pub distance : f32
-}
-
 #[derive(Component, Default)]
 pub struct SmoothCamMove {
-    pub look_at: Option<Vec3>,
-    pub position: Option<Vec3>,
-    pub speed: Option<f32>,
-    pub up: Option<Vec3>,
-    pub view_rect: Option<ViewRect>
+    pub look_at : Option<Vec3>,
+    pub position : Option<Vec3>,
+    pub speed : Option<f32>,
+    pub up : Option<Vec3>,
+    pub fov : Option<f32>,
+    pub aspect_ratio : Option<f32>
 }

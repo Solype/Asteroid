@@ -23,6 +23,7 @@ pub fn menu_plugin(app: &mut App)
         OnEnter(GameState::Menu), 
         (on_enter_menu, release_mouse)
     );
+    app.add_systems(OnExit(GameState::Menu), on_exit_menu);
     app.add_systems(
         Update,
         (

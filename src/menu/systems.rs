@@ -14,23 +14,26 @@ pub fn release_mouse(mut window: Single<&mut Window>)
     window.cursor_options.grab_mode = CursorGrabMode::None;
 }
 
+pub fn on_exit_menu(mut command: Commands, entity: Single<Entity, With<PlayerCam>>)
+{
+    let player = entity.into_inner();
+
+    command.entity(player).insert(SmoothCamMove {
+        speed : Some(3.0),
+        fov : Some(45.0_f32.to_radians()),
+        ..Default::default()
+    });
+}
+
 pub fn on_enter_menu(mut command: Commands, entity: Single<Entity, With<PlayerCam>>)
 {
     let player = entity.into_inner();
-    // let corners = [
-    //         Vec3::new(-0.216544, 0.777080, -0.318808),
-    //         Vec3::new(0.216575, 0.777080, -0.318808),
-    //         Vec3::new(0.216575, 0.640333, -0.261248),
-    //         Vec3::new(-0.216544, 0.640333, -0.261248),
-    // ];
-    let tmp = Vec3 { x: 0.0, y: 0.7087065, z: -0.29002798 } - Vec3 { x: 0.0, y: 1.1, z: 0.3 };
-    let distance = tmp.length();
 
     command.entity(player).insert(SmoothCamMove {
         look_at: Some(Vec3 { x: 0.0, y: 0.7087065, z: -0.29002798 }),
         speed: Some(1.0),
         up: Some(Vec3::Y),
-        view_rect : Some(ViewRect { width: 1.0, height: 1.5, distance: distance }),
+        fov : Some(20.0_f32.to_radians()),
         ..Default::default()
     });
 }

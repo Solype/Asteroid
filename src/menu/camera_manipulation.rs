@@ -20,7 +20,8 @@ pub fn smooth_look_at_system(
         compute_change_look_at(&mut params.look_at, &mut transform, up, t);
         compute_change_pos(&mut params.position, &mut transform, t);
         if let Projection::Perspective(proj) = projection.as_mut() {
-            compute_change_dimensions(&mut params.view_rect,  proj, t);
+            compute_change_fov(&mut params.fov,  proj, t);
+            compute_change_aspect_ratio(&mut params.aspect_ratio,  proj, t);
         }
     }
 }
@@ -32,28 +33,37 @@ pub fn smooth_look_at_system(
 ////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////
 
-fn compute_change_dimensions(
-    view_rect: &mut Option<ViewRect>,
+fn compute_change_fov(
+    fov: &mut Option<f32>,
     proj: &mut PerspectiveProjection,
     t: f32,
 ) {
-    // Hauteur et largeur actuelles à la near plane
-    let current_height = 2.0 * proj.near * (proj.fov * 0.5).tan();
-    let current_width = current_height * proj.aspect_ratio;
+    let current_fov = proj.fov;
 
-    if let Some(vr) = view_rect {
-        let target_height = vr.height * (proj.near / vr.distance);
-        let target_width = vr.width * (proj.near / vr.distance);
+    if let Some(target_fov) = fov {
+        let new_fov = current_fov + (*target_fov - current_fov) * t;
 
-        let new_height = current_height + (target_height - current_height) * t;
-        let new_width = current_width + (target_width - current_width) * t;
-
-        proj.aspect_ratio = new_width / new_height;
-        proj.fov = 2.0 * (new_height / (2.0 * proj.near)).atan();
-
-        if (new_height - target_height).abs() < 1e-6 && (new_width - target_width).abs() < 1e-6 {
-            *view_rect = None;
+        if (new_fov - *target_fov).abs() < 1e-5 {
+            *fov = None;
         }
+        proj.fov = new_fov;
+    }
+}
+
+fn compute_change_aspect_ratio(
+    aspect_ratio: &mut Option<f32>,
+    proj: &mut PerspectiveProjection,
+    t: f32,
+) {
+    let current_aspect_ratio = proj.aspect_ratio;
+
+    if let Some(target_aspect_ratio) = aspect_ratio {
+        let new_aspect_ratio = current_aspect_ratio + (*target_aspect_ratio - current_aspect_ratio) * t;
+
+        if (new_aspect_ratio - *target_aspect_ratio).abs() < 1e-5 {
+            *aspect_ratio = None;
+        }
+        proj.aspect_ratio = new_aspect_ratio;
     }
 }
 
@@ -62,7 +72,7 @@ fn compute_change_pos(param: &mut Option<Vec3>, transform: &mut Transform, t: f3
         Some(pos) => *pos,
         None => return,
     };
-    if (transform.translation - target).length_squared() < 1e-6 {
+    if (transform.translation - target).length_squared() < 1e-5 {
         *param = None;
         return;
     }
@@ -90,7 +100,8 @@ fn compute_change_look_at(param : &mut Option<Vec3>, transform : &mut Transform,
 
 fn end_of_camera_movement(target : &SmoothCamMove) -> bool
 {
-    if target.view_rect == None 
+    if target.fov == None 
+    && target.aspect_ratio == None
     && target.look_at == None
     && target.position == None {
         return true;
