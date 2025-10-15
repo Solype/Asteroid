@@ -14,11 +14,25 @@ pub fn cleanup_menu_cam(mut commands: Commands, entity: Single<(&mut Camera, &Ch
     }
 }
 
-pub fn create_main_menu_scene(mut commands: Commands, entity: Single<(Entity, &mut Camera), With<MenuCameraComponent>>, asset_server: Res<AssetServer>)
+pub fn create_main_menu_scene(
+    mut commands: Commands,
+    entity: Single<(Entity, &mut Camera), With<MenuCameraComponent>>,
+    asset_server: Res<AssetServer>,
+    existing_image: Option<Res<MenuBackgroundImage>>,
+)
 {
+    let handler : Handle<Image>;
+
+    if existing_image.is_none() {
+        handler = asset_server.load("menu_background.jpg");
+        commands.insert_resource(MenuBackgroundImage { image: handler.clone() });
+    } else {
+        handler = existing_image.unwrap().image.clone();
+    }
+
     let (camera_entity, mut camera) = entity.into_inner();
     let menu_layer = MenuTypes::layer(MenuTypes::MainMenu);
-    let background_texture: Handle<Image> = asset_server.load("menu_background.jpg");
+    let background_texture: Handle<Image> = handler;
 
     let background = commands
         .spawn((
