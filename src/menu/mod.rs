@@ -20,7 +20,7 @@ pub fn menu_plugin(app: &mut App)
 {
     app.add_systems(Startup, setup_texture_camera);
     app.add_systems(PostStartup, (setup_menu, apply_texture_to_quad));
-    app.add_event::<MenuPlaneCursorCastEvent>();
+    app.add_message::<MenuPlaneCursorCastEvent>();
     app.add_systems(OnEnter(GameState::Menu), (focus_main_screen, create_main_menu_scene, release_mouse));
     app.add_systems(OnExit(GameState::Menu), (remove_focus_menu, cleanup_menu_cam));
     

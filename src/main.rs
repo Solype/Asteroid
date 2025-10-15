@@ -1,8 +1,7 @@
 use bevy::prelude::*;
 use bevy::asset::RenderAssetUsages;
-use bevy::render::mesh::{Indices, Mesh};
 use bevy::render::render_resource::PrimitiveTopology;
-
+use bevy::mesh::{Indices, Mesh};
 
 mod controller;
 mod menu;

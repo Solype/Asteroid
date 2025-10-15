@@ -1,17 +1,21 @@
-use bevy::prelude::*;
-use bevy::app::AppExit;
-use bevy::render::view::RenderLayers;
-use bevy::window::CursorGrabMode;
+use bevy::{
+    prelude::*,
+    app::AppExit,
+    camera::visibility::RenderLayers,
+    window::{
+        CursorGrabMode, CursorOptions,PrimaryWindow
+    }
+};
 use crate::controller::PlayerCam;
 use crate::game_states::GameState;
 use crate::menu::structs::*;
 
 
 
-pub fn release_mouse(mut window: Single<&mut Window>)
+pub fn release_mouse(mut options: Single<&mut CursorOptions, With<PrimaryWindow>>)
 {
-    window.cursor_options.visible = true;
-    window.cursor_options.grab_mode = CursorGrabMode::None;
+    options.grab_mode = CursorGrabMode::None;
+    options.visible = true;
 }
 
 pub fn remove_focus_menu(mut command: Commands, entity: Single<Entity, With<PlayerCam>>)
@@ -39,12 +43,14 @@ pub fn focus_main_screen(mut command: Commands, player_entity: Single<Entity, Wi
 }
 
 pub fn menu_button_collision_system(
-    mut events: EventReader<MenuPlaneCursorCastEvent>,
+    mut events: MessageReader
+<MenuPlaneCursorCastEvent>,
     buttons: Query<(&Transform, &Sprite, &MenuButton, &RenderLayers)>,
     texture: Res<MenuCameraTarget>,
     images: Res<Assets<Image>>,
     mut next_state: ResMut<NextState<GameState>>,
-    mut exit: EventWriter<AppExit>
+    mut exit: MessageWriter
+<AppExit>
 ) {
     for event in events.read() {
         let Some(image) = images.get(&texture.image) else {

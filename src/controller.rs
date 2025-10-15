@@ -1,5 +1,9 @@
 use bevy::{
-    input::mouse::AccumulatedMouseMotion, prelude::*, window::{CursorGrabMode, PrimaryWindow}
+    input::mouse::AccumulatedMouseMotion,
+    prelude::*, 
+    window::{
+        CursorGrabMode, PrimaryWindow, CursorOptions
+    }
 };
 
 use std::f32::consts::FRAC_PI_2;
@@ -48,12 +52,14 @@ impl Default for CameraSensitivity {
 
 
 
-fn grab_mouse(mut window: Single<&mut Window>) {
-    window.cursor_options.visible = !window.cursor_options.visible;
-    window.cursor_options.grab_mode = match cfg!(target_os = "macos") {
-        true => CursorGrabMode::Locked,
-        false => CursorGrabMode::Confined
-    }
+fn grab_mouse(mut options: Single<&mut CursorOptions, With<PrimaryWindow>>)
+{
+    options.visible = false;
+    options.grab_mode = CursorGrabMode::Locked;
+    // options.grab_mode = match cfg!(target_os = "macos") {
+    //     true => CursorGrabMode::Locked,
+    //     false => CursorGrabMode::Confined
+    // }
 }
 
 fn player_system(
@@ -119,11 +125,5 @@ fn player_cam_system(
         const YAW_LIMIT: f32 = FRAC_PI_2;
         yaw = yaw.clamp(-YAW_LIMIT, YAW_LIMIT);
         transform.rotation = Quat::from_euler(EulerRot::YXZ, yaw, pitch, roll);
-        if let Ok(mut window) = windows.single_mut() {
-            if env::var("WAYLAND_DISPLAY").is_ok() {
-                let center = window.resolution.size() / 2.0;
-                let _ = window.set_cursor_position(Some(center));
-            }
-        }
     }
 }
