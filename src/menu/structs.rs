@@ -77,7 +77,7 @@ pub enum CursorEventType {
     Click = 1
 }
 
-#[derive(Message, Default)]
+#[derive(Message, Default, Debug)]
 pub struct MenuPlaneCursorCastEvent {
     pub menu_id: MenuTypes,
     pub event_type: CursorEventType,

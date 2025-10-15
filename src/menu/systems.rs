@@ -1,8 +1,5 @@
 use bevy::{
-    prelude::*,
-    app::AppExit,
-    camera::visibility::RenderLayers,
-    window::{
+    app::AppExit, prelude::*, window::{
         CursorGrabMode, CursorOptions,PrimaryWindow
     }
 };
@@ -25,6 +22,7 @@ pub fn remove_focus_menu(mut command: Commands, entity: Single<Entity, With<Play
     command.entity(player).insert(SmoothCamMove {
         speed : Some(3.0),
         fov : Some(45.0_f32.to_radians()),
+        position : Some(Vec3::new(0.0, 1.1, 0.3)),
         ..Default::default()
     });
 }
@@ -32,54 +30,50 @@ pub fn remove_focus_menu(mut command: Commands, entity: Single<Entity, With<Play
 pub fn focus_main_screen(mut command: Commands, player_entity: Single<Entity, With<PlayerCam>>)
 {
     let player = player_entity.into_inner();
+    let center = Vec3::new(0.0, 0.7087065, -0.29002798);
+    let new_position = Vec3::new(0.0, 1.05, 0.27);
 
     command.entity(player).insert(SmoothCamMove {
-        look_at: Some(Vec3 { x: 0.0, y: 0.7087065, z: -0.29002798 }),
+        look_at: Some(center),
+        position: Some(new_position),
         speed: Some(3.0),
         up: Some(Vec3::Y),
-        fov : Some(20.0_f32.to_radians()),
+        fov: Some(20.0_f32.to_radians()),
         ..Default::default()
     });
 }
 
 pub fn menu_button_collision_system(
-    mut events: MessageReader
-<MenuPlaneCursorCastEvent>,
-    buttons: Query<(&Transform, &Sprite, &MenuButton, &RenderLayers)>,
+    mut events: MessageReader<MenuPlaneCursorCastEvent>,
+    buttons: Query<(&ComputedNode, &UiGlobalTransform, &MenuButton)>,
     texture: Res<MenuCameraTarget>,
     images: Res<Assets<Image>>,
     mut next_state: ResMut<NextState<GameState>>,
-    mut exit: MessageWriter
-<AppExit>
+    mut exit: MessageWriter<AppExit>,
 ) {
     for event in events.read() {
         let Some(image) = images.get(&texture.image) else {
+            info!("No image found for MenuCameraTarget");
             continue;
         };
 
-        for (transform, sprite, button, layer) in buttons.iter() {
-            let event_layer = MenuTypes::layer(event.menu_id);
-            if !layer.intersects(&event_layer) {
-                continue;
-            }
-            let cursor_cast = Vec2::new(
-                (event.cursor_coordinates.x / event.screen_dimensions.x) * image.width() as f32,
-                (event.cursor_coordinates.y / event.screen_dimensions.y) * image.height() as f32
-            );
+        let cursor_cast = Vec2::new(
+            (event.cursor_coordinates.x / event.screen_dimensions.x) * image.width() as f32 + (image.width() as f32 / 2.0),
+            (image.height() as f32 / 2.0) - (event.cursor_coordinates.y / event.screen_dimensions.y) * image.height() as f32,
+        );
 
-            let Some(action) = check_button_collision(cursor_cast, transform, sprite, button) else {
-                continue;
-            };
-            match action {
-                MenuAction::Quit => {
-                    if event.event_type == CursorEventType::Click {
-                        info!("FIN DU JEU !");
-                        exit.write(AppExit::Success);
+        for (node, transform, button) in buttons.iter() {
+            if node.contains_point(*transform, cursor_cast) {
+                match button.action {
+                    MenuAction::Quit => {
+                        if event.event_type == CursorEventType::Click {
+                            exit.write(AppExit::Success);
+                        }
                     }
-                }
-                MenuAction::Start => {
-                    if event.event_type == CursorEventType::Click {
-                        next_state.set(GameState::Game);
+                    MenuAction::Start => {
+                        if event.event_type == CursorEventType::Click {
+                            next_state.set(GameState::Game);
+                        }
                     }
                 }
             }
@@ -89,33 +83,10 @@ pub fn menu_button_collision_system(
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////
-/// 
-/// PRIVATE METHODE
-/// 
+// 
+// PRIVATE METHODE
+//
 ////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////
-
-fn point_in_button(cursor_x: f32, cursor_y: f32, pos: Vec3, size: Vec2) -> bool
-{
-    let half_w = size.x / 2.0;
-    let half_h = size.y / 2.0;
-
-    let in_x = cursor_x >= pos.x - half_w && cursor_x <= pos.x + half_w;
-    let in_y = cursor_y >= pos.y - half_h && cursor_y <= pos.y + half_h;
-
-    in_x && in_y
-}
-
-fn check_button_collision(
-    cursor: Vec2, 
-    transform: &Transform,
-    sprite: &Sprite,
-    button: &MenuButton,
-) -> Option<MenuAction> {
-    let Some(size) = sprite.custom_size else { return None; };
-    if !point_in_button(cursor.x, cursor.y, transform.translation, size) { return None; }
-    return Some(button.action);
-}
-
 
 

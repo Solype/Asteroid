@@ -12,7 +12,17 @@ static SCREEN_HEIGHT : u32 = 256;
 pub fn setup_menu(mut commands: Commands, menu_texture: Res<MenuCameraTarget>)
 {
     let handle = menu_texture.image.clone();
-    setup_menu_camera(&mut commands, handle);
+    let menu_layer = MenuTypes::layer(MenuTypes::MainMenu);
+
+    commands.spawn((
+        Camera2d::default(),
+        Camera {
+            target: RenderTarget::Image(handle.clone().into()),
+            ..default()
+        },
+        MenuCameraComponent,
+        menu_layer.clone()
+    ));
 }
 
 pub fn apply_texture_to_quad(mut commands: Commands, screens: Query<(&MenuPlane, Entity)>, mut materials: ResMut<Assets<StandardMaterial>>, menu_texture: Res<MenuCameraTarget>)
@@ -56,31 +66,3 @@ pub fn setup_texture_camera(mut commands: Commands, mut images: ResMut<Assets<Im
     commands.insert_resource(MenuCameraTarget { image: images.add(image) });
     info!("Texture set !")
 }
-
-////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////
-/// 
-/// PRIVATE METHODE
-/// 
-////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////
-
-
-fn setup_menu_camera(commands: &mut Commands, image_handle: Handle<Image>) -> Entity
-{
-    let menu_layer = MenuTypes::layer(MenuTypes::MainMenu);
-
-    return commands
-        .spawn((
-            Camera2d::default(),
-            Camera {
-                target: RenderTarget::Image(image_handle.clone().into()),
-                ..default()
-            },
-            MenuCameraComponent,
-            menu_layer.clone(),
-        ))
-        .id();
-}
-
-

@@ -7,7 +7,6 @@ use bevy::{
 };
 
 use std::f32::consts::FRAC_PI_2;
-use std::env;
 use crate::game_states::GameState;
 
 
@@ -108,7 +107,6 @@ fn player_system(
 
 fn player_cam_system(
     accumulated_mouse_motion: Res<AccumulatedMouseMotion>,
-    mut windows: Query<&mut Window, With<PrimaryWindow>>,
     player: Single<(&mut Transform, &CameraSensitivity), With<PlayerCam>>,
 ) {
     let (mut transform, camera_sensitivity) = player.into_inner();
