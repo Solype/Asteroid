@@ -79,7 +79,7 @@ pub enum CursorEventType {
 
 #[derive(Message, Default, Debug)]
 pub struct MenuPlaneCursorCastEvent {
-    pub menu_id: MenuTypes,
+    // pub menu_id: MenuTypes,
     pub event_type: CursorEventType,
     pub cursor_coordinates: Vec2,
     pub screen_dimensions: Vec2,

@@ -32,7 +32,7 @@ pub fn cast_ray_from_cursor(
             writer.write(MenuPlaneCursorCastEvent {
                 cursor_coordinates: local_point,
                 screen_dimensions: menu_plane.dimensions,
-                menu_id: menu_plane.menu_id,
+                // menu_id: menu_plane.menu_id,
                 event_type: if pressed { CursorEventType::Click } else { CursorEventType::Move }
             });
         }
