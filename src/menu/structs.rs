@@ -105,6 +105,7 @@ pub struct MenuButton {
 pub enum MenuAction {
     Start,
     Quit,
+    Options,
 }
 
 #[derive(Resource)]

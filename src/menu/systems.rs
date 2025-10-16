@@ -75,6 +75,7 @@ pub fn menu_button_collision_system(
                             next_state.set(GameState::Game);
                         }
                     }
+                    MenuAction::Options => {}
                 }
             }
         }
