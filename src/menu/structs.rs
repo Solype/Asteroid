@@ -108,6 +108,7 @@ pub enum MenuAction {
 }
 
 #[derive(Resource)]
-pub struct MenuBackgroundImage {
-    pub image: Handle<Image>
+pub struct MainMenuRessources {
+    pub bg : Handle<Image>,
+    pub font : Handle<Font>,
 }
