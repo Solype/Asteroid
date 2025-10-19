@@ -68,76 +68,74 @@ pub fn create_main_menu_scene(
             ..default()
         },
         UiTargetCamera(cam_entity),
-        menu_layer.clone(),
-        children![
-            // --- Titre du tableau de bord ---
-            (
-                Text::new("STARSHIP DASHBOARD"),
-                TextFont { font: font.clone(), font_size: 60.0, ..default() },
-                TextColor(Color::srgb(0.0, 1.0, 1.0)),
-                Node {
-                    margin: UiRect::all(Val::Px(30.0)),
-                    ..default()
-                },
+        menu_layer.clone()
+    )).with_children(|parent| {
+        parent.spawn((
+            Text::new("STARSHIP DASHBOARD"),
+            TextFont { font: font.clone(), font_size: 60.0, ..default() },
+            TextColor(Color::srgb(0.0, 1.0, 1.0)),
+            Node {
+                margin: UiRect::all(Val::Px(30.0)),
+                ..default()
+            },
+            menu_layer.clone()
+        ));
+        parent.spawn((
+            Node {
+                width: Val::Px(300.0),
+                height: Val::Px(70.0),
+                justify_content: JustifyContent::Center,
+                align_items: AlignItems::Center,
+                flex_direction: FlexDirection::Column,
+                margin: UiRect::all(Val::Px(10.0)),
+                ..default()
+            },
+            menu_layer.clone(),
+        )).with_children(|parent| {
+            parent.spawn((
+                node.clone(),
+                border_radius.clone(),
+                border_color.clone(),
+                BackgroundColor(Color::srgba(0.0, 0.2, 0.4, 0.8)), // dark blue transparent
+                MenuButton { action: MenuAction::Start },
+                children![(
+                    Text::new("LAUNCH MISSION"),
+                    TextFont { font: font.clone(), font_size: 28.0, ..default() },
+                    TextColor(Color::srgb(0.0, 1.0, 1.0)),
+                )],
                 menu_layer.clone(),
-            ),
-            // --- Boutons ---
-            (
-                Node {
-                    width: Val::Px(300.0),
-                    height: Val::Px(70.0),
-                    justify_content: JustifyContent::Center,
-                    align_items: AlignItems::Center,
-                    flex_direction: FlexDirection::Column,
-                    margin: UiRect::all(Val::Px(10.0)),
-                    ..default()
-                },
-                children![
-                    // --- Start Mission ---
-                    (
-                        node.clone(),
-                        border_radius.clone(),
-                        border_color.clone(),
-                        BackgroundColor(Color::srgba(0.0, 0.2, 0.4, 0.8)), // dark blue transparent
-                        MenuButton { action: MenuAction::Start },
-                        children![(
-                            Text::new("LAUNCH MISSION"),
-                            TextFont { font: font.clone(), font_size: 28.0, ..default() },
-                            TextColor(Color::srgb(0.0, 1.0, 1.0)),
-                        )],
-                        menu_layer.clone(),
-                    ),
-                    // --- Options ---
-                    (
-                        node.clone(),
-                        border_radius.clone(),
-                        border_color.clone(),
-                        BackgroundColor(Color::srgba(0.0, 0.2, 0.0, 0.8)), // dark green transparent
-                        MenuButton { action: MenuAction::Options },
-                        children![(
-                            Text::new("SYSTEM SETTINGS"),
-                            TextFont { font: font.clone(), font_size: 28.0, ..default() },
-                            TextColor(Color::srgb(0.0, 1.0, 0.0)),
-                        )],
-                        menu_layer.clone(),
-                    ),
-                    // --- Quit ---
-                    (
-                        node.clone(),
-                        border_radius.clone(),
-                        border_color.clone(),
-                        BackgroundColor(Color::srgba(0.4, 0.0, 0.0, 0.8)), // dark red transparent
-                        MenuButton { action: MenuAction::Quit },
-                        children![(
-                            Text::new("EJECT"),
-                            TextFont { font: font.clone(), font_size: 28.0, ..default() },
-                            TextColor(Color::srgb(1.0, 0.0, 0.0)),
-                        )],
-                        menu_layer.clone(),
-                    ),
-                ],
+            ));
+
+
+
+            parent.spawn((
+                node.clone(),
+                border_radius.clone(),
+                border_color.clone(),
+                BackgroundColor(Color::srgba(0.0, 0.2, 0.0, 0.8)), // dark green transparent
+                MenuButton { action: MenuAction::Options },
+                children![(
+                    Text::new("SYSTEM SETTINGS"),
+                    TextFont { font: font.clone(), font_size: 28.0, ..default() },
+                    TextColor(Color::srgb(0.0, 1.0, 0.0)),
+                )],
                 menu_layer.clone(),
-            ),
-        ],
-    ));
+            ));
+
+
+            parent.spawn((
+                node.clone(),
+                border_radius.clone(),
+                border_color.clone(),
+                BackgroundColor(Color::srgba(0.4, 0.0, 0.0, 0.8)), // dark red transparent
+                MenuButton { action: MenuAction::Quit },
+                children![(
+                    Text::new("EJECT"),
+                    TextFont { font: font.clone(), font_size: 28.0, ..default() },
+                    TextColor(Color::srgb(1.0, 0.0, 0.0)),
+                )],
+                menu_layer.clone(),
+            ));
+        });
+    });
 }
