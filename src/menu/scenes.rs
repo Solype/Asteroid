@@ -30,6 +30,29 @@ pub fn create_main_menu_scene(
         commands.insert_resource(MainMenuRessources {font: font.clone(), bg: background.clone()});
     }
 
+    let border_radius = BorderRadius {
+        top_right: Val::Px(20.0),
+        bottom_left: Val::Px(20.0),
+        top_left: Val::Px(4.0),
+        bottom_right: Val::Px(4.0),
+    };
+
+    let node = Node {
+        width: Val::Px(300.0),
+        height: Val::Px(60.0),
+        justify_content: JustifyContent::Center,
+        align_items: AlignItems::Center,
+        border: UiRect::all(Val::Px(2.0)),
+        ..default()
+    };
+
+    let border_color = BorderColor {
+        top: Color::srgba(0.0, 0.9, 1.0, 0.3),
+        bottom: Color::srgba(0.0, 0.6, 0.8, 0.3),
+        left: Color::srgba(0.0, 0.8, 1.0, 0.4),
+        right: Color::srgba(0.0, 0.8, 1.0, 0.4),
+    };
+
     commands.spawn((
         DespawnOnExit(GameState::Menu),
         Node {
@@ -62,7 +85,7 @@ pub fn create_main_menu_scene(
             (
                 Node {
                     width: Val::Px(300.0),
-                    height: Val::Px(60.0),
+                    height: Val::Px(70.0),
                     justify_content: JustifyContent::Center,
                     align_items: AlignItems::Center,
                     flex_direction: FlexDirection::Column,
@@ -72,14 +95,9 @@ pub fn create_main_menu_scene(
                 children![
                     // --- Start Mission ---
                     (
-                        Node {
-                            width: Val::Px(300.0),
-                            height: Val::Px(60.0),
-                            justify_content: JustifyContent::Center,
-                            align_items: AlignItems::Center,
-                            border: UiRect::all(Val::Px(2.0)),
-                            ..default()
-                        },
+                        node.clone(),
+                        border_radius.clone(),
+                        border_color.clone(),
                         BackgroundColor(Color::srgba(0.0, 0.2, 0.4, 0.8)), // dark blue transparent
                         MenuButton { action: MenuAction::Start },
                         children![(
@@ -91,14 +109,9 @@ pub fn create_main_menu_scene(
                     ),
                     // --- Options ---
                     (
-                        Node {
-                            width: Val::Px(300.0),
-                            height: Val::Px(60.0),
-                            justify_content: JustifyContent::Center,
-                            align_items: AlignItems::Center,
-                            border: UiRect::all(Val::Px(2.0)),
-                            ..default()
-                        },
+                        node.clone(),
+                        border_radius.clone(),
+                        border_color.clone(),
                         BackgroundColor(Color::srgba(0.0, 0.2, 0.0, 0.8)), // dark green transparent
                         MenuButton { action: MenuAction::Options },
                         children![(
@@ -110,14 +123,9 @@ pub fn create_main_menu_scene(
                     ),
                     // --- Quit ---
                     (
-                        Node {
-                            width: Val::Px(300.0),
-                            height: Val::Px(60.0),
-                            justify_content: JustifyContent::Center,
-                            align_items: AlignItems::Center,
-                            border: UiRect::all(Val::Px(2.0)),
-                            ..default()
-                        },
+                        node.clone(),
+                        border_radius.clone(),
+                        border_color.clone(),
                         BackgroundColor(Color::srgba(0.4, 0.0, 0.0, 0.8)), // dark red transparent
                         MenuButton { action: MenuAction::Quit },
                         children![(

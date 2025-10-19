@@ -44,13 +44,30 @@ pub fn focus_main_screen(mut command: Commands, player_entity: Single<Entity, Wi
 }
 
 pub fn menu_button_collision_system(
+    mut commands : Commands,
     mut events: MessageReader<MenuPlaneCursorCastEvent>,
-    buttons: Query<(&ComputedNode, &UiGlobalTransform, &MenuButton)>,
+    buttons: Query<(Entity, &ComputedNode, &UiGlobalTransform, &MenuButton)>,
     texture: Res<MenuCameraTarget>,
     images: Res<Assets<Image>>,
     mut next_state: ResMut<NextState<GameState>>,
     mut exit: MessageWriter<AppExit>,
 ) {
+
+    let border_color_normal = BorderColor {
+        top: Color::srgba(0.0, 0.9, 1.0, 0.3),
+        bottom: Color::srgba(0.0, 0.6, 0.8, 0.3),
+        left: Color::srgba(0.0, 0.8, 1.0, 0.4),
+        right: Color::srgba(0.0, 0.8, 1.0, 0.4),
+    };
+
+    let border_color_hover = BorderColor {
+        top: Color::srgba(0.0, 1.0, 1.0, 0.9),
+        bottom: Color::srgba(0.0, 0.9, 1.0, 0.8),
+        left: Color::srgba(0.0, 1.0, 1.0, 1.0),
+        right: Color::srgba(0.0, 1.0, 1.0, 1.0),
+    };
+
+
     for event in events.read() {
         let Some(image) = images.get(&texture.image) else {
             info!("No image found for MenuCameraTarget");
@@ -62,8 +79,8 @@ pub fn menu_button_collision_system(
             (image.height() as f32 / 2.0) - (event.cursor_coordinates.y / event.screen_dimensions.y) * image.height() as f32,
         );
 
-        for (node, transform, button) in buttons.iter() {
-            if node.contains_point(*transform, cursor_cast) {
+        for (entity, computed_node, transform, button) in buttons.iter() {
+            if computed_node.contains_point(*transform, cursor_cast) {
                 match button.action {
                     MenuAction::Quit => {
                         if event.event_type == CursorEventType::Click {
@@ -77,6 +94,9 @@ pub fn menu_button_collision_system(
                     }
                     MenuAction::Options => {}
                 }
+                commands.entity(entity).insert(border_color_hover);
+            } else {
+                commands.entity(entity).insert(border_color_normal);
             }
         }
     }

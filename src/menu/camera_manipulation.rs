@@ -11,7 +11,7 @@ pub fn smooth_look_at_system(
     for (entity, mut transform, mut params, mut projection) in q.iter_mut() {
         let up = params.up.unwrap_or(Vec3::Y);
         let speed = params.speed.unwrap_or(1.0);
-        let t = 1.0 - (-speed * dt).exp();
+            let t = 1.0 - (-speed * dt).exp();
 
         if end_of_camera_movement(&params) {
             commands.entity(entity).remove::<SmoothCamMove>();
