@@ -8,6 +8,20 @@ pub fn cleanup_menu_cam(entity: Single<&mut Camera, With<MenuCameraComponent>>)
     camera.is_active = false;
 }
 
+static BORDER_HOVER: BorderColor = BorderColor {
+    top: Color::srgba(0.0, 1.0, 1.0, 0.9),
+    bottom: Color::srgba(0.0, 0.9, 1.0, 0.8),
+    left: Color::srgba(0.0, 1.0, 1.0, 1.0),
+    right: Color::srgba(0.0, 1.0, 1.0, 1.0),
+};
+
+static BORDER_NORMAL: BorderColor = BorderColor {
+    top: Color::srgba(0.0, 0.9, 1.0, 0.3),
+    bottom: Color::srgba(0.0, 0.6, 0.8, 0.3),
+    left: Color::srgba(0.0, 0.8, 1.0, 0.4),
+    right: Color::srgba(0.0, 0.8, 1.0, 0.4),
+};
+
 pub fn create_main_menu_scene(
     mut commands: Commands,
     camera_components: Single<(Entity, &mut Camera), With<MenuCameraComponent>>,
@@ -44,13 +58,6 @@ pub fn create_main_menu_scene(
         align_items: AlignItems::Center,
         border: UiRect::all(Val::Px(2.0)),
         ..default()
-    };
-
-    let border_color = BorderColor {
-        top: Color::srgba(0.0, 0.9, 1.0, 0.3),
-        bottom: Color::srgba(0.0, 0.6, 0.8, 0.3),
-        left: Color::srgba(0.0, 0.8, 1.0, 0.4),
-        right: Color::srgba(0.0, 0.8, 1.0, 0.4),
     };
 
     commands.spawn((
@@ -92,50 +99,61 @@ pub fn create_main_menu_scene(
             },
             menu_layer.clone(),
         )).with_children(|parent| {
+
+
             parent.spawn((
                 node.clone(),
                 border_radius.clone(),
-                border_color.clone(),
+                BORDER_NORMAL,
                 BackgroundColor(Color::srgba(0.0, 0.2, 0.4, 0.8)), // dark blue transparent
-                MenuButton { action: MenuAction::Start },
                 children![(
                     Text::new("LAUNCH MISSION"),
                     TextFont { font: font.clone(), font_size: 28.0, ..default() },
                     TextColor(Color::srgb(0.0, 1.0, 1.0)),
                 )],
                 menu_layer.clone(),
-            ));
+            )).observe(|over: On<Pointer<Over>>, mut colors: Query<&mut BorderColor>| {
+                *(colors.get_mut(over.entity).unwrap()) = BORDER_HOVER;
+            }).observe(|out: On<Pointer<Out>>, mut colors: Query<&mut BorderColor>| {
+                *(colors.get_mut(out.entity).unwrap()) = BORDER_NORMAL;
+            });
 
 
 
             parent.spawn((
                 node.clone(),
                 border_radius.clone(),
-                border_color.clone(),
+                BORDER_NORMAL,
                 BackgroundColor(Color::srgba(0.0, 0.2, 0.0, 0.8)), // dark green transparent
-                MenuButton { action: MenuAction::Options },
                 children![(
                     Text::new("SYSTEM SETTINGS"),
                     TextFont { font: font.clone(), font_size: 28.0, ..default() },
                     TextColor(Color::srgb(0.0, 1.0, 0.0)),
                 )],
                 menu_layer.clone(),
-            ));
+            )).observe(|over: On<Pointer<Over>>, mut colors: Query<&mut BorderColor>| {
+                *(colors.get_mut(over.entity).unwrap()) = BORDER_HOVER;
+            }).observe(|out: On<Pointer<Out>>, mut colors: Query<&mut BorderColor>| {
+                *(colors.get_mut(out.entity).unwrap()) = BORDER_NORMAL;
+            });
 
 
             parent.spawn((
                 node.clone(),
                 border_radius.clone(),
-                border_color.clone(),
+                BORDER_NORMAL,
                 BackgroundColor(Color::srgba(0.4, 0.0, 0.0, 0.8)), // dark red transparent
-                MenuButton { action: MenuAction::Quit },
                 children![(
                     Text::new("EJECT"),
                     TextFont { font: font.clone(), font_size: 28.0, ..default() },
                     TextColor(Color::srgb(1.0, 0.0, 0.0)),
                 )],
                 menu_layer.clone(),
-            ));
+            )).observe(|over: On<Pointer<Over>>, mut colors: Query<&mut BorderColor>| {
+                *(colors.get_mut(over.entity).unwrap()) = BORDER_HOVER;
+            }).observe(|out: On<Pointer<Out>>, mut colors: Query<&mut BorderColor>| {
+                *(colors.get_mut(out.entity).unwrap()) = BORDER_NORMAL;
+            });
         });
     });
 }

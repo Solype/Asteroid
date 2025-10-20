@@ -7,12 +7,6 @@ use bevy::camera::visibility::RenderLayers;
 /// 
 ////////////////////////////////////////////////////
 
-
-#[derive(SystemSet, Debug, Clone, PartialEq, Eq, Hash)]
-pub struct MenuSystemSet;
-
-
-
 ////////////////////////////////////////////////////
 /// 
 /// 3D components
@@ -21,9 +15,6 @@ pub struct MenuSystemSet;
 
 #[derive(Component, Default)]
 pub struct MenuPlane {
-    pub dimensions: Vec2,
-    pub center: Vec3,
-    pub normal: Vec3,
     pub menu_id: MenuTypes
 }
 
@@ -65,48 +56,12 @@ impl MenuTypes {
 
 ////////////////////////////////////////////////////
 /// 
-/// Events
-/// 
-////////////////////////////////////////////////////
-
-#[repr(u8)]
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
-pub enum CursorEventType {
-    #[default]
-    Move = 0,
-    Click = 1
-}
-
-#[derive(Message, Default, Debug)]
-pub struct MenuPlaneCursorCastEvent {
-    // pub menu_id: MenuTypes,
-    pub event_type: CursorEventType,
-    pub cursor_coordinates: Vec2,
-    pub screen_dimensions: Vec2,
-}
-
-
-////////////////////////////////////////////////////
-/// 
 /// 2D menu elements
 /// 
 ////////////////////////////////////////////////////
 
 #[derive(Component)]
 pub struct MenuCameraComponent;
-
-
-#[derive(Component)]
-pub struct MenuButton {
-    pub action: MenuAction,
-}
-
-#[derive(Debug, Clone, Copy)]
-pub enum MenuAction {
-    Start,
-    Quit,
-    Options,
-}
 
 #[derive(Resource)]
 pub struct MainMenuRessources {

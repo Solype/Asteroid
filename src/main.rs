@@ -111,7 +111,7 @@ fn setup_left_screen(
     ];
     
     let (left_mesh, _left_normal, _left_center) = create_quad(left_points[0], left_points[1], left_points[2], left_points[3]);
-    let (middle_mesh, middle_normal, middle_center) = create_quad(middle_points[0], middle_points[1], middle_points[2], middle_points[3]);
+    let (middle_mesh, _middle_normal, _middle_center) = create_quad(middle_points[0], middle_points[1], middle_points[2], middle_points[3]);
     let (right_mesh, _right_normal, _right_center) = create_quad(right_points[0], right_points[1], right_points[2], right_points[3]);
 
 
@@ -122,14 +122,7 @@ fn setup_left_screen(
     
     let middle_id = commands.spawn((
         Mesh3d(meshes.add(Mesh::from(middle_mesh))),
-        menu::structs::MenuPlane { 
-            dimensions: Vec2 {
-                x: (middle_points[0] - middle_points[1]).length(),
-                y: (middle_points[1] - middle_points[2]).length() 
-            },
-            normal: middle_normal, center:middle_center,
-            menu_id: menu::structs::MenuTypes::MainMenu 
-        }
+        menu::structs::MenuPlane { menu_id: menu::structs::MenuTypes::MainMenu }
     )).id();
 
 
