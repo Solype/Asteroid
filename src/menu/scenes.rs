@@ -116,6 +116,8 @@ pub fn create_main_menu_scene(
                 *(colors.get_mut(over.entity).unwrap()) = BORDER_HOVER;
             }).observe(|out: On<Pointer<Out>>, mut colors: Query<&mut BorderColor>| {
                 *(colors.get_mut(out.entity).unwrap()) = BORDER_NORMAL;
+            }).observe(|_: On<Pointer<Click>>, mut next_state: ResMut<NextState<GameState>>| {
+                next_state.set(GameState::Game);
             });
 
 
@@ -153,6 +155,8 @@ pub fn create_main_menu_scene(
                 *(colors.get_mut(over.entity).unwrap()) = BORDER_HOVER;
             }).observe(|out: On<Pointer<Out>>, mut colors: Query<&mut BorderColor>| {
                 *(colors.get_mut(out.entity).unwrap()) = BORDER_NORMAL;
+            }).observe(|_: On<Pointer<Click>>, mut exit: MessageWriter<AppExit>| {
+                exit.write(AppExit::Success);
             });
         });
     });
