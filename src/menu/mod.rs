@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 use bevy::picking::PickingSystems;
 use crate::game_states::GameState;
+use crate::menu::structs::MenuState;
 
 
 pub mod structs;
@@ -19,14 +20,25 @@ use scenes::*;
 
 pub fn menu_plugin(app: &mut App)
 {
+    // Initialisation of the ressources
     app.add_systems(Startup, (setup_texture_camera, setup_cube_ptr));
     app.add_systems(PostStartup, (setup_menu, apply_texture_to_quad));
-    app.add_systems(OnEnter(GameState::Menu), (focus_main_screen, create_main_menu_scene, release_mouse));
-    app.add_systems(OnExit(GameState::Menu), (remove_focus_menu, cleanup_menu_cam));
+
+    // Initialisation of the systems to enter Menu state of the game
+    app.add_systems(OnEnter(GameState::Menu), (focus_main_screen, enter_menu_state, release_mouse));
+    app.add_systems(OnExit(GameState::Menu), (remove_focus_menu, leave_menu_state));
+
+
+    // Init the scene after entering into a specific menu state
+    app.add_systems(OnEnter(MenuState::Main), create_main_menu_scene);
+    app.add_systems(OnEnter(MenuState::Options), create_options_menu_scene);
+
+    // Overall modifications
     app.add_systems(First, drive_diegetic_pointer
         .run_if(in_state(GameState::Menu))
         .in_set(PickingSystems::Input));
     app.add_systems(Update, smooth_look_at_system);
+    app.init_state::<MenuState>();
 }
 
 

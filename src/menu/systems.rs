@@ -5,8 +5,19 @@ use bevy::{
     }
 };
 use crate::controller::PlayerCam;
-// use crate::game_states::GameState;
 use crate::menu::structs::*;
+
+pub fn enter_menu_state(mut next_state: ResMut<NextState<MenuState>>)
+{
+    next_state.set(MenuState::Main);
+}
+
+
+pub fn leave_menu_state(mut next_state: ResMut<NextState<MenuState>>, entity: Single<&mut Camera, With<MenuCameraComponent>>)
+{
+    entity.into_inner().is_active = false;
+    next_state.set(MenuState::None);
+}
 
 
 
