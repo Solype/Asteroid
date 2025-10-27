@@ -12,7 +12,6 @@ mod scenes;
 
 
 use plane_cast::*;
-// use structs::*;
 use systems::*;
 use setup::*;
 use camera_manipulation::*;

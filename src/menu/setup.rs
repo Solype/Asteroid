@@ -12,7 +12,6 @@ static SCREEN_HEIGHT : u32 = 256 * 2;
 pub fn setup_menu(mut commands: Commands, menu_texture: Res<MenuCameraTarget>)
 {
     let handle = menu_texture.image.clone();
-    let menu_layer = MenuTypes::layer(MenuTypes::MainMenu);
 
     commands.spawn((
         Camera2d::default(),
@@ -21,7 +20,6 @@ pub fn setup_menu(mut commands: Commands, menu_texture: Res<MenuCameraTarget>)
             ..default()
         },
         MenuCameraComponent,
-        menu_layer.clone()
     ));
 }
 
@@ -34,12 +32,10 @@ pub fn apply_texture_to_quad(mut commands: Commands, screens: Query<(&MenuPlane,
         ..default()
     });
 
-    for (planes, entity) in screens.iter() {
-        if planes.menu_id == MenuTypes::MainMenu {
-            commands.entity(entity).insert(MeshMaterial3d(mat_handler));
-            info!("Texture applied");
-            return;
-        }
+    for (_, entity) in screens.iter() {
+        commands.entity(entity).insert(MeshMaterial3d(mat_handler));
+        info!("Texture applied");
+        return;
     }
 }
 

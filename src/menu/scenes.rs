@@ -31,7 +31,6 @@ pub fn create_main_menu_scene(
     let (cam_entity, mut camera) = camera_components.into_inner();
     camera.is_active = true;
 
-    let menu_layer = MenuTypes::layer(MenuTypes::MainMenu);
     let font: Handle<Font>;
     let background : Handle<Image>;
 
@@ -75,7 +74,6 @@ pub fn create_main_menu_scene(
             ..default()
         },
         UiTargetCamera(cam_entity),
-        menu_layer.clone()
     )).with_children(|parent| {
         parent.spawn((
             Text::new("STARSHIP DASHBOARD"),
@@ -85,7 +83,6 @@ pub fn create_main_menu_scene(
                 margin: UiRect::all(Val::Px(30.0)),
                 ..default()
             },
-            menu_layer.clone()
         ));
         parent.spawn((
             Node {
@@ -97,7 +94,6 @@ pub fn create_main_menu_scene(
                 margin: UiRect::all(Val::Px(10.0)),
                 ..default()
             },
-            menu_layer.clone(),
         )).with_children(|parent| {
 
 
@@ -111,7 +107,6 @@ pub fn create_main_menu_scene(
                     TextFont { font: font.clone(), font_size: 28.0, ..default() },
                     TextColor(Color::srgb(0.0, 1.0, 1.0)),
                 )],
-                menu_layer.clone(),
             )).observe(|over: On<Pointer<Over>>, mut colors: Query<&mut BorderColor>| {
                 *(colors.get_mut(over.entity).unwrap()) = BORDER_HOVER;
             }).observe(|out: On<Pointer<Out>>, mut colors: Query<&mut BorderColor>| {
@@ -132,7 +127,6 @@ pub fn create_main_menu_scene(
                     TextFont { font: font.clone(), font_size: 28.0, ..default() },
                     TextColor(Color::srgb(0.0, 1.0, 0.0)),
                 )],
-                menu_layer.clone(),
             )).observe(|over: On<Pointer<Over>>, mut colors: Query<&mut BorderColor>| {
                 *(colors.get_mut(over.entity).unwrap()) = BORDER_HOVER;
             }).observe(|out: On<Pointer<Out>>, mut colors: Query<&mut BorderColor>| {
@@ -150,7 +144,6 @@ pub fn create_main_menu_scene(
                     TextFont { font: font.clone(), font_size: 28.0, ..default() },
                     TextColor(Color::srgb(1.0, 0.0, 0.0)),
                 )],
-                menu_layer.clone(),
             )).observe(|over: On<Pointer<Over>>, mut colors: Query<&mut BorderColor>| {
                 *(colors.get_mut(over.entity).unwrap()) = BORDER_HOVER;
             }).observe(|out: On<Pointer<Out>>, mut colors: Query<&mut BorderColor>| {

@@ -122,7 +122,7 @@ fn setup_left_screen(
     
     let middle_id = commands.spawn((
         Mesh3d(meshes.add(Mesh::from(middle_mesh))),
-        menu::structs::MenuPlane { menu_id: menu::structs::MenuTypes::MainMenu }
+        menu::structs::MenuPlane,
     )).id();
 
 
