@@ -50,6 +50,9 @@ pub struct MenuCameraTarget {
 #[derive(Component)]
 pub struct MenuCameraComponent;
 
+#[derive(Component)]
+pub struct VolumeText;
+
 #[derive(Resource)]
 pub struct MainMenuRessources {
     pub bg : Handle<Image>,

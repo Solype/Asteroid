@@ -2,6 +2,7 @@ use bevy::{
     prelude::*,
 };
 use crate::game_states::GameState;
+use crate::globals_structs::{Keybinds, MusicVolume};
 use crate::menu::structs::*;
 
 static BORDER_HOVER: BorderColor = BorderColor {
@@ -172,6 +173,8 @@ pub fn create_options_menu_scene(
     mut commands: Commands,
     camera_components: Single<(Entity, &mut Camera), With<MenuCameraComponent>>,
     menu_ressources: Res<MainMenuRessources>,
+    master_volume: Res<MusicVolume>,
+    keybinds: Res<Keybinds>,
 ) {
     let (cam_entity, mut camera) = camera_components.into_inner();
     camera.is_active = true;
@@ -267,19 +270,36 @@ pub fn create_options_menu_scene(
                                 TextColor(Color::WHITE),
                             ),
                             (
-                                Text::new("100%"),
+                                Text::new(format!("{}%", master_volume.volume as i32)),
                                 TextFont { font: font.clone(), font_size: 24.0, ..default() },
                                 TextColor(Color::srgb(0.0, 1.0, 0.0)),
+                                VolumeText
                             )
                         ],
-                    ));
+                    )).observe(|over: On<Pointer<Over>>, mut command: Commands | {
+                        command.entity(over.entity).insert(BORDER_HOVER);
+                    }).observe(|out: On<Pointer<Out>>, mut command: Commands| {
+                        command.entity(out.entity).remove::<BorderColor>();
+                    }).observe(|_: On<Pointer<Click>>, mut master_volume: ResMut<MusicVolume>, mut texts: Query<&mut Text, With<VolumeText>>| {
+                        master_volume.volume = (master_volume.volume - 10.0).rem_euclid(110.0);
+                        for mut text in &mut texts {
+                            *text = Text::new(format!("{}%", master_volume.volume as i32));
+                        }
+                    });
 
                     // === 4 Key Binds ===
                     let binds = [
-                        ("Thrust Key", "W"),
-                        ("Fire Key", "Space"),
-                        ("Turn Left", "A"),
-                        ("Turn Right", "D"),
+                        ("Up", keybinds.up),
+                        ("Down", keybinds.down),
+                        ("Left", keybinds.left),
+                        ("Right", keybinds.right),
+                        ("Forward", keybinds.forward),
+                        ("Backward", keybinds.backward),
+                        ("Rotate_left", keybinds.rotate_left),
+                        ("Rotate_right", keybinds.rotate_right),
+                        ("Free look", keybinds.free_look),
+                        ("Shoot", keybinds.shoot),
+                        ("Menu", keybinds.menu),
                     ];
 
                     for (label, key) in binds {
@@ -298,7 +318,7 @@ pub fn create_options_menu_scene(
                                     TextColor(Color::WHITE),
                                 ),
                                 (
-                                    Text::new(key),
+                                    Text::new(key.to_str()),
                                     TextFont { font: font.clone(), font_size: 24.0, ..default() },
                                     TextColor(Color::srgb(0.0, 1.0, 1.0)),
                                 )
