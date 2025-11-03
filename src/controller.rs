@@ -1,9 +1,12 @@
 use bevy::{
-    input::mouse::AccumulatedMouseMotion, prelude::*, window::{CursorGrabMode, PrimaryWindow}
+    input::mouse::AccumulatedMouseMotion,
+    prelude::*, 
+    window::{
+        CursorGrabMode, PrimaryWindow, CursorOptions
+    }
 };
 
 use std::f32::consts::FRAC_PI_2;
-use std::env;
 use crate::game_states::GameState;
 
 
@@ -23,6 +26,8 @@ pub fn plugin(app: &mut App)
 
 #[derive(SystemSet, Debug, Clone, PartialEq, Eq, Hash)]
 struct GameSystemSet;
+
+
 
 #[derive(Component)]
 pub struct Player;
@@ -48,20 +53,27 @@ impl Default for CameraSensitivity {
 
 
 
-fn grab_mouse(mut window: Single<&mut Window>) {
-    window.cursor_options.visible = !window.cursor_options.visible;
-    window.cursor_options.grab_mode = match cfg!(target_os = "macos") {
-        true => CursorGrabMode::Locked,
-        false => CursorGrabMode::Confined
-    }
+fn grab_mouse(mut options: Single<&mut CursorOptions, With<PrimaryWindow>>)
+{
+    options.visible = false;
+    options.grab_mode = CursorGrabMode::Locked;
+    // options.grab_mode = match cfg!(target_os = "macos") {
+    //     true => CursorGrabMode::Locked,
+    //     false => CursorGrabMode::Confined
+    // }
 }
 
 fn player_system(
     keyboard_input: Res<ButtonInput<KeyCode>>,
     time: Res<Time>,
     player: Single<(&mut Transform, &CameraSensitivity), With<Player>>,
+    mut next_state: ResMut<NextState<GameState>>
 ) {
     let (mut transform, camera_sensitivity) = player.into_inner();
+
+    if keyboard_input.just_pressed(KeyCode::KeyR) {
+        next_state.set(GameState::Menu);
+    }
 
     let mut delta_yaw = 0.0;
     let mut delta_pitch = 0.0;
@@ -78,6 +90,7 @@ fn player_system(
     if keyboard_input.pressed(KeyCode::KeyD) {
         delta_yaw -= 200.0;
     }
+    
 
     if delta_yaw != 0.0 || delta_pitch != 0.0 {
         let delta_yaw = delta_yaw * camera_sensitivity.x * time.delta_secs();
@@ -96,7 +109,6 @@ fn player_system(
 
 fn player_cam_system(
     accumulated_mouse_motion: Res<AccumulatedMouseMotion>,
-    mut windows: Query<&mut Window, With<PrimaryWindow>>,
     player: Single<(&mut Transform, &CameraSensitivity), With<PlayerCam>>,
 ) {
     let (mut transform, camera_sensitivity) = player.into_inner();
@@ -113,11 +125,5 @@ fn player_cam_system(
         const YAW_LIMIT: f32 = FRAC_PI_2;
         yaw = yaw.clamp(-YAW_LIMIT, YAW_LIMIT);
         transform.rotation = Quat::from_euler(EulerRot::YXZ, yaw, pitch, roll);
-        if let Ok(mut window) = windows.single_mut() {
-            if env::var("WAYLAND_DISPLAY").is_ok() {
-                let center = window.resolution.size() / 2.0;
-                let _ = window.set_cursor_position(Some(center));
-            }
-        }
     }
 }

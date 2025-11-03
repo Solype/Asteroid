@@ -1,8 +1,7 @@
 use bevy::prelude::*;
 use bevy::asset::RenderAssetUsages;
-use bevy::render::mesh::{Indices, Mesh};
 use bevy::render::render_resource::PrimitiveTopology;
-
+use bevy::mesh::{Indices, Mesh};
 
 mod controller;
 mod menu;
@@ -39,7 +38,7 @@ fn create_quad(
     top_right: Vec3,
     bottom_right: Vec3,
     bottom_left: Vec3,
-) -> (Mesh, Vec3) {
+) -> (Mesh, Vec3, Vec3) {
     let normal = (top_right - top_left).cross(bottom_left - top_left).normalize();
 
     let mut mesh = Mesh::new(
@@ -75,6 +74,7 @@ fn create_quad(
         .collect();
 
     let normals = vec![normal; 4];
+    let center = (top_left + top_right + bottom_right + bottom_left) / 4.0;
     let indices = Indices::U32(vec![0, 2, 1, 0, 3, 2]);
 
     mesh.insert_attribute(Mesh::ATTRIBUTE_POSITION, positions);
@@ -82,7 +82,7 @@ fn create_quad(
     mesh.insert_attribute(Mesh::ATTRIBUTE_UV_0, uvs);
     mesh.insert_indices(indices);
 
-    (mesh, normal)
+    return (mesh, normal, center);
 }
 
 
@@ -110,9 +110,9 @@ fn setup_left_screen(
         Vec3::new(-0.216544, 0.640333, -0.261248),
     ];
     
-    let (left_mesh, _left_normal) = create_quad(left_points[0], left_points[1], left_points[2], left_points[3]);
-    let (middle_mesh, _middle_normal) = create_quad(middle_points[0], middle_points[1], middle_points[2], middle_points[3]);
-    let (right_mesh, _right_normal) = create_quad(right_points[0], right_points[1], right_points[2], right_points[3]);
+    let (left_mesh, _left_normal, _left_center) = create_quad(left_points[0], left_points[1], left_points[2], left_points[3]);
+    let (middle_mesh, _middle_normal, _middle_center) = create_quad(middle_points[0], middle_points[1], middle_points[2], middle_points[3]);
+    let (right_mesh, _right_normal, _right_center) = create_quad(right_points[0], right_points[1], right_points[2], right_points[3]);
 
 
     let left_id = commands.spawn((
@@ -122,7 +122,7 @@ fn setup_left_screen(
     
     let middle_id = commands.spawn((
         Mesh3d(meshes.add(Mesh::from(middle_mesh))),
-        menu::structs::MenuPlane { width: 3.0, height: 2.0, menu_id: menu::structs::MenuTypes::MainMenu }
+        menu::structs::MenuPlane,
     )).id();
 
 
@@ -151,6 +151,7 @@ fn setup(
 
     let camera_entity = commands
         .spawn((
+            Projection::from(PerspectiveProjection::default()),
             Camera3d::default(),
             Camera { order: 0, ..default() },
             Transform::from_xyz(0.0, 1.1, 0.3).looking_at(Vec3::new(-0.216544, 0.777080, -0.318808), Vec3::Y),

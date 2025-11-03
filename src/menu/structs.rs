@@ -1,66 +1,64 @@
 use bevy::prelude::*;
-use bevy::render::view::RenderLayers;
 
+////////////////////////////////////////////////////
+///
+/// Initialisation
+/// 
+////////////////////////////////////////////////////
 
-// Initialisation
+#[derive(Clone, Copy, Default, Eq, PartialEq, Debug, Hash, States)]
+pub enum MenuState {
+    #[default]
+    None,
+    Main,
+    Options,
+}
 
-#[derive(SystemSet, Debug, Clone, PartialEq, Eq, Hash)]
-pub struct MenuSystemSet;
-
-// 3D components
+////////////////////////////////////////////////////
+/// 
+/// 3D components
+/// 
+////////////////////////////////////////////////////
 
 #[derive(Component, Default)]
-pub struct MenuPlane {
-    pub width: f32,
-    pub height: f32,
-    pub menu_id: MenuTypes
-}
-
-#[derive(Event, Default)]
-pub struct MenuPlaneCursorCastEvent {
-    pub menu_id: MenuTypes,
-    pub cursor_x: f32,
-    pub cursor_y: f32,
-    pub width: f32,
-    pub height: f32,
-}
-
-#[repr(u8)]
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum MenuTypes {
-    MainMenu = 1,
-    // StatMenu = 2
-}
-
-impl Default for MenuTypes {
-    fn default() -> Self {
-        MenuTypes::MainMenu
-    }
-}
-impl MenuTypes {
-    pub fn layer(self) -> RenderLayers {
-        RenderLayers::layer(self as usize)
-    }
-}
+pub struct MenuPlane;
 
 
-// 2D menu elements
+#[derive(Component, Default)]
+pub struct SmoothCamMove {
+    pub look_at : Option<Vec3>,
+    pub position : Option<Vec3>,
+    pub speed : Option<f32>,
+    pub up : Option<Vec3>,
+    pub fov : Option<f32>,
+    pub aspect_ratio : Option<f32>
+}
+
 
 #[derive(Resource)]
 pub struct MenuCameraTarget {
     pub image: Handle<Image>,
 }
 
+
+////////////////////////////////////////////////////
+/// 
+/// 2D menu elements
+/// 
+////////////////////////////////////////////////////
+
 #[derive(Component)]
 pub struct MenuCameraComponent;
 
-#[derive(Component)]
-pub struct MenuButton {
-    pub action: MenuAction,
+#[derive(Resource)]
+pub struct MainMenuRessources {
+    pub bg : Handle<Image>,
+    pub font : Handle<Font>,
 }
 
-#[derive(Debug, Clone, Copy)]
-pub enum MenuAction {
-    Start,
-    Quit,
+#[derive(EntityEvent, Debug)]
+#[entity_event(propagate, auto_propagate)]
+pub struct Scroll {
+    pub entity: Entity,
+    pub delta: Vec2,
 }
