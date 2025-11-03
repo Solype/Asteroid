@@ -1,43 +1,91 @@
-use bevy::prelude::*;
-use bevy::render::view::RenderLayers;
-use crate::game_states::GameState;
+use bevy::{
+    // app::AppExit,
+    input::mouse::{MouseScrollUnit, MouseWheel},
+    picking::hover::HoverMap,
+    prelude::*,
+
+    window::{
+        CursorGrabMode, CursorOptions,PrimaryWindow
+    },
+};
+use crate::controller::PlayerCam;
 use crate::menu::structs::*;
 
-
-
-pub fn menu_system(
-    keyboard: Res<ButtonInput<KeyCode>>,
-    mut next_state: ResMut<NextState<GameState>>
-) {
-    if keyboard.just_pressed(KeyCode::KeyW) {
-        next_state.set(GameState::Game);
-    }
-}
-
-fn point_in_button(cursor_x: f32, cursor_y: f32, pos: Vec3, size: Vec2) -> bool
+pub fn enter_menu_state(mut next_state: ResMut<NextState<MenuState>>)
 {
-    let half_w = size.x / 2.0;
-    let half_h = size.y / 2.0;
-
-    let in_x = cursor_x >= pos.x - half_w && cursor_x <= pos.x + half_w;
-    let in_y = cursor_y >= pos.y - half_h && cursor_y <= pos.y + half_h;
-
-    in_x && in_y
+    next_state.set(MenuState::Main);
 }
 
-fn check_button_collision(
-    cursor_x: f32,
-    cursor_y: f32,
-    transform: &Transform,
-    sprite: &Sprite,
-    button: &MenuButton,
+
+pub fn leave_menu_state(mut next_state: ResMut<NextState<MenuState>>, entity: Single<&mut Camera, With<MenuCameraComponent>>)
+{
+    entity.into_inner().is_active = false;
+    next_state.set(MenuState::None);
+}
+
+
+
+pub fn release_mouse(mut options: Single<&mut CursorOptions, With<PrimaryWindow>>)
+{
+    options.grab_mode = CursorGrabMode::None;
+    options.visible = true;
+}
+
+pub fn remove_focus_menu(mut command: Commands, entity: Single<Entity, With<PlayerCam>>)
+{
+    let player = entity.into_inner();
+
+    command.entity(player).insert(SmoothCamMove {
+        speed : Some(3.0),
+        fov : Some(45.0_f32.to_radians()),
+        position : Some(Vec3::new(0.0, 1.1, 0.3)),
+        ..Default::default()
+    });
+}
+
+pub fn focus_main_screen(mut command: Commands, player_entity: Single<Entity, With<PlayerCam>>)
+{
+    let player = player_entity.into_inner();
+    let center = Vec3::new(0.0, 0.7087065, -0.29002798);
+    let new_position = Vec3::new(0.0, 1.05, 0.27);
+
+    command.entity(player).insert(SmoothCamMove {
+        look_at: Some(center),
+        position: Some(new_position),
+        speed: Some(3.0),
+        up: Some(Vec3::Y),
+        fov: Some(20.0_f32.to_radians()),
+        ..Default::default()
+    });
+}
+
+
+
+
+
+const LINE_HEIGHT: f32 = 21.;
+
+
+pub fn send_scroll_events(
+    mut mouse_wheel_reader: MessageReader<MouseWheel>,
+    hover_map: Res<HoverMap>,
+    keyboard_input: Res<ButtonInput<KeyCode>>,
+    mut commands: Commands,
 ) {
-    if let Some(size) = sprite.custom_size {
-        if point_in_button(cursor_x, cursor_y, transform.translation, size) {
-            info!("✅ Collision avec bouton {:?}", button.action);
-            match button.action {
-                MenuAction::Start => info!("🚀 Lancer le jeu !"),
-                MenuAction::Quit => info!("👋 Quitter le jeu !"),
+    for mouse_wheel in mouse_wheel_reader.read() {
+        let mut delta = -Vec2::new(mouse_wheel.x, mouse_wheel.y);
+
+        if mouse_wheel.unit == MouseScrollUnit::Line {
+            delta *= LINE_HEIGHT;
+        }
+
+        if keyboard_input.any_pressed([KeyCode::ControlLeft, KeyCode::ControlRight]) {
+            std::mem::swap(&mut delta.x, &mut delta.y);
+        }
+
+        for pointer_map in hover_map.values() {
+            for entity in pointer_map.keys().copied() {
+                commands.trigger(crate::menu::structs::Scroll { entity, delta });
             }
         }
     }
@@ -45,32 +93,49 @@ fn check_button_collision(
 
 
 
-pub fn menu_button_collision_system(
-    mut events: EventReader<MenuPlaneCursorCastEvent>,
-    buttons: Query<(&Transform, &Sprite, &MenuButton, &RenderLayers)>,
-    texture: Res<MenuCameraTarget>,
-    images: Res<Assets<Image>>
+pub fn on_scroll_handler(
+    mut scroll: On<crate::menu::structs::Scroll>,
+    mut query: Query<(&mut ScrollPosition, &Node, &ComputedNode)>,
 ) {
-    for event in events.read() {
-        let cursor_x = event.cursor_x;
-        let cursor_y = event.cursor_y;
-        let Some(image) = images.get(&texture.image) else {
-            continue;
+    let Ok((mut scroll_position, node, computed)) = query.get_mut(scroll.entity) else {
+        return;
+    };
+
+    let max_offset = (computed.content_size() - computed.size()) * computed.inverse_scale_factor();
+
+    let delta = &mut scroll.delta;
+    if node.overflow.x == OverflowAxis::Scroll && delta.x != 0. {
+        // Is this node already scrolled all the way in the direction of the scroll?
+        let max = if delta.x > 0. {
+            scroll_position.x >= max_offset.x
+        } else {
+            scroll_position.x <= 0.
         };
 
-        for (transform, sprite, button, layer) in buttons.iter() {
-            let event_layer = MenuTypes::layer(event.menu_id);
-            if !layer.intersects(&event_layer) {
-                info!("No layer intersects");
-                continue;
-            }
-            let cursor_px = (cursor_x / event.width) * image.width() as f32;
-            let cursor_py = (cursor_y / event.height) * image.height() as f32;
-            info!("event.height {}, cursor_y {}, image.height() {}", event.height, cursor_y, image.height());
-            info!("event.width {}, cursor_x {}, image.width() {}", event.width, cursor_x, image.width());
-            info!("px {} py {}", cursor_px, cursor_py);
-            check_button_collision(cursor_px, cursor_py, transform, sprite, button);
+        if !max {
+            scroll_position.x += delta.x;
+            // Consume the X portion of the scroll delta.
+            delta.x = 0.;
         }
     }
-}
 
+    if node.overflow.y == OverflowAxis::Scroll && delta.y != 0. {
+        // Is this node already scrolled all the way in the direction of the scroll?
+        let max = if delta.y > 0. {
+            scroll_position.y >= max_offset.y
+        } else {
+            scroll_position.y <= 0.
+        };
+
+        if !max {
+            scroll_position.y += delta.y;
+            // Consume the Y portion of the scroll delta.
+            delta.y = 0.;
+        }
+    }
+
+    // Stop propagating when the delta is fully consumed.
+    if *delta == Vec2::ZERO {
+        scroll.propagate(false);
+    }
+}
