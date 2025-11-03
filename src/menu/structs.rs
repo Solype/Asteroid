@@ -55,3 +55,10 @@ pub struct MainMenuRessources {
     pub bg : Handle<Image>,
     pub font : Handle<Font>,
 }
+
+#[derive(EntityEvent, Debug)]
+#[entity_event(propagate, auto_propagate)]
+pub struct Scroll {
+    pub entity: Entity,
+    pub delta: Vec2,
+}

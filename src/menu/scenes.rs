@@ -1,4 +1,6 @@
-use bevy::{prelude::*};
+use bevy::{
+    prelude::*,
+};
 use crate::game_states::GameState;
 use crate::menu::structs::*;
 
@@ -193,6 +195,7 @@ pub fn create_options_menu_scene(
         ..default()
     };
 
+    // === Racine du menu ===
     commands.spawn((
         DespawnOnExit(MenuState::Options),
         Node {
@@ -210,7 +213,7 @@ pub fn create_options_menu_scene(
         UiTargetCamera(cam_entity),
     ))
     .with_children(|parent| {
-        // Titre principal
+        // === Titre ===
         parent.spawn((
             Text::new("SYSTEM SETTINGS"),
             TextFont { font: font.clone(), font_size: 50.0, ..default() },
@@ -221,109 +224,111 @@ pub fn create_options_menu_scene(
             },
         ));
 
-
-        // Section des options
-        parent.spawn((
-            Node {
-                width: Val::Px(500.0),
-                height: Val::Px(200.0),
-                flex_direction: FlexDirection::Column,
-                justify_content: JustifyContent::SpaceEvenly,
-                align_items: AlignItems::Center,
-                ..default()
-            },
-        ))
-        .with_children(|parent| {
-            // Master Volume
-            parent.spawn((
+        // === Scrollable container ===
+        parent
+            .spawn((
                 Node {
-                    width: Val::Px(400.0),
-                    height: Val::Px(40.0),
-                    justify_content: JustifyContent::SpaceBetween,
-                    align_items: AlignItems::Center,
+                    align_self: AlignSelf::Stretch,
+                    height: percent(45),
+                    overflow: Overflow::scroll_y(),
+                    flex_direction: FlexDirection::Column,
                     ..default()
                 },
-                children![
-                    (
-                        Text::new("Master Volume"),
-                        TextFont { font: font.clone(), font_size: 26.0, ..default() },
-                        TextColor(Color::WHITE),
-                    ),
-                    (
-                        Text::new("100%"),
-                        TextFont { font: font.clone(), font_size: 24.0, ..default() },
-                        TextColor(Color::srgb(0.0, 1.0, 0.0)),
-                    )
-                ],
-            ));
+                BackgroundColor(Color::srgba(0.0, 0.0, 0.0, 0.3)),
+            ))
+            .with_children(|scroll_root| {
+                // === Contenu scrollable ===
+                scroll_root.spawn((
+                    Node {
+                        width: Val::Percent(100.0),
+                        height: Val::Auto,
+                        flex_direction: FlexDirection::Column,
+                        justify_content: JustifyContent::Start,
+                        align_items: AlignItems::Center,
+                        row_gap: Val::Px(15.0),
+                        padding: UiRect::all(Val::Px(20.0)),
+                        ..default()
+                    },
+                ))
+                .with_children(|content| {
+                    // === Master Volume ===
+                    content.spawn((
+                        Node {
+                            width: Val::Px(450.0),
+                            height: Val::Px(40.0),
+                            justify_content: JustifyContent::SpaceBetween,
+                            align_items: AlignItems::Center,
+                            ..default()
+                        },
+                        children![
+                            (
+                                Text::new("Master Volume"),
+                                TextFont { font: font.clone(), font_size: 26.0, ..default() },
+                                TextColor(Color::WHITE),
+                            ),
+                            (
+                                Text::new("100%"),
+                                TextFont { font: font.clone(), font_size: 24.0, ..default() },
+                                TextColor(Color::srgb(0.0, 1.0, 0.0)),
+                            )
+                        ],
+                    ));
 
-            // Bind 1
-            parent.spawn((
-                Node {
-                    width: Val::Px(400.0),
-                    height: Val::Px(40.0),
-                    justify_content: JustifyContent::SpaceBetween,
-                    align_items: AlignItems::Center,
-                    ..default()
-                },
-                children![
-                    (
-                        Text::new("Thrust Key"),
-                        TextFont { font: font.clone(), font_size: 26.0, ..default() },
-                        TextColor(Color::WHITE),
-                    ),
-                    (
-                        Text::new("W"),
-                        TextFont { font: font.clone(), font_size: 24.0, ..default() },
-                        TextColor(Color::srgb(0.0, 1.0, 1.0)),
-                    )
-                ],
-            ));
+                    // === 4 Key Binds ===
+                    let binds = [
+                        ("Thrust Key", "W"),
+                        ("Fire Key", "Space"),
+                        ("Turn Left", "A"),
+                        ("Turn Right", "D"),
+                    ];
 
-            // Bind 2
-            parent.spawn((
-                Node {
-                    width: Val::Px(400.0),
-                    height: Val::Px(40.0),
-                    justify_content: JustifyContent::SpaceBetween,
-                    align_items: AlignItems::Center,
-                    ..default()
-                },
-                children![
-                    (
-                        Text::new("Fire Key"),
-                        TextFont { font: font.clone(), font_size: 26.0, ..default() },
-                        TextColor(Color::WHITE),
-                    ),
-                    (
-                        Text::new("Space"),
-                        TextFont { font: font.clone(), font_size: 24.0, ..default() },
-                        TextColor(Color::srgb(1.0, 0.0, 0.0)),
-                    )
-                ],
-            ));
-        });
+                    for (label, key) in binds {
+                        content.spawn((
+                            Node {
+                                width: Val::Px(450.0),
+                                height: Val::Px(40.0),
+                                justify_content: JustifyContent::SpaceBetween,
+                                align_items: AlignItems::Center,
+                                ..default()
+                            },
+                            children![
+                                (
+                                    Text::new(label),
+                                    TextFont { font: font.clone(), font_size: 26.0, ..default() },
+                                    TextColor(Color::WHITE),
+                                ),
+                                (
+                                    Text::new(key),
+                                    TextFont { font: font.clone(), font_size: 24.0, ..default() },
+                                    TextColor(Color::srgb(0.0, 1.0, 1.0)),
+                                )
+                            ],
+                        ));
+                    }
+                });
+            });
 
-        // Bouton "Back"
-        parent.spawn((
-            node.clone(),
-            border_radius.clone(),
-            BORDER_NORMAL,
-            BackgroundColor(Color::srgba(0.0, 0.2, 0.4, 0.8)),
-            children![(
-                Text::new("BACK"),
-                TextFont { font: font.clone(), font_size: 28.0, ..default() },
-                TextColor(Color::srgb(0.0, 1.0, 1.0)),
-            )],
-        ))
-        .observe(|over: On<Pointer<Over>>, mut colors: Query<&mut BorderColor>| {
-            *(colors.get_mut(over.entity).unwrap()) = BORDER_HOVER;
-        })
-        .observe(|out: On<Pointer<Out>>, mut colors: Query<&mut BorderColor>| {
-            *(colors.get_mut(out.entity).unwrap()) = BORDER_NORMAL;
-        })
-        .observe(|_: On<Pointer<Click>>, mut next_state: ResMut<NextState<MenuState>>| {
-            next_state.set(MenuState::Main);
-        });
+        // === Bouton "Back" ===
+        parent
+            .spawn((
+                node.clone(),
+                border_radius.clone(),
+                BORDER_NORMAL,
+                BackgroundColor(Color::srgba(0.0, 0.2, 0.4, 0.8)),
+                children![(
+                    Text::new("BACK"),
+                    TextFont { font: font.clone(), font_size: 28.0, ..default() },
+                    TextColor(Color::srgb(0.0, 1.0, 1.0)),
+                )],
+            ))
+            .observe(|over: On<Pointer<Over>>, mut colors: Query<&mut BorderColor>| {
+                *(colors.get_mut(over.entity).unwrap()) = BORDER_HOVER;
+            })
+            .observe(|out: On<Pointer<Out>>, mut colors: Query<&mut BorderColor>| {
+                *(colors.get_mut(out.entity).unwrap()) = BORDER_NORMAL;
+            })
+            .observe(|_: On<Pointer<Click>>, mut next_state: ResMut<NextState<MenuState>>| {
+                next_state.set(MenuState::Main);
+            });
     });
 }
