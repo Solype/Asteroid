@@ -28,20 +28,6 @@ pub fn plugin(app: &mut App)
 struct GameSystemSet;
 
 
-pub fn plugin(app: &mut App)
-{
-    app.add_systems(OnEnter(GameState::Game), grab_mouse);
-    app.add_systems(Update, 
-        (player_cam_system, player_system)
-        .in_set(GameSystemSet)
-        .run_if(in_state(GameState::Game))
-    );
-}
-
-
-
-#[derive(SystemSet, Debug, Clone, PartialEq, Eq, Hash)]
-struct GameSystemSet;
 
 #[derive(Component)]
 pub struct Player;
