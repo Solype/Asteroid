@@ -194,28 +194,6 @@ fn setup(
     // commands.entity(player_entity).add_children(&[camera_entity, left_screen, middle_screen, right_screen]);
     commands.insert_resource(skybox::CameraHolder(camera_entity));
 
-
-    let sun_material = materials.add(StandardMaterial {
-        base_color: Color::srgb(1.0, 0.9, 0.0),
-        emissive: Color::srgb(1.0, 0.9, 0.0).to_linear() * 8.0,
-        unlit: false,
-        ..Default::default()
-    });
-    commands.spawn((
-        PointLight {
-            intensity: 1_000_000_000_000.0,
-            range: 50000.0,
-            radius: 500.0,
-            color: Color::srgb(1.0, 0.9, 0.0),
-            shadows_enabled: true,
-            ..default()
-        },
-        Transform::from_xyz(-1000.0, 1000.0, 0.0),
-        children![(
-            Mesh3d(meshes.add(Sphere::new(500.0).mesh().uv(64, 64))),
-            MeshMaterial3d(sun_material),
-        )],
-    ));
     commands.insert_resource(AmbientLight {
         brightness: 100.0,
         color: Color::srgb(1.0, 0.9, 0.0),
