@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use crate::globals_structs::{Action,};
 
 ////////////////////////////////////////////////////
 ///
@@ -65,3 +66,6 @@ pub struct Scroll {
     pub entity: Entity,
     pub delta: Vec2,
 }
+
+#[derive(Resource, Default)]
+pub struct WaitingForRebind(pub Option<Action>);

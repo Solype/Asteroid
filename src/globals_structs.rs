@@ -64,3 +64,18 @@ impl Default for Keybinds {
         }
     }
 }
+
+#[derive(Component, Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub enum Action {
+    Up,
+    Down,
+    Left,
+    Right,
+    Forward,
+    Backward,
+    RotateLeft,
+    RotateRight,
+    FreeLook,
+    Shoot,
+    Menu,
+}
