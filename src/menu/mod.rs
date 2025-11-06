@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy::picking::PickingSystems;
 use crate::game_states::GameState;
-use crate::menu::structs::MenuState;
+use crate::menu::structs::{MenuState, WaitingForRebind};
 
 
 pub mod structs;
@@ -33,8 +33,9 @@ pub fn menu_plugin(app: &mut App)
     app.add_systems(OnEnter(MenuState::Main), create_main_menu_scene);
     app.add_systems(OnEnter(MenuState::Options), create_options_menu_scene);
 
-    app.add_systems(Update, send_scroll_events.run_if(in_state(GameState::Menu)));
+    app.add_systems(Update, (send_scroll_events, rebind_key).run_if(in_state(GameState::Menu)));
     app.add_observer(on_scroll_handler);
+    app.insert_resource(WaitingForRebind(None));
 
     // Overall modifications
     app.add_systems(First, drive_diegetic_pointer

@@ -8,7 +8,7 @@ use bevy::{
         CursorGrabMode, CursorOptions,PrimaryWindow
     },
 };
-use crate::controller::PlayerCam;
+use crate::{controller::PlayerCam, globals_structs::{Action, InputButton, Keybinds}};
 use crate::menu::structs::*;
 
 pub fn enter_menu_state(mut next_state: ResMut<NextState<MenuState>>)
@@ -61,7 +61,17 @@ pub fn focus_main_screen(mut command: Commands, player_entity: Single<Entity, Wi
 
 
 
-
+//////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////
+//
+//
+// SCROLL
+//
+//////////////////////////////////////////////////////////////////////////////////////////////
 
 const LINE_HEIGHT: f32 = 21.;
 
@@ -137,5 +147,69 @@ pub fn on_scroll_handler(
     // Stop propagating when the delta is fully consumed.
     if *delta == Vec2::ZERO {
         scroll.propagate(false);
+    }
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////
+// 
+// 
+// REBIND
+//
+//////////////////////////////////////////////////////////////////////////////////////////////
+
+pub fn rebind_key(
+    mut waiting: ResMut<WaitingForRebind>,
+    mut keybinds: ResMut<Keybinds>,
+    mut texts: Query<(&mut Text, &Action)>,
+    keyboard: Res<ButtonInput<KeyCode>>,
+    mouse: Res<ButtonInput<MouseButton>>,
+) {
+    if let Some(action) = waiting.0 {
+        if let Some(code) = keyboard.get_just_pressed().last() {
+            let button = InputButton::Key(*code);
+            set_bind(&mut keybinds, action, button);
+            update_text(&mut texts, action, button);
+            waiting.0 = None;
+            info!("Has bind  with keyboard!");
+            return;
+        }
+        if let Some(code) = mouse.get_just_pressed().last() {
+            let button = InputButton::Mouse(*code);
+            set_bind(&mut keybinds, action, button);
+            update_text(&mut texts, action, button);
+            waiting.0 = None;
+            info!("Has bind  with mouse!");
+            return;
+        }
+    }
+}
+
+fn set_bind(binds: &mut Keybinds, action: Action, button: InputButton) {
+    match action {
+        Action::Up => binds.up = button,
+        Action::Down => binds.down = button,
+        Action::Left => binds.left = button,
+        Action::Right => binds.right = button,
+        Action::Forward => binds.forward = button,
+        Action::Backward => binds.backward = button,
+        Action::RotateLeft => binds.rotate_left = button,
+        Action::RotateRight => binds.rotate_right = button,
+        Action::FreeLook => binds.free_look = button,
+        Action::Shoot => binds.shoot = button,
+        Action::Menu => binds.menu = button,
+    }
+}
+
+fn update_text(texts: &mut Query<(&mut Text, &Action)>, action: Action, button: InputButton)
+{
+    for (mut text, act) in texts.iter_mut() {
+        if *act == action {
+            *text = Text::new(button.to_str());
+        }
     }
 }

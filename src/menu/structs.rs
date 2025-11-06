@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use crate::globals_structs::{Action,};
 
 ////////////////////////////////////////////////////
 ///
@@ -50,6 +51,9 @@ pub struct MenuCameraTarget {
 #[derive(Component)]
 pub struct MenuCameraComponent;
 
+#[derive(Component)]
+pub struct VolumeText;
+
 #[derive(Resource)]
 pub struct MainMenuRessources {
     pub bg : Handle<Image>,
@@ -62,3 +66,6 @@ pub struct Scroll {
     pub entity: Entity,
     pub delta: Vec2,
 }
+
+#[derive(Resource, Default)]
+pub struct WaitingForRebind(pub Option<Action>);

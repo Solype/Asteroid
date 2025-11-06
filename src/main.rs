@@ -7,9 +7,10 @@ mod controller;
 mod menu;
 mod game_states;
 mod skybox;
+mod globals_structs;
 
 use game_states::GameState;
-
+use globals_structs::*;
 
 
 
@@ -24,6 +25,8 @@ fn main() {
             // rock::plugin
         ))
         .init_state::<GameState>()
+        .insert_resource(MusicVolume { volume: 100.0_f32 })
+        .insert_resource(Keybinds::default())
         .add_systems(Update, start_after_startup.run_if(in_state(GameState::Startup)))
         .run();
 }
