@@ -205,7 +205,8 @@ fn set_bind(binds: &mut Keybinds, action: Action, button: InputButton) {
     }
 }
 
-fn update_text(texts: &mut Query<(&mut Text, &Action)>, action: Action, button: InputButton) {
+fn update_text(texts: &mut Query<(&mut Text, &Action)>, action: Action, button: InputButton)
+{
     for (mut text, act) in texts.iter_mut() {
         if *act == action {
             *text = Text::new(button.to_str());
