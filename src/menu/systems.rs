@@ -1,140 +1,172 @@
-use crate::controller::PlayerCam;
-use crate::game_states::GameState;
-use crate::menu::structs::*;
-use bevy::app::AppExit;
-use bevy::camera::visibility::RenderLayers;
-use bevy::prelude::*;
-use bevy::window::{CursorGrabMode, CursorOptions};
+use bevy::{
+    // app::AppExit,
+    input::mouse::{MouseScrollUnit, MouseWheel},
+    picking::hover::HoverMap,
+    prelude::*,
 
-pub fn release_mouse(mut windows: Query<(&Window, &mut CursorOptions)>) {
-    for (window, mut cursor_options) in &mut windows {
-        if !window.focused {
-            continue;
-        }
-        cursor_options.visible = true;
-        cursor_options.grab_mode = CursorGrabMode::None;
-    }
+    window::{
+        CursorGrabMode, CursorOptions,PrimaryWindow
+    },
+};
+use crate::{controller::PlayerCam, globals_structs::{Action, InputButton, Keybinds}};
+use crate::menu::structs::*;
+
+pub fn enter_menu_state(mut next_state: ResMut<NextState<MenuState>>)
+{
+    next_state.set(MenuState::Main);
 }
 
-pub fn on_enter_menu(mut command: Commands, entity: Single<Entity, With<PlayerCam>>) {
+
+pub fn leave_menu_state(mut next_state: ResMut<NextState<MenuState>>, entity: Single<&mut Camera, With<MenuCameraComponent>>)
+{
+    entity.into_inner().is_active = false;
+    next_state.set(MenuState::None);
+}
+
+
+
+pub fn release_mouse(mut options: Single<&mut CursorOptions, With<PrimaryWindow>>)
+{
+    options.grab_mode = CursorGrabMode::None;
+    options.visible = true;
+}
+
+pub fn remove_focus_menu(mut command: Commands, entity: Single<Entity, With<PlayerCam>>)
+{
     let player = entity.into_inner();
 
-    command.entity(player).insert(SmoothLookAt {
-        target_world: Vec3 {
-            x: 0.0,
-            y: 0.7087065,
-            z: -0.29002798,
-        },
-        speed: 1.0,
-        up: Vec3::Y,
+    command.entity(player).insert(SmoothCamMove {
+        speed : Some(3.0),
+        fov : Some(45.0_f32.to_radians()),
+        position : Some(Vec3::new(0.0, 1.1, 0.3)),
+        ..Default::default()
     });
 }
 
-pub fn smooth_look_at_system(
-    time: Res<Time>,
+pub fn focus_main_screen(mut command: Commands, player_entity: Single<Entity, With<PlayerCam>>)
+{
+    let player = player_entity.into_inner();
+    let center = Vec3::new(0.0, 0.7087065, -0.29002798);
+    let new_position = Vec3::new(0.0, 1.05, 0.27);
+
+    command.entity(player).insert(SmoothCamMove {
+        look_at: Some(center),
+        position: Some(new_position),
+        speed: Some(3.0),
+        up: Some(Vec3::Y),
+        fov: Some(20.0_f32.to_radians()),
+        ..Default::default()
+    });
+}
+
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////
+//
+//
+// SCROLL
+//
+//////////////////////////////////////////////////////////////////////////////////////////////
+
+const LINE_HEIGHT: f32 = 21.;
+
+
+pub fn send_scroll_events(
+    mut mouse_wheel_reader: MessageReader<MouseWheel>,
+    hover_map: Res<HoverMap>,
+    keyboard_input: Res<ButtonInput<KeyCode>>,
     mut commands: Commands,
-    mut q: Query<(Entity, &mut Transform, &SmoothLookAt), With<Camera>>,
 ) {
-    let dt = time.delta_secs();
+    for mouse_wheel in mouse_wheel_reader.read() {
+        let mut delta = -Vec2::new(mouse_wheel.x, mouse_wheel.y);
 
-    for (entity, mut transform, params) in q.iter_mut() {
-        let to_target = params.target_world - transform.translation;
-        if to_target.length_squared() < 1e-8 {
-            continue;
+        if mouse_wheel.unit == MouseScrollUnit::Line {
+            delta *= LINE_HEIGHT;
         }
 
-        let mut tmp_world = Transform::from_translation(transform.translation);
-        tmp_world.look_at(params.target_world, params.up);
-        let target_world_rot = tmp_world.rotation;
-
-        let t = 1.0 - (-params.speed * dt).exp();
-        transform.rotation = transform.rotation.slerp(target_world_rot, t);
-
-        let angle = transform.rotation.angle_between(target_world_rot);
-        if angle < 1e-3 {
-            transform.rotation = target_world_rot;
-            commands.entity(entity).remove::<SmoothLookAt>();
+        if keyboard_input.any_pressed([KeyCode::ControlLeft, KeyCode::ControlRight]) {
+            std::mem::swap(&mut delta.x, &mut delta.y);
         }
-    }
-}
 
-pub fn menu_button_collision_system(
-    mut events: MessageReader<MenuPlaneCursorCastEvent>,
-    buttons: Query<(&Transform, &Sprite, &MenuButton, &RenderLayers)>,
-    texture: Res<MenuCameraTarget>,
-    images: Res<Assets<Image>>,
-    mut next_state: ResMut<NextState<GameState>>,
-    mut exit: MessageWriter<AppExit>,
-) {
-    for event in events.read() {
-        let Some(image) = images.get(&texture.image) else {
-            continue;
-        };
-
-        for (transform, sprite, button, layer) in buttons.iter() {
-            let event_layer = MenuTypes::layer(event.menu_id);
-            if !layer.intersects(&event_layer) {
-                continue;
-            }
-            let cursor_cast = Vec2::new(
-                (event.cursor_coordinates.x / event.screen_dimensions.x) * image.width() as f32,
-                (event.cursor_coordinates.y / event.screen_dimensions.y) * image.height() as f32,
-            );
-
-            let Some(action) = check_button_collision(cursor_cast, transform, sprite, button)
-            else {
-                continue;
-            };
-            match action {
-                MenuAction::Quit => {
-                    if event.event_type == CursorEventType::Click {
-                        info!("FIN DU JEU !");
-                        exit.write(AppExit::Success);
-                    }
-                }
-                MenuAction::Start => {
-                    if event.event_type == CursorEventType::Click {
-                        next_state.set(GameState::Game);
-                    }
-                }
+        for pointer_map in hover_map.values() {
+            for entity in pointer_map.keys().copied() {
+                commands.trigger(crate::menu::structs::Scroll { entity, delta });
             }
         }
     }
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////
-///
-/// PRIVATE METHODE
-///
-////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////
 
-fn point_in_button(cursor_x: f32, cursor_y: f32, pos: Vec3, size: Vec2) -> bool {
-    let half_w = size.x / 2.0;
-    let half_h = size.y / 2.0;
 
-    let in_x = cursor_x >= pos.x - half_w && cursor_x <= pos.x + half_w;
-    let in_y = cursor_y >= pos.y - half_h && cursor_y <= pos.y + half_h;
-
-    in_x && in_y
-}
-
-fn check_button_collision(
-    cursor: Vec2,
-    transform: &Transform,
-    sprite: &Sprite,
-    button: &MenuButton,
-) -> Option<MenuAction> {
-    let Some(size) = sprite.custom_size else {
-        return None;
+pub fn on_scroll_handler(
+    mut scroll: On<crate::menu::structs::Scroll>,
+    mut query: Query<(&mut ScrollPosition, &Node, &ComputedNode)>,
+) {
+    let Ok((mut scroll_position, node, computed)) = query.get_mut(scroll.entity) else {
+        return;
     };
-    info!(
-        "cursor: {}; dimention bouton : coordinate : {}; size : {}",
-        cursor, transform.translation, size
-    );
-    if !point_in_button(cursor.x, cursor.y, transform.translation, size) {
-        return None;
+
+    let max_offset = (computed.content_size() - computed.size()) * computed.inverse_scale_factor();
+
+    let delta = &mut scroll.delta;
+    if node.overflow.x == OverflowAxis::Scroll && delta.x != 0. {
+        // Is this node already scrolled all the way in the direction of the scroll?
+        let max = if delta.x > 0. {
+            scroll_position.x >= max_offset.x
+//////////////////////////////////////////////////////////////////////////////////////////////
+
+pub fn rebind_key(
+    mut waiting: ResMut<WaitingForRebind>,
+    mut keybinds: ResMut<Keybinds>,
+    mut texts: Query<(&mut Text, &Action)>,
+    keyboard: Res<ButtonInput<KeyCode>>,
+    mouse: Res<ButtonInput<MouseButton>>,
+) {
+    if let Some(action) = waiting.0 {
+        if let Some(code) = keyboard.get_just_pressed().last() {
+            let button = InputButton::Key(*code);
+            set_bind(&mut keybinds, action, button);
+            update_text(&mut texts, action, button);
+            waiting.0 = None;
+            info!("Has bind  with keyboard!");
+            return;
+        }
+        if let Some(code) = mouse.get_just_pressed().last() {
+            let button = InputButton::Mouse(*code);
+            set_bind(&mut keybinds, action, button);
+            update_text(&mut texts, action, button);
+            waiting.0 = None;
+            info!("Has bind  with mouse!");
+            return;
+        }
     }
-    return Some(button.action);
+}
+
+fn set_bind(binds: &mut Keybinds, action: Action, button: InputButton) {
+    match action {
+        Action::Up => binds.up = button,
+        Action::Down => binds.down = button,
+        Action::Left => binds.left = button,
+        Action::Right => binds.right = button,
+        Action::Forward => binds.forward = button,
+        Action::Backward => binds.backward = button,
+        Action::RotateLeft => binds.rotate_left = button,
+        Action::RotateRight => binds.rotate_right = button,
+        Action::FreeLook => binds.free_look = button,
+        Action::Shoot => binds.shoot = button,
+        Action::Menu => binds.menu = button,
+    }
+}
+
+fn update_text(texts: &mut Query<(&mut Text, &Action)>, action: Action, button: InputButton)
+    for (mut text, act) in texts.iter_mut() {
+        if *act == action {
+            *text = Text::new(button.to_str());
+        }
+    }
 }
