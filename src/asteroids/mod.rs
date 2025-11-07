@@ -1,4 +1,4 @@
-use bevy::prelude::*;
+use bevy::{platform::collections::HashMap, prelude::*};
 
 pub mod collision;
 pub mod movement;
@@ -13,10 +13,13 @@ pub struct Asteroid {
 #[derive(Component, Deref, DerefMut)]
 pub struct Velocity(Vec3);
 
+#[derive(Component, Deref, DerefMut)]
+pub struct RotationVelocity(Vec3);
+
 #[derive(Resource)]
 pub struct AsteroidAssets {
-    mesh: Handle<Mesh>,
-    materials: Vec<Handle<StandardMaterial>>,
+    meshes: HashMap<String, Vec<Handle<Mesh>>>,
+    materials: HashMap<String, Handle<StandardMaterial>>,
 }
 
 #[derive(Resource)]
@@ -26,6 +29,8 @@ pub struct AsteroidConfig {
     spawn_range: f32,
     despawn_range: f32,
 }
+const ASTEROID_SIZE_TYPES_LEN: usize = 6;
+const ASTEROID_SIZE_TYPES: [&str; ASTEROID_SIZE_TYPES_LEN] = ["XS", "S", "M", "L", "XL", "XXL"];
 
 const ANIMATION_DURATION: f32 = 0.5;
 
@@ -48,7 +53,9 @@ impl Plugin for AsteroidPlugin {
                 Update,
                 (
                     movement::move_asteroids,
+                    movement::rotate_asteroids,
                     collision::asteroid_asteroid_collision,
+                    collision::asteroid_ammo_collision,
                     spawn::asteroid_wave,
                     spawn::animate_spawn,
                     spawn::animate_despawn,
@@ -68,23 +75,31 @@ pub fn setup(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
+    asset_server: Res<AssetServer>,
 ) {
-    let sphere_mesh = meshes.add(Sphere::new(1.0).mesh().uv(32, 32));
-
-    let materials_vec = (0..10)
-        .map(|i| {
-            materials.add(StandardMaterial {
-                base_color: Color::hsl(i as f32 * 36.0, 0.8, 0.6),
-                metallic: 0.1,
-                perceptual_roughness: 0.8,
-                ..default()
-            })
-        })
-        .collect::<Vec<_>>();
+    let mut asteroid_meshes: HashMap<String, Vec<Handle<Mesh>>> = Default::default();
+    let mut asteroid_materials: HashMap<String, Handle<StandardMaterial>> = Default::default();
+    for asteroid_type in ASTEROID_SIZE_TYPES {
+        for n in 0..4 {
+            let mesh =
+                asset_server.load(format!("asteroids/{asteroid_type}{n}.glb#Mesh0/Primitive0"));
+            asteroid_meshes
+                .entry(asteroid_type.to_string()) // ensure key exists
+                .or_default()
+                .push(mesh);
+        }
+        let material = materials.add(StandardMaterial {
+            base_color: Color::hsl(35.0, 0.35, 0.45),
+            metallic: 0.1,
+            perceptual_roughness: 0.8,
+            ..default()
+        });
+        asteroid_materials.insert(asteroid_type.to_string(), material);
+    }
 
     commands.insert_resource(AsteroidAssets {
-        mesh: sphere_mesh,
-        materials: materials_vec,
+        meshes: asteroid_meshes,
+        materials: asteroid_materials,
     });
 
     let sun_position = Vec3::new(-1000.0, 1000.0, 0.0);

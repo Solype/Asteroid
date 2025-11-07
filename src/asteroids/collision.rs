@@ -1,14 +1,21 @@
 use crate::asteroids::*;
 
+use rand::{prelude::IteratorRandom, Rng};
+
 pub fn asteroid_asteroid_collision(
     mut asteroids_query: Query<(Entity, &Asteroid, &mut Transform, &mut Velocity)>,
 ) {
-    let entity_ids: Vec<Entity> = asteroids_query.iter().map(|(e, _, _, _)| e.entity()).collect(); // just to get count
+    let entity_ids: Vec<Entity> = asteroids_query
+        .iter()
+        .map(|(e, _, _, _)| e.entity())
+        .collect(); // just to get count
     let len = entity_ids.len();
 
     for i in 0..len {
         for j in (i + 1)..len {
-            let [a, b] = asteroids_query.get_many_mut([entity_ids[i], entity_ids[j]]).unwrap();
+            let [a, b] = asteroids_query
+                .get_many_mut([entity_ids[i], entity_ids[j]])
+                .unwrap();
 
             let (_, a_ast, mut a_tf, mut a_vel) = a;
             let (_, b_ast, mut b_tf, mut b_vel) = b;

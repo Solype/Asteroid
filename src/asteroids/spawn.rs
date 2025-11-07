@@ -35,7 +35,7 @@ pub fn asteroid_wave(
             rng.random_range(-1.0..1.0),
             rng.random_range(-1.0..1.0),
         )
-        .normalize();
+        .normalize() * 0.5;
 
         let size = sample_truncated_norm(
             (config.size_range.0 + config.size_range.1) / 2.0,
@@ -43,20 +43,32 @@ pub fn asteroid_wave(
             config.size_range.0,
             config.size_range.1,
             &mut rng,
-        )
-        .floor();
+        );
+
+        let size_type =
+            ASTEROID_SIZE_TYPES[(size / (ASTEROID_SIZE_TYPES_LEN as f32)).round() as usize];
+
+        let rounded_size = size.round();
+
         let velocity = -(position.normalize() + random_dir * 0.3).normalize() * f(size);
+        let rotation_velocity = Vec3::new(
+            rng.random_range(-1.0..1.0),
+            rng.random_range(-1.0..1.0),
+            rng.random_range(-1.0..1.0),
+        ).normalize() * f(size);
         commands.spawn((
-            Mesh3d(assets.mesh.clone()),
-            MeshMaterial3d(assets.materials[size as usize].clone()),
-            Asteroid { size: size },
+            Mesh3d(assets.meshes.get(size_type).unwrap()[rng.random_range(0..4)].clone()),
+            MeshMaterial3d(assets.materials.get(size_type).unwrap().clone()),
+            Asteroid { size: rounded_size },
             Transform {
                 translation: position,
                 scale: Vec3::ZERO,
+                rotation: Quat::from_rng(&mut rng),
                 ..Default::default()
             },
             GlobalTransform::default(),
             Velocity(velocity),
+            RotationVelocity(rotation_velocity),
             SpawnAnimation {
                 timer: Timer::from_seconds(ANIMATION_DURATION, TimerMode::Once),
             },
