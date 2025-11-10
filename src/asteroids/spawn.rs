@@ -1,15 +1,14 @@
 use crate::asteroids::utils::*;
 use crate::asteroids::*;
+use crate::controller::Player;
 use rand::Rng;
-
-use crate::camera_controller::CameraController;
 
 pub fn asteroid_wave(
     mut commands: Commands,
     config: ResMut<AsteroidConfig>,
     query: Query<Entity, With<Asteroid>>,
     assets: Res<AsteroidAssets>,
-    player: Single<&Transform, With<CameraController>>,
+    player: Single<&Transform, With<Player>>,
 ) {
     let current = query.iter().count();
     if current >= config.max_asteroid {
@@ -35,7 +34,8 @@ pub fn asteroid_wave(
             rng.random_range(-1.0..1.0),
             rng.random_range(-1.0..1.0),
         )
-        .normalize() * 0.5;
+        .normalize()
+            * 0.5;
 
         let size = sample_truncated_norm(
             (config.size_range.0 + config.size_range.1) / 2.0,
@@ -55,7 +55,9 @@ pub fn asteroid_wave(
             rng.random_range(-1.0..1.0),
             rng.random_range(-1.0..1.0),
             rng.random_range(-1.0..1.0),
-        ).normalize() * f(size);
+        )
+        .normalize()
+            * f(size);
         commands.spawn((
             Mesh3d(assets.meshes.get(size_type).unwrap()[rng.random_range(0..4)].clone()),
             MeshMaterial3d(assets.materials.get(size_type).unwrap().clone()),
@@ -109,7 +111,7 @@ pub fn animate_despawn(
 pub fn clear_asteroid(
     mut commands: Commands,
     config: ResMut<AsteroidConfig>,
-    player: Single<&Transform, With<CameraController>>,
+    player: Single<&Transform, With<Player>>,
     mut query: Query<(Entity, &Transform), (With<Asteroid>, Without<DespawnAnimation>)>,
 ) {
     for (entity, transform) in &mut query {
