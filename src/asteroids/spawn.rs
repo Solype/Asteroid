@@ -34,8 +34,7 @@ pub fn asteroid_wave(
             rng.random_range(-1.0..1.0),
             rng.random_range(-1.0..1.0),
         )
-        .normalize()
-            * 0.5;
+        .normalize();
 
         let size = sample_truncated_norm(
             (config.size_range.0 + config.size_range.1) / 2.0,
@@ -57,7 +56,8 @@ pub fn asteroid_wave(
             rng.random_range(-1.0..1.0),
         )
         .normalize()
-            * f(size);
+            * f(size)
+            * 0.3;
         commands.spawn((
             Mesh3d(assets.meshes.get(size_type).unwrap()[rng.random_range(0..4)].clone()),
             MeshMaterial3d(assets.materials.get(size_type).unwrap().clone()),
