@@ -21,11 +21,11 @@ use scenes::*;
 pub fn menu_plugin(app: &mut App)
 {
     // Initialisation of the ressources
-    app.add_systems(Startup, (setup_texture_camera, setup_cube_ptr));
+    app.add_systems(Startup, (setup_texture_camera, setup_cube_ptr, setup_sound_effect_and_music));
     app.add_systems(PostStartup, (setup_menu, apply_texture_to_quad));
 
     // Initialisation of the systems to enter Menu state of the game
-    app.add_systems(OnEnter(GameState::Menu), (focus_main_screen, enter_menu_state, release_mouse, new_sounds));
+    app.add_systems(OnEnter(GameState::Menu), (focus_main_screen, enter_menu_state, release_mouse));
     app.add_systems(OnExit(GameState::Menu), (remove_focus_menu, leave_menu_state));
 
 

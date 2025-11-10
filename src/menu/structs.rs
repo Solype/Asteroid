@@ -75,3 +75,14 @@ pub struct ButtonInfo {
     pub border_normal: BorderColor,
     pub border_hover: BorderColor,
 }
+
+////////////////////////////////////////////////////
+/// 
+/// AUDIO
+/// 
+////////////////////////////////////////////////////
+
+#[derive(Resource)]
+pub struct MenuSounds {
+    pub button_bips: Vec<Handle<AudioSource>>,
+}
