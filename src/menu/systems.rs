@@ -59,6 +59,35 @@ pub fn focus_main_screen(mut command: Commands, player_entity: Single<Entity, Wi
     });
 }
 
+pub fn new_sounds(asset_server: Res<AssetServer>, mut commands: Commands)
+{
+    commands.spawn((
+        AudioPlayer::new(asset_server.load("menu_bip.mp3")),
+        PlaybackSettings {mode: bevy::audio::PlaybackMode::Despawn, ..Default::default()}
+    ));
+}
+
+pub fn play_click_sound_system(
+    mut over_reader: MessageReader<Pointer<Over>>,
+    mut out_reader: MessageReader<Pointer<Out>>,
+    // audio: Res<Audio>,
+    // sound: Res<ClickSoundAsset>,
+    mut command : Commands,
+    query: Query<(&ButtonInfo, Entity)>,
+) {
+    for over in over_reader.read() {
+        let Ok((button_info, entity)) = query.get(over.entity) else {
+            continue;
+        };
+        command.entity(entity).insert(button_info.border_hover);
+    }
+    for out in out_reader.read() {
+        let Ok((button_info, entity)) = query.get(out.entity) else {
+            continue;
+        };
+        command.entity(entity).insert(button_info.border_normal);
+    }
+}
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////

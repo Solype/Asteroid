@@ -69,3 +69,9 @@ pub struct Scroll {
 
 #[derive(Resource, Default)]
 pub struct WaitingForRebind(pub Option<Action>);
+
+#[derive(Component)]
+pub struct ButtonInfo {
+    pub border_normal: BorderColor,
+    pub border_hover: BorderColor,
+}

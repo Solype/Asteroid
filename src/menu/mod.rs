@@ -25,7 +25,7 @@ pub fn menu_plugin(app: &mut App)
     app.add_systems(PostStartup, (setup_menu, apply_texture_to_quad));
 
     // Initialisation of the systems to enter Menu state of the game
-    app.add_systems(OnEnter(GameState::Menu), (focus_main_screen, enter_menu_state, release_mouse));
+    app.add_systems(OnEnter(GameState::Menu), (focus_main_screen, enter_menu_state, release_mouse, new_sounds));
     app.add_systems(OnExit(GameState::Menu), (remove_focus_menu, leave_menu_state));
 
 
@@ -33,7 +33,7 @@ pub fn menu_plugin(app: &mut App)
     app.add_systems(OnEnter(MenuState::Main), create_main_menu_scene);
     app.add_systems(OnEnter(MenuState::Options), create_options_menu_scene);
 
-    app.add_systems(Update, (send_scroll_events, rebind_key).run_if(in_state(GameState::Menu)));
+    app.add_systems(Update, (send_scroll_events, rebind_key, play_click_sound_system).run_if(in_state(GameState::Menu)));
     app.add_observer(on_scroll_handler);
     app.insert_resource(WaitingForRebind(None));
 
