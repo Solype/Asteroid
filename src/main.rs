@@ -1,8 +1,10 @@
-use bevy::asset::RenderAssetUsages;
-use bevy::light::DirectionalLightShadowMap;
-use bevy::mesh::{Indices, Mesh};
-use bevy::prelude::*;
-use bevy::render::render_resource::PrimitiveTopology;
+use bevy::{
+    prelude::*,
+    asset::RenderAssetUsages,
+    render::render_resource::PrimitiveTopology,
+    mesh::{Indices, Mesh},
+    light::*
+};
 
 mod asteroids;
 mod player;

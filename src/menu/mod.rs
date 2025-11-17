@@ -21,7 +21,7 @@ use scenes::*;
 pub fn menu_plugin(app: &mut App)
 {
     // Initialisation of the ressources
-    app.add_systems(Startup, (setup_texture_camera, setup_cube_ptr));
+    app.add_systems(Startup, (setup_texture_camera, setup_cube_ptr, setup_sound_effect_and_music));
     app.add_systems(PostStartup, (setup_menu, apply_texture_to_quad));
 
     // Initialisation of the systems to enter Menu state of the game
@@ -33,7 +33,7 @@ pub fn menu_plugin(app: &mut App)
     app.add_systems(OnEnter(MenuState::Main), create_main_menu_scene);
     app.add_systems(OnEnter(MenuState::Options), create_options_menu_scene);
 
-    app.add_systems(Update, (send_scroll_events, rebind_key).run_if(in_state(GameState::Menu)));
+    app.add_systems(Update, (send_scroll_events, rebind_key, play_click_sound_system).run_if(in_state(GameState::Menu)));
     app.add_observer(on_scroll_handler);
     app.insert_resource(WaitingForRebind(None));
 

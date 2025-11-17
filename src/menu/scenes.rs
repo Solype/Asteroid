@@ -19,13 +19,6 @@ static BORDER_NORMAL: BorderColor = BorderColor {
     right: Color::srgba(0.0, 0.8, 1.0, 0.4),
 };
 
-static BORDER_RADIUS: BorderRadius = BorderRadius {
-    top_right: Val::Px(20.0),
-    bottom_left: Val::Px(20.0),
-    top_left: Val::Px(4.0),
-    bottom_right: Val::Px(4.0),
-};
-
 static BORDER_RADIUS_SQUARE: BorderRadius = BorderRadius {
     top_right: Val::Px(4.0),
     bottom_left: Val::Px(4.0),
@@ -49,12 +42,12 @@ pub fn create_main_menu_scene(
         font = ressources.font.clone();
         background = ressources.bg.clone();
     } else {
-        font = asset_server.load("fonts/font.ttf");
-        background = asset_server.load("menu_background.jpg");
+        font = asset_server.load("font.ttf");
+        background = asset_server.load("menu_bg.png");
         commands.insert_resource(MainMenuRessources {font: font.clone(), bg: background.clone()});
     }
 
-   
+
 
     let node = Node {
         width: Val::Px(300.0),
@@ -93,19 +86,17 @@ pub fn create_main_menu_scene(
         parent.spawn((
             Node {
                 width: Val::Px(300.0),
-                height: Val::Px(70.0),
+                height: Val::Auto,
                 justify_content: JustifyContent::Center,
                 align_items: AlignItems::Center,
                 flex_direction: FlexDirection::Column,
                 margin: UiRect::all(Val::Px(10.0)),
+                row_gap: Val::Px(15.0),
                 ..default()
             },
         )).with_children(|parent| {
-
-
             parent.spawn((
                 node.clone(),
-                BORDER_RADIUS,
                 BORDER_NORMAL,
                 BackgroundColor(Color::srgba(0.0, 0.2, 0.4, 0.8)), // dark blue transparent
                 children![(
@@ -125,7 +116,6 @@ pub fn create_main_menu_scene(
 
             parent.spawn((
                 node.clone(),
-                BORDER_RADIUS,
                 BORDER_NORMAL,
                 BackgroundColor(Color::srgba(0.0, 0.2, 0.0, 0.8)), // dark green transparent
                 children![(
@@ -144,7 +134,6 @@ pub fn create_main_menu_scene(
 
             parent.spawn((
                 node.clone(),
-                BORDER_RADIUS,
                 BORDER_NORMAL,
                 BackgroundColor(Color::srgba(0.4, 0.0, 0.0, 0.8)), // dark red transparent
                 children![(
@@ -162,21 +151,6 @@ pub fn create_main_menu_scene(
         });
     });
 }
-
-
-
-
-/////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////
-
 
 pub fn create_options_menu_scene(
     mut commands: Commands,
@@ -267,6 +241,7 @@ pub fn create_options_menu_scene(
                             ..default()
                         },
                         BorderColor::all(Color::NONE),
+                        ButtonInfo { border_hover: BORDER_HOVER, border_normal: BorderColor::all(Color::NONE) },
                         BORDER_RADIUS_SQUARE,
                         children![
                             (
@@ -281,13 +256,7 @@ pub fn create_options_menu_scene(
                                 VolumeText
                             )
                         ],
-                    )).observe(|over: On<Pointer<Over>>, mut elems: Query<&mut BorderColor> | {
-                        let Ok(mut border) = elems.get_mut(over.entity) else { return; };
-                        *border = BORDER_HOVER;
-                    }).observe(|out: On<Pointer<Out>>, mut elems: Query<&mut BorderColor>| {
-                        let Ok(mut border) = elems.get_mut(out.entity) else { return; };
-                        *border = BorderColor::all(Color::NONE);
-                    }).observe(|_: On<Pointer<Click>>, mut master_volume: ResMut<MusicVolume>, mut texts: Query<&mut Text, With<VolumeText>>| {
+                    )).observe(|_: On<Pointer<Click>>, mut master_volume: ResMut<MusicVolume>, mut texts: Query<&mut Text, With<VolumeText>>| {
                         master_volume.volume = (master_volume.volume - 10.0).rem_euclid(110.0);
                         for mut text in &mut texts {
                             *text = Text::new(format!("{}%", master_volume.volume as i32));
@@ -320,6 +289,7 @@ pub fn create_options_menu_scene(
                                 ..default()
                             },
                             action,
+                            ButtonInfo { border_hover: BORDER_HOVER, border_normal: BorderColor::all(Color::NONE) },
                             BorderColor::all(Color::NONE),
                             BORDER_RADIUS_SQUARE,
                         )).with_children(|parent|{
@@ -343,12 +313,6 @@ pub fn create_options_menu_scene(
                                 waiting.0 = Some(*act);
                                 info!("Now waiting for new key for {:?}", waiting.0);
                             }
-                        }).observe(|over: On<Pointer<Over>>, mut elems: Query<&mut BorderColor> | {
-                            let Ok(mut border) = elems.get_mut(over.entity) else { return; };
-                            *border = BORDER_HOVER;
-                        }).observe(|out: On<Pointer<Out>>, mut elems: Query<&mut BorderColor>| {
-                            let Ok(mut border) = elems.get_mut(out.entity) else { return; };
-                            *border = BorderColor::all(Color::NONE);
                         });
                     }
                 });
@@ -358,7 +322,6 @@ pub fn create_options_menu_scene(
         parent
             .spawn((
                 node.clone(),
-                BORDER_RADIUS,
                 BORDER_NORMAL,
                 BackgroundColor(Color::srgba(0.0, 0.2, 0.4, 0.8)),
                 children![(
