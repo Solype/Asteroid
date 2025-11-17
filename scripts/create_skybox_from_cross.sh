@@ -45,4 +45,4 @@ rm "${BASENAME}_face_"*.png
 
 echo "Conversion finished: skybox.png was generated."
 
-mv sky_strip.png ../assets/skybox.png
+mv "${BASENAME}_strip.png" ../assets/skybox.png
