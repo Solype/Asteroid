@@ -85,3 +85,9 @@ pub struct Score
 {
     pub value: u32
 }
+
+#[derive(Resource)]
+pub struct UIRessources {
+    pub bg : Handle<Image>,
+    pub font : Handle<Font>,
+}

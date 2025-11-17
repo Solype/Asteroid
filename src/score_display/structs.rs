@@ -16,3 +16,6 @@ pub struct ScoreCameraTarget {
 pub struct ScoreCamTimer {
     pub timer: Timer
 }
+
+#[derive(Component)]
+pub struct ScoreText;

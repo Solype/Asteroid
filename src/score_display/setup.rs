@@ -1,3 +1,4 @@
+use crate::globals_structs::{Score, UIRessources};
 use crate::score_display::structs::*;
 use bevy::prelude::*;
 use bevy::camera::RenderTarget;
@@ -6,23 +7,49 @@ use bevy::render::render_resource::{Extent3d, TextureDescriptor, TextureDimensio
 static SCREEN_WIDTH : u32 = 512 * 2;
 static SCREEN_HEIGHT : u32 = 256 * 2;
 
-pub fn setup_score(mut commands: Commands, menu_texture: Res<ScoreCameraTarget>)
-{
+pub fn setup_score(
+    mut commands: Commands,
+    menu_texture: Res<ScoreCameraTarget>,
+    menu_ressources: Res<UIRessources>,
+    score: Res<Score>
+) {
     let handle = menu_texture.image.clone();
+    let font: Handle<Font> = menu_ressources.font.clone();
 
-    commands.spawn((
+    let cam_entity = commands.spawn((
         Camera2d::default(),
         Camera {
             target: RenderTarget::Image(handle.clone().into()),
-            is_active: false,
             ..default()
         },
         ScoreCamComponent,
         ScoreCamTimer {
             timer: Timer::from_seconds(1.0, TimerMode::Repeating)
         }
-    ));
+    )).id();
 
+    commands.spawn((
+        Node {
+            width: Val::Percent(100.0),
+            height: Val::Percent(100.0),
+            justify_content: JustifyContent::Center,
+            align_items: AlignItems::Center,
+            ..default()
+        },
+        UiTargetCamera(cam_entity),
+    )).with_children(|parent| {
+
+        parent.spawn((
+            Text::new(format!("{} $$", score.into_inner().value)),
+            TextFont { font: font.clone(), font_size: 200.0, ..default() },
+            TextColor(Color::srgb(0.0, 1.0, 1.0)),
+            Node {
+                margin: UiRect::all(Val::Px(30.0)),
+                ..default()
+            },
+            ScoreText,
+        ));
+    });
 }
 
 pub fn apply_texture_to_quad(mut commands: Commands, screens: Query<(&ScorePlane, Entity)>, mut materials: ResMut<Assets<StandardMaterial>>, menu_texture: Res<ScoreCameraTarget>)

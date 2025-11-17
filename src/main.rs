@@ -24,7 +24,7 @@ fn main() {
             watch_for_changes_override: Some(true),
             ..default()
         }))
-        .add_systems(Startup, setup)
+        .add_systems(Startup, (setup, setup_ui_ressource))
         .add_plugins((
             menu::menu_plugin,
             skybox::plugin,
@@ -41,6 +41,13 @@ fn main() {
             start_after_startup.run_if(in_state(GameState::Startup)),
         )
         .run();
+}
+
+fn setup_ui_ressource(mut command: Commands, asset_server: Res<AssetServer>)
+{
+    let font = asset_server.load("font.ttf");
+    let background = asset_server.load("menu_bg.jpg");
+    command.insert_resource(UIRessources {font: font.clone(), bg: background.clone()});
 }
 
 fn start_after_startup(mut next_state: ResMut<NextState<GameState>>) {
