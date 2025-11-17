@@ -3,6 +3,7 @@ use bevy::{
     asset::RenderAssetUsages,
     render::render_resource::PrimitiveTopology,
     mesh::{Indices, Mesh},
+    light::*
 };
 
 mod asteroids;

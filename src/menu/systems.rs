@@ -1,7 +1,7 @@
 use crate::menu::structs::*;
 use crate::{
     controller::PlayerCam,
-    globals_structs::{Action, InputButton, Keybinds},
+    globals_structs::{Action, InputButton, Keybinds, MusicVolume},
 };
 use bevy::{
     // app::AppExit,
@@ -9,10 +9,8 @@ use bevy::{
         CursorGrabMode, CursorOptions,PrimaryWindow
     }
 };
-use crate::{controller::PlayerCam, globals_structs::{Action, InputButton, Keybinds, MusicVolume}};
-use crate::menu::structs::*;
-use rand::seq::SliceRandom;
 
+use rand::prelude::IndexedRandom;
 
 
 pub fn enter_menu_state(mut next_state: ResMut<NextState<MenuState>>) {
@@ -80,7 +78,7 @@ pub fn play_click_sound_system(
         commands.entity(entity).insert(button_info.border_normal);
     }
     if !click_reader.is_empty() && master_volume.volume != 0.0_f32 {
-        let mut rng = rand::thread_rng();
+        let mut rng = rand::rng();
         if let Some(handle) = audio.button_bips.choose(&mut rng) {
             commands.spawn((
                 AudioPlayer::new(handle.clone()),
