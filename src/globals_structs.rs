@@ -21,6 +21,39 @@ impl InputButton {
             InputButton::Mouse(b) => format!("Mouse {:?}", b),
         }
     }
+
+    pub fn pressed(
+        &self,
+        keyboard: &ButtonInput<KeyCode>,
+        mouse: &ButtonInput<MouseButton>,
+    ) -> bool {
+        match self {
+            InputButton::Key(code) => keyboard.pressed(*code),
+            InputButton::Mouse(code) => mouse.pressed(*code),
+        }
+    }
+
+    pub fn just_pressed(
+        &self,
+        keyboard: &ButtonInput<KeyCode>,
+        mouse: &ButtonInput<MouseButton>,
+    ) -> bool {
+        match self {
+            InputButton::Key(code) => keyboard.just_pressed(*code),
+            InputButton::Mouse(code) => mouse.just_pressed(*code),
+        }
+    }
+
+    pub fn just_released(
+        &self,
+        keyboard: &ButtonInput<KeyCode>,
+        mouse: &ButtonInput<MouseButton>,
+    ) -> bool {
+        match self {
+            InputButton::Key(code) => keyboard.just_released(*code),
+            InputButton::Mouse(code) => mouse.just_released(*code),
+        }
+    }
 }
 
 #[derive(Resource)]
@@ -39,7 +72,7 @@ pub struct Keybinds
     // other
     pub menu: InputButton,
     pub free_look: InputButton,
-    pub shoot: InputButton
+    pub shoot: InputButton,
 }
 
 impl Default for Keybinds {
