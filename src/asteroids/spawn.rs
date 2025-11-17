@@ -19,7 +19,6 @@ pub fn asteroid_wave(
 
     let to_spawn = config.max_asteroid - current;
     for _ in 0..to_spawn {
-        // Random direction on range sphere
         let theta = rng.random_range(0.0..std::f32::consts::TAU);
         let phi = rng.random_range(0.0..std::f32::consts::PI);
 
@@ -28,7 +27,6 @@ pub fn asteroid_wave(
         let z = config.spawn_range * phi.sin() * theta.sin();
         let position = Vec3::new(x, y, z) + player.translation;
 
-        // Random inward velocity
         let random_dir = Vec3::new(
             rng.random_range(-1.0..1.0),
             rng.random_range(-1.0..1.0),
@@ -68,7 +66,6 @@ pub fn asteroid_wave(
                 rotation: Quat::from_rng(&mut rng),
                 ..Default::default()
             },
-            GlobalTransform::default(),
             Velocity(velocity),
             RotationVelocity(rotation_velocity),
             SpawnAnimation {

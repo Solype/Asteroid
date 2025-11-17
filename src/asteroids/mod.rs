@@ -1,4 +1,4 @@
-use bevy::{platform::collections::HashMap, prelude::*};
+use bevy::{color::palettes::css::WHITE, platform::collections::HashMap, prelude::*};
 
 pub mod collision;
 pub mod movement;
@@ -11,7 +11,7 @@ pub struct Asteroid {
 }
 
 #[derive(Component, Deref, DerefMut)]
-pub struct Velocity(Vec3);
+pub struct Velocity(pub Vec3);
 
 #[derive(Component, Deref, DerefMut)]
 pub struct RotationVelocity(Vec3);
@@ -59,7 +59,7 @@ impl Plugin for AsteroidPlugin {
                     spawn::asteroid_wave,
                     spawn::animate_spawn,
                     spawn::animate_despawn,
-                    spawn::clear_asteroid, // collision::asteroid_collision_system,
+                    spawn::clear_asteroid,
                 ),
             )
             .insert_resource(AsteroidConfig {
@@ -130,7 +130,7 @@ pub fn setup(
             intensity: 1_000_000_000_000.0,
             range: 50000.0,
             radius: 500.0,
-            color: Color::srgb(1.0, 0.9, 0.0),
+            color: Color::WHITE,
             shadows_enabled: true,
             ..default()
         },
