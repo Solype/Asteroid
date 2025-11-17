@@ -147,7 +147,10 @@ fn setup_left_screen(
         .id();
 
     let right_id = commands
-        .spawn((Mesh3d(meshes.add(Mesh::from(right_mesh))),))
+        .spawn((
+            Mesh3d(meshes.add(Mesh::from(right_mesh))),
+            
+        ))
         .id();
 
     return (left_id, middle_id, right_id);
