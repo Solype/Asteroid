@@ -12,10 +12,7 @@ pub fn shoot_ammo(
     assets: Res<AmmoAssets>,
     mut commands: Commands,
 ) {
-    if !(match keybinds.shoot {
-        Key(code) => keyboard.just_pressed(code),
-        Mouse(code) => mouse.just_pressed(code),
-    }) {
+    if !keybinds.shoot.just_pressed(keyboard, mouse) {
         return;
     }
 
