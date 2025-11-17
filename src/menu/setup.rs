@@ -62,3 +62,13 @@ pub fn setup_texture_camera(mut commands: Commands, mut images: ResMut<Assets<Im
     commands.insert_resource(MenuCameraTarget { image: images.add(image) });
     info!("Texture set !")
 }
+
+pub fn setup_sound_effect_and_music(mut commands: Commands, asset_server: Res<AssetServer>)
+{
+    commands.insert_resource(MenuSounds{
+        button_bips: vec![
+            asset_server.load("menu_bip1.wav"),
+            asset_server.load("menu_bip2.wav")
+        ]
+    });
+}
