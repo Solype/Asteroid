@@ -12,6 +12,7 @@ mod game_states;
 mod globals_structs;
 mod menu;
 mod skybox;
+mod score_display;
 
 use game_states::GameState;
 use globals_structs::*;
@@ -29,6 +30,7 @@ fn main() {
             skybox::plugin,
             controller::plugin,
             asteroids::AsteroidPlugin,
+            score_display::score_display_plugin,
         ))
         .init_state::<GameState>()
         .insert_resource(MusicVolume { volume: 100.0_f32 })
@@ -149,7 +151,7 @@ fn setup_left_screen(
     let right_id = commands
         .spawn((
             Mesh3d(meshes.add(Mesh::from(right_mesh))),
-            
+            score_display::structs::ScorePlane,
         ))
         .id();
 
