@@ -13,6 +13,7 @@ mod game_states;
 mod globals_structs;
 mod menu;
 mod skybox;
+mod score_display;
 
 use game_states::GameState;
 use globals_structs::*;
@@ -23,22 +24,31 @@ fn main() {
             watch_for_changes_override: Some(true),
             ..default()
         }))
-        .add_systems(Startup, setup)
+        .add_systems(Startup, (setup, setup_ui_ressource))
         .add_plugins((
             menu::menu_plugin,
             skybox::plugin,
             controller::plugin,
             asteroids::AsteroidPlugin,
+            score_display::score_display_plugin,
             player::PlayerPlugin,
         ))
         .init_state::<GameState>()
         .insert_resource(MusicVolume { volume: 100.0_f32 })
         .insert_resource(Keybinds::default())
+        .insert_resource(Score::default())
         .add_systems(
             Update,
             start_after_startup.run_if(in_state(GameState::Startup)),
         )
         .run();
+}
+
+fn setup_ui_ressource(mut command: Commands, asset_server: Res<AssetServer>)
+{
+    let font = asset_server.load("font.ttf");
+    let background = asset_server.load("menu_bg.jpg");
+    command.insert_resource(UIRessources {font: font.clone(), bg: background.clone()});
 }
 
 fn start_after_startup(mut next_state: ResMut<NextState<GameState>>) {
@@ -147,7 +157,10 @@ fn setup_left_screen(
         .id();
 
     let right_id = commands
-        .spawn((Mesh3d(meshes.add(Mesh::from(right_mesh))),))
+        .spawn((
+            Mesh3d(meshes.add(Mesh::from(right_mesh))),
+            score_display::structs::ScorePlane,
+        ))
         .id();
 
     return (left_id, middle_id, right_id);

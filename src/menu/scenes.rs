@@ -4,6 +4,7 @@ use bevy::{
 use crate::game_states::GameState;
 use crate::globals_structs::{Action, Keybinds, MusicVolume};
 use crate::menu::structs::*;
+use crate::globals_structs::UIRessources;
 
 static BORDER_HOVER: BorderColor = BorderColor {
     top: Color::srgba(0.0, 1.0, 1.0, 0.9),
@@ -29,25 +30,13 @@ static BORDER_RADIUS_SQUARE: BorderRadius = BorderRadius {
 pub fn create_main_menu_scene(
     mut commands: Commands,
     camera_components: Single<(Entity, &mut Camera), With<MenuCameraComponent>>,
-    asset_server: Res<AssetServer>,
-    menu_ressources: Option<ResMut<MainMenuRessources>>
+    menu_ressources: Res<UIRessources>
 ) {
     let (cam_entity, mut camera) = camera_components.into_inner();
     camera.is_active = true;
 
-    let font: Handle<Font>;
-    let background : Handle<Image>;
-
-    if let Some(ressources) = menu_ressources {
-        font = ressources.font.clone();
-        background = ressources.bg.clone();
-    } else {
-        font = asset_server.load("font.ttf");
-        background = asset_server.load("menu_bg.png");
-        commands.insert_resource(MainMenuRessources {font: font.clone(), bg: background.clone()});
-    }
-
-
+    let font: Handle<Font> = menu_ressources.font.clone();
+    let background : Handle<Image> = menu_ressources.bg.clone();
 
     let node = Node {
         width: Val::Px(300.0),
@@ -155,7 +144,7 @@ pub fn create_main_menu_scene(
 pub fn create_options_menu_scene(
     mut commands: Commands,
     camera_components: Single<(Entity, &mut Camera), With<MenuCameraComponent>>,
-    menu_ressources: Res<MainMenuRessources>,
+    menu_ressources: Res<UIRessources>,
     master_volume: Res<MusicVolume>,
     keybinds: Res<Keybinds>,
 ) {

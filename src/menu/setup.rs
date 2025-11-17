@@ -1,13 +1,15 @@
 use bevy::prelude::*;
 use bevy::camera::RenderTarget;
-use bevy::render::render_resource::{Extent3d, TextureDescriptor, TextureDimension, TextureFormat, TextureUsages};
+use bevy::render::render_resource::{
+    Extent3d, TextureDescriptor, TextureDimension, TextureFormat, TextureUsages
+};
 
 
 
 use crate::menu::structs::*;
 
-static SCREEN_WIDTH : u32 = 512 * 2;
-static SCREEN_HEIGHT : u32 = 256 * 2;
+static SCREEN_WIDTH : u32 = 96 * 16;
+static SCREEN_HEIGHT : u32 = 32 * 16;
 
 pub fn setup_menu(mut commands: Commands, menu_texture: Res<MenuCameraTarget>)
 {
