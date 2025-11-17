@@ -263,6 +263,8 @@ fn setup(
             controller::Player,
             Velocity(Vec3::ZERO),
             controller::CameraSensitivity::default(),
+            controller::TranslationalVelocity::default(),
+            controller::RotationalVelocity::default(),
             Transform::from_xyz(0.0, 0.0, 0.0).looking_at(Vec3::ZERO, Vec3::Y),
             children![
                 (

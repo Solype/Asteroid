@@ -27,15 +27,35 @@ pub struct Player;
 pub struct PlayerCam;
 
 #[derive(Debug, Component, Deref, DerefMut)]
-pub struct CameraSensitivity(Vec2);
+pub struct CameraSensitivity(Vec3);
+
+#[derive(Component, Deref, DerefMut)]
+pub struct TranslationalVelocity(Vec3);
+
+#[derive(Component, Deref, DerefMut)]
+pub struct RotationalVelocity(Vec3);
+
 
 impl Default for CameraSensitivity {
     fn default() -> Self {
-        Self(Vec2::new(0.003, 0.002))
+        Self(Vec3::new(0.003, 0.002, 0.002))
     }
 }
 
-fn grab_mouse(mut options: Single<&mut CursorOptions, With<PrimaryWindow>>) {
+impl Default for TranslationalVelocity {
+    fn default() -> Self {
+        Self(Vec3::ZERO)
+    }
+}
+
+impl Default for RotationalVelocity {
+    fn default() -> Self {
+        Self(Vec3::ZERO)
+    }
+}
+
+fn grab_mouse(mut options: Single<&mut CursorOptions, With<PrimaryWindow>>)
+{
     options.visible = false;
     options.grab_mode = CursorGrabMode::Locked;
     // options.grab_mode = match cfg!(target_os = "macos") {
@@ -47,43 +67,62 @@ fn grab_mouse(mut options: Single<&mut CursorOptions, With<PrimaryWindow>>) {
 fn player_system(
     keyboard_input: Res<ButtonInput<KeyCode>>,
     time: Res<Time>,
-    player: Single<(&mut Transform, &CameraSensitivity), With<Player>>,
-    mut next_state: ResMut<NextState<GameState>>,
+    player: Single<(&mut Transform, &CameraSensitivity, &mut TranslationalVelocity, &mut RotationalVelocity), With<Player>>,
+    mut next_state: ResMut<NextState<GameState>>
 ) {
-    let (mut transform, camera_sensitivity) = player.into_inner();
+    let (mut transform, _camera_sensitivity , _trans_velocity, mut rota_velocity) = player.into_inner();
 
     if keyboard_input.just_pressed(KeyCode::KeyR) {
         next_state.set(GameState::Menu);
     }
 
-    let mut delta_yaw = 0.0;
-    let mut delta_pitch = 0.0;
+    let base_speed = 200.0_f32.to_radians(); // ≈3.49 rad/s
+    let dt = time.delta_secs();
+
+    let mut accel_yaw   = 0.0;
+    let mut accel_pitch = 0.0;
+    let mut accel_roll  = 0.0;
 
     if keyboard_input.pressed(KeyCode::KeyW) {
-        delta_pitch -= 200.0;
+        accel_pitch -= base_speed;
     }
     if keyboard_input.pressed(KeyCode::KeyS) {
-        delta_pitch += 200.0;
+        accel_pitch += base_speed;
     }
     if keyboard_input.pressed(KeyCode::KeyA) {
-        delta_yaw += 200.0;
+        accel_yaw += base_speed;
     }
     if keyboard_input.pressed(KeyCode::KeyD) {
-        delta_yaw -= 200.0;
+        accel_yaw -= base_speed;
+    }
+    if keyboard_input.pressed(KeyCode::KeyQ) {
+        accel_roll += base_speed;
+    }
+    if keyboard_input.pressed(KeyCode::KeyE) {
+        accel_roll -= base_speed;
     }
 
-    if delta_yaw != 0.0 || delta_pitch != 0.0 {
-        let delta_yaw = delta_yaw * camera_sensitivity.x * time.delta_secs();
-        let delta_pitch = delta_pitch * camera_sensitivity.y * time.delta_secs();
-        let (yaw, pitch, roll) = transform.rotation.to_euler(EulerRot::YXZ);
-        let mut yaw = yaw + delta_yaw;
-        let mut pitch = pitch + delta_pitch;
-        // const PITCH_LIMIT: f32 = FRAC_PI_2 - 0.01;
-        // pitch = pitch.clamp(-PITCH_LIMIT, PITCH_LIMIT);
-        // const YAW_LIMIT: f32 = std::f32::consts::PI;
-        // yaw = yaw.clamp(-YAW_LIMIT, YAW_LIMIT);
-        transform.rotation = Quat::from_euler(EulerRot::YXZ, yaw, pitch, roll);
-    }
+    // Apply input acceleration to angular velocity
+    rota_velocity.x += accel_yaw * dt;
+    rota_velocity.y += accel_pitch * dt;
+    rota_velocity.z += accel_roll * dt;
+
+    const DAMPING: f32 = 0.99f32; // 1.0 = no damping
+    rota_velocity.x *= DAMPING;
+    rota_velocity.y *= DAMPING;
+    rota_velocity.z *= DAMPING;
+
+    let delta_yaw   = rota_velocity.x * dt;
+    let delta_pitch = rota_velocity.y * dt;
+    let delta_roll  = rota_velocity.z * dt;
+
+    // Build a small rotation from the angular increments
+    let delta_rot = Quat::from_euler(EulerRot::YXZ, delta_yaw, delta_pitch, delta_roll);
+    println!("{:?}", transform.translation.x);
+    println!("{:?}", transform.translation.y);
+    println!("{:?}", transform.translation.z);
+    // Apply to the transform
+    transform.rotation *= delta_rot;
 }
 
 fn player_cam_system(
