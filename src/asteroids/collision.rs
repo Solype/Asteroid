@@ -1,4 +1,5 @@
-use crate::asteroids::*;
+use crate::asteroids::{utils::f, *};
+use crate::player::Ammo;
 
 use rand::{prelude::IteratorRandom, Rng};
 
@@ -59,7 +60,105 @@ pub fn asteroid_player_collision(
 
 pub fn asteroid_ammo_collision(
     mut commands: Commands,
-    mut asteroids_query: Query<(Entity, &Asteroid, &Transform, &Velocity)>,
+    assets: Res<AsteroidAssets>,
+    asteroids_query: Query<
+        (Entity, &Asteroid, &Transform),
+        (Without<SpawnAnimation>, Without<DespawnAnimation>),
+    >,
+    ammos_query: Query<(Entity, &Transform), With<Ammo>>,
 ) {
-    // todo
+    let mut rng = rand::rng();
+
+    for (ammo_entity, ammo_transform) in &ammos_query {
+        for (asteroid_entity, asteroid, asteroid_transform) in &asteroids_query {
+            let dist = ammo_transform
+                .translation
+                .distance(asteroid_transform.translation);
+
+            let ammo_radius = 1.0;
+            let ast_radius = asteroid.size;
+            if dist > ammo_radius + ast_radius {
+                continue;
+            }
+
+            commands.entity(asteroid_entity).insert(DespawnAnimation {
+                timer: Timer::from_seconds(ANIMATION_DURATION, TimerMode::Once),
+            });
+            commands.entity(ammo_entity).despawn();
+            if asteroid.size < 2.0 {
+                //todo score
+                return;
+            }
+
+            let new_size = asteroid.size / 2.0;
+
+            let size_type =
+                ASTEROID_SIZE_TYPES[(new_size / (ASTEROID_SIZE_TYPES_LEN as f32)).round() as usize];
+
+            let new_size_rounded = new_size.round();
+
+            let fw = ammo_transform.forward().normalize();
+            let helper = if fw.abs().z < 0.9 { Vec3::Z } else { Vec3::Y };
+
+            let u = fw.cross(helper).normalize();
+            let v = fw.cross(u).normalize();
+
+            let angle = rand::random::<f32>() * core::f32::consts::TAU;
+            let new_dir = (u * angle.cos() + v * angle.sin()).normalize();
+            let new_velocity = (new_dir * 0.3).normalize() * f(new_size);
+            let new_velocity_neg = (-new_dir * 0.3).normalize() * f(new_size);
+
+            let new_rotation_velocity = Vec3::new(
+                rng.random_range(-1.0..1.0),
+                rng.random_range(-1.0..1.0),
+                rng.random_range(-1.0..1.0),
+            )
+            .normalize()
+                * f(new_size)
+                * 0.3;
+
+                commands.spawn_batch([
+                (
+                    Mesh3d(assets.meshes.get(size_type).unwrap()[rng.random_range(0..4)].clone()),
+                    MeshMaterial3d(assets.materials.get(size_type).unwrap().clone()),
+                    Asteroid {
+                        size: new_size_rounded,
+                    },
+                    Transform {
+                        translation: asteroid_transform.translation + new_velocity * 0.1,
+                        scale: Vec3 {
+                            x: new_size_rounded,
+                            y: new_size_rounded,
+                            z: new_size_rounded,
+                        },
+                        rotation: Quat::from_rng(&mut rng),
+                        ..Default::default()
+                    },
+                    Velocity(new_velocity),
+                    RotationVelocity(new_rotation_velocity),
+                ),
+                (
+                    Mesh3d(assets.meshes.get(size_type).unwrap()[rng.random_range(0..4)].clone()),
+                    MeshMaterial3d(assets.materials.get(size_type).unwrap().clone()),
+                    Asteroid {
+                        size: new_size_rounded,
+                    },
+                    Transform {
+                        translation: asteroid_transform.translation + new_velocity_neg * 0.1,
+                        scale: Vec3 {
+                            x: new_size_rounded,
+                            y: new_size_rounded,
+                            z: new_size_rounded,
+                        },
+                        rotation: Quat::from_rng(&mut rng),
+
+                        ..Default::default()
+                    },
+                    Velocity(new_velocity_neg),
+                    RotationVelocity(-new_rotation_velocity),
+                ),
+            ]);
+            return;
+        }
+    }
 }
