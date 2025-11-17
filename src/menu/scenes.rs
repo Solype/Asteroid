@@ -19,13 +19,6 @@ static BORDER_NORMAL: BorderColor = BorderColor {
     right: Color::srgba(0.0, 0.8, 1.0, 0.4),
 };
 
-static BORDER_RADIUS: BorderRadius = BorderRadius {
-    top_right: Val::Px(20.0),
-    bottom_left: Val::Px(20.0),
-    top_left: Val::Px(4.0),
-    bottom_right: Val::Px(4.0),
-};
-
 static BORDER_RADIUS_SQUARE: BorderRadius = BorderRadius {
     top_right: Val::Px(4.0),
     bottom_left: Val::Px(4.0),
@@ -93,19 +86,17 @@ pub fn create_main_menu_scene(
         parent.spawn((
             Node {
                 width: Val::Px(300.0),
-                height: Val::Px(70.0),
+                height: Val::Auto,
                 justify_content: JustifyContent::Center,
                 align_items: AlignItems::Center,
                 flex_direction: FlexDirection::Column,
                 margin: UiRect::all(Val::Px(10.0)),
+                row_gap: Val::Px(15.0),
                 ..default()
             },
         )).with_children(|parent| {
-
-
             parent.spawn((
                 node.clone(),
-                BORDER_RADIUS,
                 BORDER_NORMAL,
                 BackgroundColor(Color::srgba(0.0, 0.2, 0.4, 0.8)), // dark blue transparent
                 children![(
@@ -125,7 +116,6 @@ pub fn create_main_menu_scene(
 
             parent.spawn((
                 node.clone(),
-                BORDER_RADIUS,
                 BORDER_NORMAL,
                 BackgroundColor(Color::srgba(0.0, 0.2, 0.0, 0.8)), // dark green transparent
                 children![(
@@ -144,7 +134,6 @@ pub fn create_main_menu_scene(
 
             parent.spawn((
                 node.clone(),
-                BORDER_RADIUS,
                 BORDER_NORMAL,
                 BackgroundColor(Color::srgba(0.4, 0.0, 0.0, 0.8)), // dark red transparent
                 children![(
@@ -162,21 +151,6 @@ pub fn create_main_menu_scene(
         });
     });
 }
-
-
-
-
-/////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////
-
 
 pub fn create_options_menu_scene(
     mut commands: Commands,
@@ -348,7 +322,6 @@ pub fn create_options_menu_scene(
         parent
             .spawn((
                 node.clone(),
-                BORDER_RADIUS,
                 BORDER_NORMAL,
                 BackgroundColor(Color::srgba(0.0, 0.2, 0.4, 0.8)),
                 children![(
