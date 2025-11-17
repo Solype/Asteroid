@@ -43,4 +43,6 @@ magick \
 # Étape 3 : nettoyage (facultatif)
 rm "${BASENAME}_face_"*.png
 
-echo "✅ Conversion terminée : ${BASENAME}_strip.png généré."
+echo "Conversion finished: skybox.png was generated."
+
+mv "${BASENAME}_strip.png" ../assets/skybox.png
