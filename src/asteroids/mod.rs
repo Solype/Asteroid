@@ -88,12 +88,28 @@ pub fn setup(
                 .or_default()
                 .push(mesh);
         }
-        let material = materials.add(StandardMaterial {
-            base_color: Color::hsl(35.0, 0.35, 0.45),
-            metallic: 0.1,
-            perceptual_roughness: 0.8,
-            ..default()
-        });
+        let material = match asteroid_type {
+            "XS" => materials.add(StandardMaterial {
+                base_color: Color::srgb(0.5, 0.3, 0.6),
+                emissive: Color::srgb(0.7, 0.2, 0.2).to_linear() * 0.3,
+                metallic: 0.5,
+                perceptual_roughness: 0.5,
+                ..default()
+            }),
+            "S" | "M" => materials.add(StandardMaterial {
+                base_color: Color::srgb(0.45, 0.4, 0.35),
+                metallic: 0.1,
+                perceptual_roughness: 0.8,
+                ..default()
+            }),
+            "L" | "XL" | "XXL" => materials.add(StandardMaterial {
+                base_color: Color::srgb(0.3, 0.3, 0.3),
+                metallic: 0.1,
+                perceptual_roughness: 0.9,
+                ..default()
+            }),
+            _ => materials.add(StandardMaterial::default()),
+        };
         asteroid_materials.insert(asteroid_type.to_string(), material);
     }
 
