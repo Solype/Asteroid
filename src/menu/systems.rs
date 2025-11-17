@@ -1,3 +1,8 @@
+use crate::menu::structs::*;
+use crate::{
+    controller::PlayerCam,
+    globals_structs::{Action, InputButton, Keybinds},
+};
 use bevy::{
     // app::AppExit,
     audio::Volume, input::mouse::{MouseScrollUnit, MouseWheel}, picking::hover::HoverMap, prelude::*, window::{
@@ -10,40 +15,35 @@ use rand::seq::SliceRandom;
 
 
 
-pub fn enter_menu_state(mut next_state: ResMut<NextState<MenuState>>)
-{
+pub fn enter_menu_state(mut next_state: ResMut<NextState<MenuState>>) {
     next_state.set(MenuState::Main);
 }
 
-
-pub fn leave_menu_state(mut next_state: ResMut<NextState<MenuState>>, entity: Single<&mut Camera, With<MenuCameraComponent>>)
-{
+pub fn leave_menu_state(
+    mut next_state: ResMut<NextState<MenuState>>,
+    entity: Single<&mut Camera, With<MenuCameraComponent>>,
+) {
     entity.into_inner().is_active = false;
     next_state.set(MenuState::None);
 }
 
-
-
-pub fn release_mouse(mut options: Single<&mut CursorOptions, With<PrimaryWindow>>)
-{
+pub fn release_mouse(mut options: Single<&mut CursorOptions, With<PrimaryWindow>>) {
     options.grab_mode = CursorGrabMode::None;
     options.visible = true;
 }
 
-pub fn remove_focus_menu(mut command: Commands, entity: Single<Entity, With<PlayerCam>>)
-{
+pub fn remove_focus_menu(mut command: Commands, entity: Single<Entity, With<PlayerCam>>) {
     let player = entity.into_inner();
 
     command.entity(player).insert(SmoothCamMove {
-        speed : Some(3.0),
-        fov : Some(45.0_f32.to_radians()),
-        position : Some(Vec3::new(0.0, 1.1, 0.3)),
+        speed: Some(3.0),
+        fov: Some(45.0_f32.to_radians()),
+        position: Some(Vec3::new(0.0, 1.1, 0.3)),
         ..Default::default()
     });
 }
 
-pub fn focus_main_screen(mut command: Commands, player_entity: Single<Entity, With<PlayerCam>>)
-{
+pub fn focus_main_screen(mut command: Commands, player_entity: Single<Entity, With<PlayerCam>>) {
     let player = player_entity.into_inner();
     let center = Vec3::new(0.0, 0.7087065, -0.29002798);
     let new_position = Vec3::new(0.0, 1.05, 0.27);
@@ -110,7 +110,6 @@ pub fn play_click_sound_system(
 
 const LINE_HEIGHT: f32 = 21.;
 
-
 pub fn send_scroll_events(
     mut mouse_wheel_reader: MessageReader<MouseWheel>,
     hover_map: Res<HoverMap>,
@@ -135,8 +134,6 @@ pub fn send_scroll_events(
         }
     }
 }
-
-
 
 pub fn on_scroll_handler(
     mut scroll: On<crate::menu::structs::Scroll>,
@@ -191,8 +188,8 @@ pub fn on_scroll_handler(
 //////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////
-// 
-// 
+//
+//
 // REBIND
 //
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -240,8 +237,7 @@ fn set_bind(binds: &mut Keybinds, action: Action, button: InputButton) {
     }
 }
 
-fn update_text(texts: &mut Query<(&mut Text, &Action)>, action: Action, button: InputButton)
-{
+fn update_text(texts: &mut Query<(&mut Text, &Action)>, action: Action, button: InputButton) {
     for (mut text, act) in texts.iter_mut() {
         if *act == action {
             *text = Text::new(button.to_str());
