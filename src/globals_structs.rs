@@ -79,3 +79,9 @@ pub enum Action {
     Shoot,
     Menu,
 }
+
+#[derive(Resource, Default)]
+pub struct Score
+{
+    pub value: u32
+}

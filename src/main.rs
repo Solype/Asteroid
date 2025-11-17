@@ -33,6 +33,7 @@ fn main() {
         .init_state::<GameState>()
         .insert_resource(MusicVolume { volume: 100.0_f32 })
         .insert_resource(Keybinds::default())
+        .insert_resource(Score::default())
         .add_systems(
             Update,
             start_after_startup.run_if(in_state(GameState::Startup)),
