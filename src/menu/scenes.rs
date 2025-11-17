@@ -267,6 +267,7 @@ pub fn create_options_menu_scene(
                             ..default()
                         },
                         BorderColor::all(Color::NONE),
+                        ButtonInfo { border_hover: BORDER_HOVER, border_normal: BorderColor::all(Color::NONE) },
                         BORDER_RADIUS_SQUARE,
                         children![
                             (
@@ -281,13 +282,7 @@ pub fn create_options_menu_scene(
                                 VolumeText
                             )
                         ],
-                    )).observe(|over: On<Pointer<Over>>, mut elems: Query<&mut BorderColor> | {
-                        let Ok(mut border) = elems.get_mut(over.entity) else { return; };
-                        *border = BORDER_HOVER;
-                    }).observe(|out: On<Pointer<Out>>, mut elems: Query<&mut BorderColor>| {
-                        let Ok(mut border) = elems.get_mut(out.entity) else { return; };
-                        *border = BorderColor::all(Color::NONE);
-                    }).observe(|_: On<Pointer<Click>>, mut master_volume: ResMut<MusicVolume>, mut texts: Query<&mut Text, With<VolumeText>>| {
+                    )).observe(|_: On<Pointer<Click>>, mut master_volume: ResMut<MusicVolume>, mut texts: Query<&mut Text, With<VolumeText>>| {
                         master_volume.volume = (master_volume.volume - 10.0).rem_euclid(110.0);
                         for mut text in &mut texts {
                             *text = Text::new(format!("{}%", master_volume.volume as i32));
@@ -320,6 +315,7 @@ pub fn create_options_menu_scene(
                                 ..default()
                             },
                             action,
+                            ButtonInfo { border_hover: BORDER_HOVER, border_normal: BorderColor::all(Color::NONE) },
                             BorderColor::all(Color::NONE),
                             BORDER_RADIUS_SQUARE,
                         )).with_children(|parent|{
@@ -343,12 +339,6 @@ pub fn create_options_menu_scene(
                                 waiting.0 = Some(*act);
                                 info!("Now waiting for new key for {:?}", waiting.0);
                             }
-                        }).observe(|over: On<Pointer<Over>>, mut elems: Query<&mut BorderColor> | {
-                            let Ok(mut border) = elems.get_mut(over.entity) else { return; };
-                            *border = BORDER_HOVER;
-                        }).observe(|out: On<Pointer<Out>>, mut elems: Query<&mut BorderColor>| {
-                            let Ok(mut border) = elems.get_mut(out.entity) else { return; };
-                            *border = BorderColor::all(Color::NONE);
                         });
                     }
                 });

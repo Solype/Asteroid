@@ -5,12 +5,15 @@ use crate::{
 };
 use bevy::{
     // app::AppExit,
-    input::mouse::{MouseScrollUnit, MouseWheel},
-    picking::hover::HoverMap,
-    prelude::*,
-
-    window::{CursorGrabMode, CursorOptions, PrimaryWindow},
+    audio::Volume, input::mouse::{MouseScrollUnit, MouseWheel}, picking::hover::HoverMap, prelude::*, window::{
+        CursorGrabMode, CursorOptions,PrimaryWindow
+    }
 };
+use crate::{controller::PlayerCam, globals_structs::{Action, InputButton, Keybinds, MusicVolume}};
+use crate::menu::structs::*;
+use rand::seq::SliceRandom;
+
+
 
 pub fn enter_menu_state(mut next_state: ResMut<NextState<MenuState>>) {
     next_state.set(MenuState::Main);
@@ -54,6 +57,44 @@ pub fn focus_main_screen(mut command: Commands, player_entity: Single<Entity, Wi
         ..Default::default()
     });
 }
+
+pub fn play_click_sound_system(
+    mut over_reader : MessageReader<Pointer<Over>>,
+    mut out_reader : MessageReader<Pointer<Out>>,
+    mut click_reader : MessageReader<Pointer<Click>>,
+    audio : Res<MenuSounds>,
+    master_volume : Res<MusicVolume>, 
+    mut commands : Commands,
+    query : Query<(&ButtonInfo, Entity)>,
+) {
+    for over in over_reader.read() {
+        let Ok((button_info, entity)) = query.get(over.entity) else {
+            continue;
+        };
+        commands.entity(entity).insert(button_info.border_hover);
+    }
+    for out in out_reader.read() {
+        let Ok((button_info, entity)) = query.get(out.entity) else {
+            continue;
+        };
+        commands.entity(entity).insert(button_info.border_normal);
+    }
+    if !click_reader.is_empty() && master_volume.volume != 0.0_f32 {
+        let mut rng = rand::thread_rng();
+        if let Some(handle) = audio.button_bips.choose(&mut rng) {
+            commands.spawn((
+                AudioPlayer::new(handle.clone()),
+                PlaybackSettings {
+                    mode: bevy::audio::PlaybackMode::Despawn,
+                    volume : Volume::Linear(master_volume.volume / 100.0_f32),
+                    ..Default::default()
+                }
+            ));
+        }
+        click_reader.clear();
+    }
+}
+
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////
