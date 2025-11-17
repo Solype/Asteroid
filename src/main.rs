@@ -5,6 +5,7 @@ use bevy::prelude::*;
 use bevy::render::render_resource::PrimitiveTopology;
 
 mod asteroids;
+mod player;
 mod controller;
 mod game_states;
 mod globals_structs;
@@ -16,7 +17,6 @@ use globals_structs::*;
 
 fn main() {
     App::new()
-        .insert_resource(DirectionalLightShadowMap { size: 4096 })
         .add_plugins(DefaultPlugins.set(AssetPlugin {
             watch_for_changes_override: Some(true),
             ..default()
@@ -27,6 +27,7 @@ fn main() {
             skybox::plugin,
             controller::plugin,
             asteroids::AsteroidPlugin,
+            player::PlayerPlugin,
         ))
         .init_state::<GameState>()
         .insert_resource(MusicVolume { volume: 100.0_f32 })
