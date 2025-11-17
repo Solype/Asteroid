@@ -1,7 +1,4 @@
-use crate::globals_structs::{
-    InputButton::{Key, Mouse},
-    Keybinds,
-};
+use crate::globals_structs::Keybinds;
 use crate::{asteroids::Velocity, controller::Player, player::*};
 
 pub fn shoot_ammo(
@@ -12,7 +9,7 @@ pub fn shoot_ammo(
     assets: Res<AmmoAssets>,
     mut commands: Commands,
 ) {
-    if !keybinds.shoot.just_pressed(keyboard, mouse) {
+    if !keybinds.shoot.just_pressed(&keyboard, &mouse) {
         return;
     }
 
