@@ -11,3 +11,8 @@ pub struct ScoreCamComponent;
 pub struct ScoreCameraTarget {
     pub image: Handle<Image>,
 }
+
+#[derive(Component)]
+pub struct ScoreCamTimer {
+    pub timer: Timer
+}

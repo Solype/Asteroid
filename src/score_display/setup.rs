@@ -14,10 +14,15 @@ pub fn setup_score(mut commands: Commands, menu_texture: Res<ScoreCameraTarget>)
         Camera2d::default(),
         Camera {
             target: RenderTarget::Image(handle.clone().into()),
+            is_active: false,
             ..default()
         },
         ScoreCamComponent,
+        ScoreCamTimer {
+            timer: Timer::from_seconds(1.0, TimerMode::Repeating)
+        }
     ));
+
 }
 
 pub fn apply_texture_to_quad(mut commands: Commands, screens: Query<(&ScorePlane, Entity)>, mut materials: ResMut<Assets<StandardMaterial>>, menu_texture: Res<ScoreCameraTarget>)
