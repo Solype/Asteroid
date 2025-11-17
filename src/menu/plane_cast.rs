@@ -24,7 +24,7 @@ pub fn drive_diegetic_pointer(
     mut raycast: MeshRayCast,
     rays: Res<RayMap>,
     cubes: Query<&Mesh3d, With<MenuPlane>>,
-    ui_camera: Query<&Camera, With<Camera2d>>,
+    ui_camera: Query<&Camera, (With<Camera2d>, With<MenuCameraComponent>)>,
     primary_window: Query<Entity, With<PrimaryWindow>>,
     windows: Query<(Entity, &Window)>,
     images: Res<Assets<Image>>,

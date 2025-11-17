@@ -50,7 +50,7 @@ pub fn create_main_menu_scene(
         background = ressources.bg.clone();
     } else {
         font = asset_server.load("font.ttf");
-        background = asset_server.load("menu_bg.png");
+        background = asset_server.load("menu_bg.jpg");
         commands.insert_resource(MainMenuRessources {font: font.clone(), bg: background.clone()});
     }
 
