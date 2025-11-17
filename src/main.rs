@@ -3,7 +3,6 @@ use bevy::{
     asset::RenderAssetUsages,
     render::render_resource::PrimitiveTopology,
     mesh::{Indices, Mesh},
-    light::*
 };
 
 mod asteroids;
@@ -14,6 +13,7 @@ mod globals_structs;
 mod menu;
 mod skybox;
 mod score_display;
+mod back_camera;
 
 use game_states::GameState;
 use globals_structs::*;
@@ -32,6 +32,7 @@ fn main() {
             asteroids::AsteroidPlugin,
             score_display::score_display_plugin,
             player::PlayerPlugin,
+            back_camera::back_cam_plugin,
         ))
         .init_state::<GameState>()
         .insert_resource(MusicVolume { volume: 100.0_f32 })
