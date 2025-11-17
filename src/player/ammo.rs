@@ -1,19 +1,23 @@
+use crate::globals_structs::{
+    InputButton::{Key, Mouse},
+    Keybinds,
+};
 use crate::{asteroids::Velocity, controller::Player, player::*};
 
 pub fn shoot_ammo(
+    keybinds: Res<Keybinds>,
     keyboard: Res<ButtonInput<KeyCode>>,
+    mouse: Res<ButtonInput<MouseButton>>,
     player: Single<&Transform, With<Player>>,
     assets: Res<AmmoAssets>,
     mut commands: Commands,
 ) {
-    if !keyboard.just_pressed(KeyCode::Space) {
+    if !(match keybinds.shoot {
+        Key(code) => keyboard.just_pressed(code),
+        Mouse(code) => mouse.just_pressed(code),
+    }) {
         return;
     }
-
-    // for (mut shooter, transform) in &mut query {
-    // alternate left/right shot
-    // let offset_x = if shooter.next_side_left { -0.3 } else { 0.3 };
-    // shooter.next_side_left = !shooter.next_side_left;
 
     let spawn_pos = player.translation;
 
