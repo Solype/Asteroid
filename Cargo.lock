@@ -7,8 +7,11 @@ name = "AST3ROID"
 version = "0.1.0"
 dependencies = [
  "bevy",
+ "bevy_hanabi",
+ "bytemuck",
  "rand",
  "rand_distr",
+ "wgpu 27.0.1",
 ]
 
 [[package]]
@@ -673,18 +676,6 @@ checksum = "7179e985f3f1b99265cb87fe194db3b00aee8e2914888d621ff9826e1417ee19"
 dependencies = [
  "bevy_macro_utils",
  "encase_derive_impl",
-]
-
-[[package]]
-name = "bevy_game"
-version = "0.1.0"
-dependencies = [
- "bevy",
- "bevy_hanabi",
- "bytemuck",
- "rand",
- "rand_distr",
- "wgpu 27.0.1",
 ]
 
 [[package]]
