@@ -28,12 +28,12 @@ pub fn shoot_ammo(
         },
         Transform {
             translation: spawn_pos,
-            scale: Vec3::new(0.15, 0.15, 2.0), // ellipse shape
+            scale: Vec3::new(0.5, 0.5, 5.0), // ellipse shape
             rotation: Quat::from_rotation_arc(Vec3::Z, laser_dir),
             ..Default::default()
         },
         Ammo,
-        Velocity(laser_dir * 20.0), // fast forward
+        Velocity(laser_dir * 10.0), // fast forward
         children![(
             Mesh3d(assets.mesh.clone()),
             MeshMaterial3d(assets.material.clone()),
