@@ -49,12 +49,12 @@ pub fn create_main_menu_scene(
         font = ressources.font.clone();
         background = ressources.bg.clone();
     } else {
-        font = asset_server.load("fonts/font.ttf");
-        background = asset_server.load("menu_background.jpg");
+        font = asset_server.load("font.ttf");
+        background = asset_server.load("menu_bg.png");
         commands.insert_resource(MainMenuRessources {font: font.clone(), bg: background.clone()});
     }
 
-   
+
 
     let node = Node {
         width: Val::Px(300.0),
