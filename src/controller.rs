@@ -1,33 +1,24 @@
 use bevy::{
     input::mouse::AccumulatedMouseMotion,
-    prelude::*, 
-    window::{
-        CursorGrabMode, PrimaryWindow, CursorOptions
-    }
+    prelude::*,
+    window::{CursorGrabMode, CursorOptions, PrimaryWindow},
 };
 
-use std::f32::consts::FRAC_PI_2;
 use crate::game_states::GameState;
+use std::f32::consts::FRAC_PI_2;
 
-
-
-
-pub fn plugin(app: &mut App)
-{
+pub fn plugin(app: &mut App) {
     app.add_systems(OnEnter(GameState::Game), grab_mouse);
-    app.add_systems(Update, 
+    app.add_systems(
+        Update,
         (player_cam_system, player_system)
-        .in_set(GameSystemSet)
-        .run_if(in_state(GameState::Game))
+            .in_set(GameSystemSet)
+            .run_if(in_state(GameState::Game)),
     );
 }
 
-
-
 #[derive(SystemSet, Debug, Clone, PartialEq, Eq, Hash)]
 struct GameSystemSet;
-
-
 
 #[derive(Component)]
 pub struct Player;
@@ -38,23 +29,13 @@ pub struct PlayerCam;
 #[derive(Debug, Component, Deref, DerefMut)]
 pub struct CameraSensitivity(Vec2);
 
-
-
-
-
-
-
 impl Default for CameraSensitivity {
     fn default() -> Self {
         Self(Vec2::new(0.003, 0.002))
     }
 }
 
-
-
-
-fn grab_mouse(mut options: Single<&mut CursorOptions, With<PrimaryWindow>>)
-{
+fn grab_mouse(mut options: Single<&mut CursorOptions, With<PrimaryWindow>>) {
     options.visible = false;
     options.grab_mode = CursorGrabMode::Locked;
     // options.grab_mode = match cfg!(target_os = "macos") {
@@ -67,7 +48,7 @@ fn player_system(
     keyboard_input: Res<ButtonInput<KeyCode>>,
     time: Res<Time>,
     player: Single<(&mut Transform, &CameraSensitivity), With<Player>>,
-    mut next_state: ResMut<NextState<GameState>>
+    mut next_state: ResMut<NextState<GameState>>,
 ) {
     let (mut transform, camera_sensitivity) = player.into_inner();
 
@@ -90,7 +71,6 @@ fn player_system(
     if keyboard_input.pressed(KeyCode::KeyD) {
         delta_yaw -= 200.0;
     }
-    
 
     if delta_yaw != 0.0 || delta_pitch != 0.0 {
         let delta_yaw = delta_yaw * camera_sensitivity.x * time.delta_secs();
@@ -105,7 +85,6 @@ fn player_system(
         transform.rotation = Quat::from_euler(EulerRot::YXZ, yaw, pitch, roll);
     }
 }
-
 
 fn player_cam_system(
     accumulated_mouse_motion: Res<AccumulatedMouseMotion>,
