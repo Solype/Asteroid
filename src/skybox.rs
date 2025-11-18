@@ -15,11 +15,6 @@ pub struct SkyCubeMap {
     pub loaded: bool,
 }
 
-
-#[derive(Resource)]
-pub struct CameraHolder(pub Entity);
-
-
 pub fn plugin(app: &mut App)
 {
     app
@@ -43,7 +38,7 @@ fn reinterpret_cubemap(
     mut images: ResMut<Assets<Image>>,
     mut cubemap: ResMut<SkyCubeMap>,
     mut commands: Commands,
-    camera_holder: Res<CameraHolder>,
+    cameras: Query<Entity, With<Camera3d>>,
 ) {
     if !cubemap.loaded
         && matches!(
@@ -64,11 +59,13 @@ fn reinterpret_cubemap(
                 ..Default::default()
             });
 
-            commands.entity(camera_holder.0).insert(Skybox {
-                image: cubemap.image.clone(),
-                brightness: 1000.0,
-                rotation: Quat::IDENTITY,
-            });
+            for entity in cameras {
+                commands.entity(entity).insert(Skybox {
+                    image: cubemap.image.clone(),
+                    brightness: 1000.0,
+                    rotation: Quat::IDENTITY,
+                });
+            }
         } else {
             warn!(
                 "Skybox image must be 6xN pixels. Got {} layers.",

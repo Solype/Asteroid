@@ -199,5 +199,4 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>, meshes: ResMut<
         middle_screen,
         right_screen,
     ]);
-    commands.insert_resource(skybox::CameraHolder(camera_entity));
 }

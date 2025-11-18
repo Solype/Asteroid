@@ -1,4 +1,6 @@
 use bevy::prelude::*;
+
+use crate::game_states::GameState;
 pub mod ammo;
 
 #[derive(Component)]
@@ -16,7 +18,7 @@ impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, setup).add_systems(
             Update,
-            (ammo::shoot_ammo, ammo::move_ammos, ammo::clear_ammos),
+            (ammo::shoot_ammo, ammo::move_ammos, ammo::clear_ammos).run_if(in_state(GameState::Game)),
         );
     }
 }
