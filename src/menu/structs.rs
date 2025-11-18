@@ -38,7 +38,8 @@ pub struct SmoothCamMove {
 
 #[derive(Resource)]
 pub struct MenuCameraTarget {
-    pub image: Handle<Image>,
+    // pub image: Handle<Image>,
+    pub material: Handle<StandardMaterial>
 }
 
 
