@@ -11,37 +11,16 @@ use crate::menu::structs::*;
 static SCREEN_WIDTH : u32 = 96 * 16;
 static SCREEN_HEIGHT : u32 = 32 * 16;
 
-pub fn setup_menu(mut commands: Commands, menu_texture: Res<MenuCameraTarget>)
+pub fn apply_texture_to_quad(mut commands: Commands, screens: Query<(&MenuPlane, Entity)>, menu_texture: Res<MenuCameraTarget>)
 {
-    let handle = menu_texture.image.clone();
-
-    commands.spawn((
-        Camera2d::default(),
-        Camera {
-            target: RenderTarget::Image(handle.clone().into()),
-            ..default()
-        },
-        MenuCameraComponent,
-    ));
-}
-
-pub fn apply_texture_to_quad(mut commands: Commands, screens: Query<(&MenuPlane, Entity)>, mut materials: ResMut<Assets<StandardMaterial>>, menu_texture: Res<MenuCameraTarget>)
-{
-    let mat_handler = materials.add(StandardMaterial {
-        base_color_texture: Some(menu_texture.image.clone()),
-        reflectance: 0.02,
-        unlit: true,
-        ..default()
-    });
-
     for (_, entity) in screens.iter() {
-        commands.entity(entity).insert(MeshMaterial3d(mat_handler));
+        commands.entity(entity).insert(MeshMaterial3d(menu_texture.material.clone()));
         info!("Texture applied");
         return;
     }
 }
 
-pub fn setup_texture_camera(mut commands: Commands, mut images: ResMut<Assets<Image>>)
+pub fn setup_texture_camera(mut commands: Commands, mut images: ResMut<Assets<Image>>, mut materials: ResMut<Assets<StandardMaterial>>)
 {
     let mut image = Image {
         texture_descriptor: TextureDescriptor {
@@ -60,9 +39,25 @@ pub fn setup_texture_camera(mut commands: Commands, mut images: ResMut<Assets<Im
     };
 
     image.resize(Extent3d { width: SCREEN_WIDTH, height: SCREEN_HEIGHT, depth_or_array_layers: 1 });
+    let handler = images.add(image);
 
-    commands.insert_resource(MenuCameraTarget { image: images.add(image) });
-    info!("Texture set !")
+    let mat_handler = materials.add(StandardMaterial {
+        base_color_texture: Some(handler.clone()),
+        reflectance: 0.02,
+        unlit: true,
+        ..default()
+    });
+
+    commands.insert_resource(MenuCameraTarget { /* image: handler.clone(), */ material: mat_handler });
+
+    commands.spawn((
+        Camera2d::default(),
+        Camera {
+            target: RenderTarget::Image(handler.clone().into()),
+            ..default()
+        },
+        MenuCameraComponent,
+    ));
 }
 
 pub fn setup_sound_effect_and_music(mut commands: Commands, asset_server: Res<AssetServer>)

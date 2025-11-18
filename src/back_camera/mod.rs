@@ -19,22 +19,12 @@ pub fn back_cam_plugin(app: &mut App)
 
 fn display_renter_target(
     render_target: Res<BackCameraRenderTargetImage>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
     screens: Query<(&MenuPlane, Entity)>,
     mut commands: Commands
 )
 {
-    let mat_handler = materials.add(StandardMaterial {
-        base_color_texture: Some(render_target.image.clone()),
-        reflectance: 0.02,
-        unlit: true,
-        ..default()
-    });
-
     for (_, entity) in screens.iter() {
-        commands.entity(entity).insert(MeshMaterial3d(mat_handler));
-        info!("Texture applied");
-        return;
+        commands.entity(entity).insert(MeshMaterial3d(render_target.material.clone()));
     }
 }
 
@@ -44,7 +34,8 @@ static SCREEN_HEIGHT : u32 = 128;
 
 fn setup_camera_3d_render_to_texture(
     mut commands: Commands,
-    mut images: ResMut<Assets<Image>>
+    mut images: ResMut<Assets<Image>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
 
     let mut image = Image {
@@ -79,6 +70,13 @@ fn setup_camera_3d_render_to_texture(
                 .looking_at(Vec3::new(0.216544, -0.777080, 0.318808), Vec3::Y),
     ));
 
-    commands.insert_resource(BackCameraRenderTargetImage{image: image_handle.clone()});
+    let mat_handle = materials.add(StandardMaterial {
+        base_color_texture: Some(image_handle.clone()),
+        reflectance: 0.02,
+        unlit: true,
+        ..default()
+    });
+
+    commands.insert_resource(BackCameraRenderTargetImage{material: mat_handle.clone()});
 
 }
