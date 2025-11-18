@@ -13,8 +13,17 @@ use bevy::{
 use rand::prelude::IndexedRandom;
 
 
-pub fn enter_menu_state(mut next_state: ResMut<NextState<MenuState>>) {
+pub fn enter_menu_state(
+    mut next_state: ResMut<NextState<MenuState>>,
+    screens: Query<(&MenuPlane, Entity)>,
+    mut commands: Commands,
+    render_target: Res<MenuCameraTarget>
+) {
     next_state.set(MenuState::Main);
+
+    for (_, entity) in screens.iter() {
+        commands.entity(entity).insert(MeshMaterial3d(render_target.material.clone()));
+    }
 }
 
 pub fn leave_menu_state(
