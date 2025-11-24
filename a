@@ -1,0 +1,124 @@
+   Compiling bevy_game v0.1.0 (/home/solype/delivery/current_days/game_rust)
+warning: unused import: `color::palettes::css::WHITE`
+ --> src/asteroids/mod.rs:1:12
+  |
+1 | use bevy::{color::palettes::css::WHITE, platform::collections::HashMap, prelude::*};
+  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` on by default
+
+warning: unused import: `prelude::IteratorRandom`
+ --> src/asteroids/collision.rs:4:12
+  |
+4 | use rand::{prelude::IteratorRandom, Rng};
+  |            ^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `std::f32::consts::FRAC_PI_2`
+ --> src/controller.rs:8:5
+  |
+8 | use std::f32::consts::FRAC_PI_2;
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused variable: `commands`
+  --> src/asteroids/collision.rs:55:9
+   |
+55 |     mut commands: Commands,
+   |         ^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_commands`
+   |
+   = note: `#[warn(unused_variables)]` on by default
+
+warning: unused variable: `asteroids_query`
+  --> src/asteroids/collision.rs:56:9
+   |
+56 |     mut asteroids_query: Query<(Entity, &Asteroid, &Transform, &Velocity)>,
+   |         ^^^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_asteroids_query`
+
+warning: variable does not need to be mutable
+  --> src/asteroids/collision.rs:55:5
+   |
+55 |     mut commands: Commands,
+   |     ----^^^^^^^^
+   |     |
+   |     help: remove this `mut`
+   |
+   = note: `#[warn(unused_mut)]` on by default
+
+warning: variable does not need to be mutable
+  --> src/asteroids/collision.rs:56:5
+   |
+56 |     mut asteroids_query: Query<(Entity, &Asteroid, &Transform, &Velocity)>,
+   |     ----^^^^^^^^^^^^^^^
+   |     |
+   |     help: remove this `mut`
+
+warning: variable does not need to be mutable
+  --> src/controller.rs:79:13
+   |
+79 |         let mut yaw = yaw + delta_yaw;
+   |             ----^^^
+   |             |
+   |             help: remove this `mut`
+
+warning: variable does not need to be mutable
+  --> src/controller.rs:80:13
+   |
+80 |         let mut pitch = pitch + delta_pitch;
+   |             ----^^^^^
+   |             |
+   |             help: remove this `mut`
+
+warning: variable does not need to be mutable
+   --> src/controller.rs:100:13
+    |
+100 |         let mut yaw = yaw + delta_yaw;
+    |             ----^^^
+    |             |
+    |             help: remove this `mut`
+
+warning: variable does not need to be mutable
+   --> src/controller.rs:101:13
+    |
+101 |         let mut pitch = pitch + delta_pitch;
+    |             ----^^^^^
+    |             |
+    |             help: remove this `mut`
+
+warning: function `asteroid_player_collision` is never used
+  --> src/asteroids/collision.rs:54:8
+   |
+54 | pub fn asteroid_player_collision(
+   |        ^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(dead_code)]` on by default
+
+warning: methods `pressed` and `just_released` are never used
+  --> src/globals_structs.rs:25:12
+   |
+17 | impl InputButton {
+   | ---------------- methods in this implementation
+...
+25 |     pub fn pressed(
+   |            ^^^^^^^
+...
+47 |     pub fn just_released(
+   |            ^^^^^^^^^^^^^
+
+warning: `bevy_game` (bin "bevy_game") generated 13 warnings (run `cargo fix --bin "bevy_game"` to apply 9 suggestions)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 17.16s
+     Running `target/debug/bevy_game`
+[2m2025-11-24T15:58:15.030465Z[0m [32m INFO[0m [2mbevy_diagnostic::system_information_diagnostics_plugin::internal[0m[2m:[0m SystemInfo { os: "Linux (Fedora Linux 43)", kernel: "6.17.8-300.fc43.x86_64", cpu: "13th Gen Intel(R) Core(TM) i5-1335U", core_count: "10", memory: "15.3 GiB" }
+[2m2025-11-24T15:58:15.032661Z[0m [33m WARN[0m [2mbevy_asset::io::source[0m[2m:[0m AssetSourceId::Default does not have an AssetWatcher configured. Consider enabling the `file_watcher` feature.
+[2m2025-11-24T15:58:15.270311Z[0m [32m INFO[0m [2mbevy_render::renderer[0m[2m:[0m AdapterInfo { name: "Intel(R) Iris(R) Xe Graphics (RPL-U)", vendor: 32902, device: 42913, device_type: IntegratedGpu, driver: "Intel open-source Mesa driver", driver_info: "Mesa 25.2.7", backend: Vulkan }
+[2m2025-11-24T15:58:16.031618Z[0m [32m INFO[0m [2mbevy_render::batching::gpu_preprocessing[0m[2m:[0m GPU preprocessing is fully supported on this device.
+[2m2025-11-24T15:58:16.067486Z[0m [32m INFO[0m [2mbevy_winit::system[0m[2m:[0m Creating new window bevy_game (0v0)
+
+thread 'main' panicked at /home/solype/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bevy_ecs-0.17.3/src/error/handler.rs:125:1:
+Encountered an error in system `bevy_game::particules::spawn_particles`: Parameter `ResMut<Assets<EffectAsset>>` failed validation: Resource does not exist
+If this is an expected state, wrap the parameter in `Option<T>` and handle `None` when it happens, or wrap the parameter in `If<T>` to skip the system when it happens.
+
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+[2m2025-11-24T15:58:16.215488Z[0m [32m INFO[0m [2mbevy_game::score_display::setup[0m[2m:[0m Texture set !
+[2m2025-11-24T15:58:16.216048Z[0m [33m WARN[0m [2mbevy_ecs::world::command_queue[0m[2m:[0m CommandQueue has un-applied commands being dropped. Did you forget to call SystemState::apply?
+[2m2025-11-24T15:58:16.216142Z[0m [33m WARN[0m [2mbevy_ecs::world::command_queue[0m[2m:[0m CommandQueue has un-applied commands being dropped. Did you forget to call SystemState::apply?
+[2m2025-11-24T15:58:16.216177Z[0m [33m WARN[0m [2mbevy_ecs::world::command_queue[0m[2m:[0m CommandQueue has un-applied commands being dropped. Did you forget to call SystemState::apply?
+Encountered a panic in system `bevy_app::main_schedule::Main::run_main`!
