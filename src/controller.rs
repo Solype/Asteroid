@@ -6,6 +6,7 @@ use bevy::{
 
 use crate::game_states::GameState;
 use std::f32::consts::FRAC_PI_2;
+use crate::globals_structs::Keybinds;
 
 pub fn plugin(app: &mut App) {
     app.add_systems(OnEnter(GameState::Game), grab_mouse);
@@ -68,7 +69,10 @@ fn player_system(
     keyboard_input: Res<ButtonInput<KeyCode>>,
     time: Res<Time>,
     player: Single<(&mut Transform, &CameraSensitivity, &mut TranslationalVelocity, &mut RotationalVelocity), With<Player>>,
-    mut next_state: ResMut<NextState<GameState>>
+    mut next_state: ResMut<NextState<GameState>>,
+    keybinds: Res<Keybinds>,
+    keyboard: Res<ButtonInput<KeyCode>>,
+    mouse: Res<ButtonInput<MouseButton>>,
 ) {
     let (mut transform, _camera_sensitivity , _trans_velocity, mut rota_velocity) = player.into_inner();
 
@@ -83,22 +87,10 @@ fn player_system(
     let mut accel_pitch = 0.0;
     let mut accel_roll  = 0.0;
 
-    if keyboard_input.pressed(KeyCode::KeyW) {
-        accel_pitch -= base_speed;
-    }
-    if keyboard_input.pressed(KeyCode::KeyS) {
-        accel_pitch += base_speed;
-    }
-    if keyboard_input.pressed(KeyCode::KeyA) {
-        accel_yaw += base_speed;
-    }
-    if keyboard_input.pressed(KeyCode::KeyD) {
-        accel_yaw -= base_speed;
-    }
-    if keyboard_input.pressed(KeyCode::KeyQ) {
+    if keybinds.rotate_left.pressed(&keyboard, &mouse) {
         accel_roll += base_speed;
     }
-    if keyboard_input.pressed(KeyCode::KeyE) {
+    if keybinds.rotate_right.pressed(&keyboard, &mouse) {
         accel_roll -= base_speed;
     }
 
@@ -108,9 +100,18 @@ fn player_system(
     rota_velocity.z += accel_roll * dt;
 
     const DAMPING: f32 = 0.99f32; // 1.0 = no damping
-    rota_velocity.x *= DAMPING;
-    rota_velocity.y *= DAMPING;
-    rota_velocity.z *= DAMPING;
+    if rota_velocity.x.abs() < 2.0 { rota_velocity.x *= DAMPING; }
+    if rota_velocity.y.abs() < 2.0 { rota_velocity.y *= DAMPING; }
+    if rota_velocity.z.abs() < 2.0 { rota_velocity.z *= DAMPING; }
+
+    // clamp
+    rota_velocity.x = rota_velocity.x.clamp(-5.0, 5.0); // adjust limits as needed
+    rota_velocity.y = rota_velocity.y.clamp(-5.0, 5.0);
+    rota_velocity.z = rota_velocity.z.clamp(-5.0, 5.0);
+
+    println!("x {:?}", rota_velocity.x);
+    println!("y {:?}", rota_velocity.y);
+    println!("z {:?}", rota_velocity.z);
 
     let delta_yaw   = rota_velocity.x * dt;
     let delta_pitch = rota_velocity.y * dt;
@@ -118,9 +119,6 @@ fn player_system(
 
     // Build a small rotation from the angular increments
     let delta_rot = Quat::from_euler(EulerRot::YXZ, delta_yaw, delta_pitch, delta_roll);
-    println!("{:?}", transform.translation.x);
-    println!("{:?}", transform.translation.y);
-    println!("{:?}", transform.translation.z);
     // Apply to the transform
     transform.rotation *= delta_rot;
 }
