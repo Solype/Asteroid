@@ -3,6 +3,15 @@
 version = 4
 
 [[package]]
+name = "AST3ROID"
+version = "0.1.0"
+dependencies = [
+ "bevy",
+ "rand",
+ "rand_distr",
+]
+
+[[package]]
 name = "ab_glyph"
 version = "0.2.32"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -652,15 +661,6 @@ checksum = "7449e5903594a00f007732ba232af0c527ad4e6e3d29bc3e195ec78dbd20c8b2"
 dependencies = [
  "bevy_macro_utils",
  "encase_derive_impl",
-]
-
-[[package]]
-name = "bevy_game"
-version = "0.1.0"
-dependencies = [
- "bevy",
- "rand",
- "rand_distr",
 ]
 
 [[package]]
