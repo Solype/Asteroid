@@ -7,6 +7,11 @@ pub mod ammo;
 pub struct Ammo;
 
 #[derive(Resource)]
+pub struct ShootSide {
+    value: f32,
+}
+
+#[derive(Resource)]
 pub struct AmmoAssets {
     mesh: Handle<Mesh>,
     material: Handle<StandardMaterial>,
@@ -18,7 +23,8 @@ impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, setup).add_systems(
             Update,
-            (ammo::shoot_ammo, ammo::move_ammos, ammo::clear_ammos).run_if(in_state(GameState::Game)),
+            (ammo::shoot_ammo, ammo::move_ammos, ammo::clear_ammos)
+                .run_if(in_state(GameState::Game)),
         );
     }
 }
@@ -39,4 +45,6 @@ pub fn setup(
         mesh: mesh,
         material: material,
     });
+
+    commands.insert_resource(ShootSide { value: 1.0 });
 }

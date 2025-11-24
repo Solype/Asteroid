@@ -1,4 +1,5 @@
 use crate::asteroids::{utils::f, *};
+use crate::globals_structs::Score;
 use crate::player::Ammo;
 
 use rand::{prelude::IteratorRandom, Rng};
@@ -58,8 +59,21 @@ pub fn asteroid_player_collision(
     // todo
 }
 
+pub fn get_score(size_type: &str) -> u32 {
+    return match size_type {
+        "XS" => 50,
+        "S" => 30,
+        "M" => 10,
+        "L" => 5,
+        "XL" => 1,
+        "XXL" => 1,
+        _ => 0,
+    };
+}
+
 pub fn asteroid_ammo_collision(
     mut commands: Commands,
+    mut score: ResMut<Score>,
     assets: Res<AsteroidAssets>,
     asteroids_query: Query<
         (Entity, &Asteroid, &Transform),
@@ -76,23 +90,26 @@ pub fn asteroid_ammo_collision(
                 .distance(asteroid_transform.translation);
 
             let ammo_radius = 1.0;
-            let ast_radius = asteroid.size;
-            if dist > ammo_radius + ast_radius {
+            if dist > ammo_radius + asteroid.size {
                 continue;
             }
+
+            let size_type = ASTEROID_SIZE_TYPES
+                [(asteroid.size / (ASTEROID_SIZE_TYPES_LEN as f32)).round() as usize];
+
+            score.value += get_score(size_type);
 
             commands.entity(asteroid_entity).insert(DespawnAnimation {
                 timer: Timer::from_seconds(ANIMATION_DURATION, TimerMode::Once),
             });
             commands.entity(ammo_entity).despawn();
             if asteroid.size < 2.0 {
-                //todo score
                 return;
             }
 
             let new_size = asteroid.size / 2.0;
 
-            let size_type =
+            let new_size_type =
                 ASTEROID_SIZE_TYPES[(new_size / (ASTEROID_SIZE_TYPES_LEN as f32)).round() as usize];
 
             let new_size_rounded = new_size.round();
@@ -117,10 +134,12 @@ pub fn asteroid_ammo_collision(
                 * f(new_size)
                 * 0.3;
 
-                commands.spawn_batch([
+            commands.spawn_batch([
                 (
-                    Mesh3d(assets.meshes.get(size_type).unwrap()[rng.random_range(0..4)].clone()),
-                    MeshMaterial3d(assets.materials.get(size_type).unwrap().clone()),
+                    Mesh3d(
+                        assets.meshes.get(new_size_type).unwrap()[rng.random_range(0..4)].clone(),
+                    ),
+                    MeshMaterial3d(assets.materials.get(new_size_type).unwrap().clone()),
                     Asteroid {
                         size: new_size_rounded,
                     },
@@ -138,8 +157,10 @@ pub fn asteroid_ammo_collision(
                     RotationVelocity(new_rotation_velocity),
                 ),
                 (
-                    Mesh3d(assets.meshes.get(size_type).unwrap()[rng.random_range(0..4)].clone()),
-                    MeshMaterial3d(assets.materials.get(size_type).unwrap().clone()),
+                    Mesh3d(
+                        assets.meshes.get(new_size_type).unwrap()[rng.random_range(0..4)].clone(),
+                    ),
+                    MeshMaterial3d(assets.materials.get(new_size_type).unwrap().clone()),
                     Asteroid {
                         size: new_size_rounded,
                     },
