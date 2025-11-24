@@ -59,16 +59,16 @@ impl InputButton {
 #[derive(Resource)]
 pub struct Keybinds
 {
-    // movement
-    pub up: InputButton,
-    pub down: InputButton,
-    pub right: InputButton,
-    pub left: InputButton,
-    pub forward: InputButton,
-    pub backward: InputButton,
+    // translation
+    pub up: InputButton, // z
+    pub down: InputButton, // -z
+    pub right: InputButton, // -y
+    pub left: InputButton, // y
+    pub forward: InputButton, // x
+    pub backward: InputButton, // -x
     // rotation
-    pub rotate_left: InputButton,
-    pub rotate_right: InputButton,
+    pub rotate_left: InputButton, // roll
+    pub rotate_right: InputButton, // -roll
     // other
     pub menu: InputButton,
     pub free_look: InputButton,
