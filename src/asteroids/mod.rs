@@ -1,5 +1,7 @@
 use bevy::{color::palettes::css::WHITE, platform::collections::HashMap, prelude::*};
 
+use crate::game_states::GameState;
+
 pub mod collision;
 pub mod movement;
 pub mod spawn;
@@ -55,12 +57,13 @@ impl Plugin for AsteroidPlugin {
                     movement::move_asteroids,
                     movement::rotate_asteroids,
                     collision::asteroid_asteroid_collision,
+                    collision::asteroid_player_collision,
                     collision::asteroid_ammo_collision,
                     spawn::asteroid_wave,
                     spawn::animate_spawn,
                     spawn::animate_despawn,
                     spawn::clear_asteroid,
-                ),
+                ).run_if(in_state(GameState::Game)),
             )
             .insert_resource(AsteroidConfig {
                 max_asteroid: 50,
