@@ -1,3 +1,4 @@
+use std::process::id;
 use bevy::{
     asset::RenderAssetUsages,
     mesh::{Indices, Mesh},
@@ -283,6 +284,7 @@ fn setup(
         ))
         .id();
 
+
     let camera_entity = commands
         .spawn((
             Projection::from(PerspectiveProjection::default()),
@@ -308,4 +310,18 @@ fn setup(
         middle_screen,
         right_screen,
     ]);
+    commands.insert_resource(skybox::CameraHolder(camera_entity));
+
+    commands.spawn(
+            (
+                Node {
+                    ..default()
+                },
+                ImageNode {
+                    image: asset_server.load("niko.jpeg"),
+                    ..default()
+                },
+                UiTargetCamera(camera_entity)
+            ),
+        );
 }
