@@ -12,7 +12,7 @@ pub fn plugin(app: &mut App) {
     app.add_systems(OnEnter(GameState::Game), grab_mouse);
     app.add_systems(
         Update,
-        (player_cam_system, player_system)
+        (player_cam_system, player_system, mouse_system)
             .in_set(GameSystemSet)
             .run_if(in_state(GameState::Game)),
     );
@@ -27,6 +27,9 @@ pub struct Player;
 #[derive(Component)]
 pub struct PlayerCam;
 
+#[derive(Component)]
+pub struct VirtualMouse;
+
 #[derive(Debug, Component, Deref, DerefMut)]
 pub struct CameraSensitivity(Vec3);
 
@@ -36,6 +39,8 @@ pub struct TranslationalVelocity(Vec3);
 #[derive(Component, Deref, DerefMut)]
 pub struct RotationalVelocity(Vec3);
 
+#[derive(Component, Deref, DerefMut)]
+pub struct MouseVector(Vec2);
 
 impl Default for CameraSensitivity {
     fn default() -> Self {
@@ -55,26 +60,35 @@ impl Default for RotationalVelocity {
     }
 }
 
+impl Default for MouseVector {
+    fn default() -> Self {
+        Self(Vec2::ZERO)
+    }
+}
+
 fn grab_mouse(mut options: Single<&mut CursorOptions, With<PrimaryWindow>>)
 {
     options.visible = false;
     options.grab_mode = CursorGrabMode::Locked;
-    // options.grab_mode = match cfg!(target_os = "macos") {
-    //     true => CursorGrabMode::Locked,
-    //     false => CursorGrabMode::Confined
-    // }
+}
+
+fn mouse_system(
+    mouse: Single<&MouseVector, With<VirtualMouse>>,
+    accumulated_mouse_motion: Res<AccumulatedMouseMotion>
+) {
+
 }
 
 fn player_system(
     keyboard_input: Res<ButtonInput<KeyCode>>,
     time: Res<Time>,
-    player: Single<(&mut Transform, &CameraSensitivity, &mut TranslationalVelocity, &mut RotationalVelocity), With<Player>>,
+    player: Single<(&mut Transform, &mut TranslationalVelocity, &mut RotationalVelocity), With<Player>>,
     mut next_state: ResMut<NextState<GameState>>,
     keybinds: Res<Keybinds>,
     keyboard: Res<ButtonInput<KeyCode>>,
     mouse: Res<ButtonInput<MouseButton>>,
 ) {
-    let (mut transform, _camera_sensitivity , _trans_velocity, mut rota_velocity) = player.into_inner();
+    let (mut transform, _trans_velocity, mut rota_velocity) = player.into_inner();
 
     if keyboard_input.just_pressed(KeyCode::KeyR) {
         next_state.set(GameState::Menu);
