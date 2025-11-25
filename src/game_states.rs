@@ -6,4 +6,5 @@ pub enum GameState {
     Startup,
     Menu,
     Game,
+    GameOver,
 }

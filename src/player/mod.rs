@@ -3,8 +3,19 @@ use bevy::prelude::*;
 use crate::game_states::GameState;
 pub mod ammo;
 
+
+#[derive(Component)]
+pub struct PlayerHitBox {
+    pub radius: f32,
+}
+
 #[derive(Component)]
 pub struct Ammo;
+
+#[derive(Resource)]
+pub struct ShootSide {
+    value: f32,
+}
 
 #[derive(Resource)]
 pub struct AmmoAssets {
@@ -12,13 +23,18 @@ pub struct AmmoAssets {
     material: Handle<StandardMaterial>,
 }
 
+
+pub const PLAYER_MASS: f32 = 216.0; //6³
+
+
 pub struct PlayerPlugin;
 
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, setup).add_systems(
             Update,
-            (ammo::shoot_ammo, ammo::move_ammos, ammo::clear_ammos).run_if(in_state(GameState::Game)),
+            (ammo::shoot_ammo, ammo::move_ammos, ammo::clear_ammos)
+                .run_if(in_state(GameState::Game)),
         );
     }
 }
@@ -39,4 +55,6 @@ pub fn setup(
         mesh: mesh,
         material: material,
     });
+
+    commands.insert_resource(ShootSide { value: 1.0 });
 }

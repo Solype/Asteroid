@@ -1,7 +1,34 @@
 use crate::asteroids::{utils::f, *};
-use crate::player::Ammo;
+use crate::globals_structs::Score;
+use crate::player::{Ammo, PlayerHitBox, PLAYER_MASS};
 
-use rand::{prelude::IteratorRandom, Rng};
+use rand::Rng;
+
+struct CollisionBody {
+    tr: Vec3,
+    vel: Vec3,
+    radius: f32,
+    mass: f32,
+}
+
+fn mass_collision(a_body: &mut CollisionBody, b_body: &mut CollisionBody, dist: f32) {
+    let delta = b_body.tr - a_body.tr;
+    let n = delta / dist;
+
+    let overlap = (a_body.radius + b_body.radius) - dist;
+    let correction = n * (overlap / (a_body.mass + b_body.mass));
+    a_body.tr -= correction * b_body.mass; // lighter one moves more
+    b_body.tr += correction * a_body.mass;
+
+    let v_rel = a_body.vel - b_body.vel;
+    let vel_along_normal = v_rel.dot(n);
+
+    let impulse_mag = -(2.0 * vel_along_normal) / (1.0 / a_body.mass + 1.0 / b_body.mass);
+    let impulse = impulse_mag * n;
+
+    a_body.vel += impulse / a_body.mass;
+    b_body.vel -= impulse / b_body.mass;
+}
 
 pub fn asteroid_asteroid_collision(
     mut asteroids_query: Query<(Entity, &Asteroid, &mut Transform, &mut Velocity)>,
@@ -27,39 +54,90 @@ pub fn asteroid_asteroid_collision(
             if dist > a_radius + b_radius {
                 continue;
             }
+            let a_body = &mut CollisionBody {
+                tr: a_tf.translation,
+                vel: a_vel.0,
+                radius: a_radius,
+                mass: a_ast.size.powi(3),
+            };
+            let b_body = &mut CollisionBody {
+                tr: b_tf.translation,
+                vel: b_vel.0,
+                radius: b_radius,
+                mass: b_ast.size.powi(3),
+            };
 
-            let delta = b_tf.translation - a_tf.translation;
-            let n = delta / dist;
+            mass_collision(a_body, b_body, dist);
 
-            let a_mass = a_ast.size.powi(3);
-            let b_mass = b_ast.size.powi(3);
+            a_tf.translation = a_body.tr;
+            b_tf.translation = b_body.tr;
 
-            let overlap = (a_radius + b_radius) - dist;
-            let correction = n * (overlap / (a_mass + b_mass));
-            a_tf.translation -= correction * b_mass; // lighter one moves more
-            b_tf.translation += correction * a_mass;
-
-            let v_rel = a_vel.0 - b_vel.0;
-            let vel_along_normal = v_rel.dot(n);
-
-            let impulse_mag = -(2.0 * vel_along_normal) / (1.0 / a_mass + 1.0 / b_mass);
-            let impulse = impulse_mag * n;
-
-            a_vel.0 += impulse / a_mass;
-            b_vel.0 -= impulse / b_mass;
+            a_vel.0 = a_body.vel;
+            b_vel.0 = b_body.vel;
         }
     }
 }
 
 pub fn asteroid_player_collision(
     mut commands: Commands,
-    mut asteroids_query: Query<(Entity, &Asteroid, &Transform, &Velocity)>,
+    mut next_state: ResMut<NextState<GameState>>,
+    player_hitboxes: Query<(&Transform, &PlayerHitBox), Without<Asteroid>>,
+    //todo mut player_velocity: Single<&mut Velocity, (With<Player>, Without<Asteroid>)>,
+    mut asteroids_query: Query<(Entity, &mut Transform, &Asteroid, &mut Velocity)>,
 ) {
-    // todo
+    let player_velocity = Vec3::ZERO;
+    for (hb_transform, player_hitbox) in &player_hitboxes {
+        for (asteroid_entity, mut asteroid_transform, asteroid, mut asteroid_velocity) in
+            &mut asteroids_query
+        {
+            let dist = hb_transform
+                .translation
+                .distance(asteroid_transform.translation);
+
+            if dist > player_hitbox.radius + asteroid.size {
+                continue;
+            }
+            info!("HIT");
+            let a_body = &mut CollisionBody {
+                tr: hb_transform.translation,
+                vel: player_velocity,
+                radius: player_hitbox.radius,
+                mass: PLAYER_MASS,
+            };
+            let b_body = &mut CollisionBody {
+                tr: asteroid_transform.translation,
+                vel: asteroid_velocity.0,
+                radius: asteroid.size,
+                mass: asteroid.size.powi(3),
+            };
+
+            mass_collision(a_body, b_body, dist);
+
+            asteroid_transform.translation = b_body.tr;
+
+            asteroid_velocity.0 = b_body.vel;
+
+            // next_state.set(GameState::GameOver);
+            return;
+        }
+    }
+}
+
+pub fn get_score(size_type: &str) -> u32 {
+    return match size_type {
+        "XS" => 50,
+        "S" => 30,
+        "M" => 10,
+        "L" => 5,
+        "XL" => 1,
+        "XXL" => 1,
+        _ => 0,
+    };
 }
 
 pub fn asteroid_ammo_collision(
     mut commands: Commands,
+    mut score: ResMut<Score>,
     assets: Res<AsteroidAssets>,
     asteroids_query: Query<
         (Entity, &Asteroid, &Transform),
@@ -76,23 +154,26 @@ pub fn asteroid_ammo_collision(
                 .distance(asteroid_transform.translation);
 
             let ammo_radius = 1.0;
-            let ast_radius = asteroid.size;
-            if dist > ammo_radius + ast_radius {
+            if dist > ammo_radius + asteroid.size {
                 continue;
             }
+
+            let size_type = ASTEROID_SIZE_TYPES
+                [(asteroid.size / (ASTEROID_SIZE_TYPES_LEN as f32)).round() as usize];
+
+            score.value += get_score(size_type);
 
             commands.entity(asteroid_entity).insert(DespawnAnimation {
                 timer: Timer::from_seconds(ANIMATION_DURATION, TimerMode::Once),
             });
             commands.entity(ammo_entity).despawn();
             if asteroid.size < 2.0 {
-                //todo score
                 return;
             }
 
             let new_size = asteroid.size / 2.0;
 
-            let size_type =
+            let new_size_type =
                 ASTEROID_SIZE_TYPES[(new_size / (ASTEROID_SIZE_TYPES_LEN as f32)).round() as usize];
 
             let new_size_rounded = new_size.round();
@@ -117,10 +198,12 @@ pub fn asteroid_ammo_collision(
                 * f(new_size)
                 * 0.3;
 
-                commands.spawn_batch([
+            commands.spawn_batch([
                 (
-                    Mesh3d(assets.meshes.get(size_type).unwrap()[rng.random_range(0..4)].clone()),
-                    MeshMaterial3d(assets.materials.get(size_type).unwrap().clone()),
+                    Mesh3d(
+                        assets.meshes.get(new_size_type).unwrap()[rng.random_range(0..4)].clone(),
+                    ),
+                    MeshMaterial3d(assets.materials.get(new_size_type).unwrap().clone()),
                     Asteroid {
                         size: new_size_rounded,
                     },
@@ -138,8 +221,10 @@ pub fn asteroid_ammo_collision(
                     RotationVelocity(new_rotation_velocity),
                 ),
                 (
-                    Mesh3d(assets.meshes.get(size_type).unwrap()[rng.random_range(0..4)].clone()),
-                    MeshMaterial3d(assets.materials.get(size_type).unwrap().clone()),
+                    Mesh3d(
+                        assets.meshes.get(new_size_type).unwrap()[rng.random_range(0..4)].clone(),
+                    ),
+                    MeshMaterial3d(assets.materials.get(new_size_type).unwrap().clone()),
                     Asteroid {
                         size: new_size_rounded,
                     },
