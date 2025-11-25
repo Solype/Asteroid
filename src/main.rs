@@ -1,3 +1,4 @@
+use std::process::id;
 use bevy::{
     prelude::*,
     asset::RenderAssetUsages,
@@ -176,12 +177,12 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>, meshes: ResMut<
         .spawn((
             SceneRoot(asset_server.load("Spaceship.glb#Scene0")),
             controller::Player,
-            controller::CameraSensitivity::default(),
             controller::TranslationalVelocity::default(),
             controller::RotationalVelocity::default(),
             Transform::from_xyz(0.0, 0.0, 0.0).looking_at(Vec3::ZERO, Vec3::Y),
         ))
         .id();
+
 
     let camera_entity = commands
         .spawn((
@@ -205,4 +206,18 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>, meshes: ResMut<
         middle_screen,
         right_screen,
     ]);
+    commands.insert_resource(skybox::CameraHolder(camera_entity));
+
+    commands.spawn(
+            (
+                Node {
+                    ..default()
+                },
+                ImageNode {
+                    image: asset_server.load("niko.jpeg"),
+                    ..default()
+                },
+                UiTargetCamera(camera_entity)
+            ),
+        );
 }
