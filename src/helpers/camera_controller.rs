@@ -13,13 +13,7 @@ use bevy::{
 use std::{f32::consts::*, fmt};
 
 /// A freecam-style camera controller plugin.
-pub struct CameraControllerPlugin;
 
-impl Plugin for CameraControllerPlugin {
-    fn build(&self, app: &mut App) {
-        app.add_systems(Update, run_camera_controller);
-    }
-}
 
 /// Based on Valorant's default sensitivity, not entirely sure why it is exactly 1.0 / 180.0,
 /// but I'm guessing it is a misunderstanding between degrees/radians and then sticking with
@@ -124,7 +118,7 @@ Freecam Controls:
     }
 }
 
-fn run_camera_controller(
+pub fn run_camera_controller(
     time: Res<Time<Real>>,
     mut windows: Query<(&Window, &mut CursorOptions)>,
     accumulated_mouse_motion: Res<AccumulatedMouseMotion>,

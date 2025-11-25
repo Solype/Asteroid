@@ -33,6 +33,7 @@ fn main() {
             score_display::score_display_plugin,
             player::PlayerPlugin,
             back_camera::back_cam_plugin,
+            helpers::CameraControllerPlugin,
         ))
         .init_state::<GameState>()
         .insert_resource(MusicVolume { volume: 100.0_f32 })
