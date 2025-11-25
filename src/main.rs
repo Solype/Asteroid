@@ -16,7 +16,6 @@ mod menu;
 mod player;
 mod score_display;
 mod skybox;
-mod back_camera;
 mod particules;
 
 use bevy_hanabi::HanabiPlugin;
