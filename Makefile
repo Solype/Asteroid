@@ -9,15 +9,15 @@ help:  ## Display this help
 .PHONY: build
 build:  ## Build the project
 	cargo build
-	mv target/debug/bevy_game .
+	mv target/debug/AST3ROID .
 
 .PHONY: run
 run: ## Run the project
 	cargo build
-	mv target/debug/bevy_game .
+	mv target/debug/AST3ROID .
 
 ##@ Cleanup
 .PHONY: clean
 clean: ## Clean the directory
 	rm -rf target
-	rm bevy_game
+	rm AST3ROID
