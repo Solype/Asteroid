@@ -1,22 +1,26 @@
 use bevy::{
-    prelude::*,
     asset::RenderAssetUsages,
-    render::render_resource::PrimitiveTopology,
+    math::VectorSpace,
     mesh::{Indices, Mesh},
+    prelude::*,
+    render::render_resource::PrimitiveTopology,
 };
 
 mod asteroids;
-mod player;
+mod back_camera;
 mod controller;
 mod game_states;
 mod globals_structs;
+mod helpers;
 mod menu;
-mod skybox;
+mod player;
 mod score_display;
-mod back_camera;
+mod skybox;
 
 use game_states::GameState;
 use globals_structs::*;
+
+use crate::{asteroids::Velocity, player::PlayerHitBox};
 
 fn main() {
     App::new()
@@ -46,11 +50,13 @@ fn main() {
         .run();
 }
 
-fn setup_ui_ressource(mut command: Commands, asset_server: Res<AssetServer>)
-{
+fn setup_ui_ressource(mut command: Commands, asset_server: Res<AssetServer>) {
     let font = asset_server.load("font.ttf");
     let background = asset_server.load("menu_bg.jpg");
-    command.insert_resource(UIRessources {font: font.clone(), bg: background.clone()});
+    command.insert_resource(UIRessources {
+        font: font.clone(),
+        bg: background.clone(),
+    });
 }
 
 fn start_after_startup(mut next_state: ResMut<NextState<GameState>>) {
@@ -168,13 +174,33 @@ fn setup_left_screen(
     return (left_id, middle_id, right_id);
 }
 
-fn setup(mut commands: Commands, asset_server: Res<AssetServer>, meshes: ResMut<Assets<Mesh>>) {
+fn setup(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+) {
     let player_entity = commands
         .spawn((
             SceneRoot(asset_server.load("Spaceship.glb#Scene0")),
             controller::Player,
+            Velocity(Vec3::ZERO),
             controller::CameraSensitivity::default(),
             Transform::from_xyz(0.0, 0.0, 0.0).looking_at(Vec3::ZERO, Vec3::Y),
+            children![
+                (
+                    PlayerHitBox { radius: 1.0 },
+                    Transform::from_xyz(0.0, 0.5, -2.0),
+                ),
+                (
+                    PlayerHitBox { radius: 1.5 },
+                    Transform::from_xyz(0.0, 1.0, 0.5),
+                ),
+                (
+                    PlayerHitBox { radius: 1.25 },
+                    Transform::from_xyz(0.0, 0.5, 3.5),
+                ),
+            ],
         ))
         .id();
 
@@ -189,6 +215,7 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>, meshes: ResMut<
             Transform::from_xyz(0.0, 1.1, 0.3)
                 .looking_at(Vec3::new(-0.216544, 0.777080, -0.318808), Vec3::Y),
             controller::PlayerCam,
+            //helpers::camera_controller::CameraController::default(),
             controller::CameraSensitivity::default(),
         ))
         .id();

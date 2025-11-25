@@ -3,6 +3,12 @@ use bevy::prelude::*;
 use crate::game_states::GameState;
 pub mod ammo;
 
+
+#[derive(Component)]
+pub struct PlayerHitBox {
+    pub radius: f32,
+}
+
 #[derive(Component)]
 pub struct Ammo;
 
@@ -16,6 +22,10 @@ pub struct AmmoAssets {
     mesh: Handle<Mesh>,
     material: Handle<StandardMaterial>,
 }
+
+
+pub const PLAYER_MASS: f32 = 216.0; //6³
+
 
 pub struct PlayerPlugin;
 
