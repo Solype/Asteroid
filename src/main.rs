@@ -16,7 +16,10 @@ mod menu;
 mod player;
 mod score_display;
 mod skybox;
+mod back_camera;
+mod particules;
 
+use bevy_hanabi::HanabiPlugin;
 use game_states::GameState;
 use globals_structs::*;
 
@@ -38,6 +41,8 @@ fn main() {
             player::PlayerPlugin,
             back_camera::back_cam_plugin,
             helpers::CameraControllerPlugin,
+            HanabiPlugin,
+            particules::ParticlesPlugin
         ))
         .init_state::<GameState>()
         .insert_resource(MusicVolume { volume: 100.0_f32 })

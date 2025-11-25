@@ -78,10 +78,10 @@ fn player_system(
         let (yaw, pitch, roll) = transform.rotation.to_euler(EulerRot::YXZ);
         let mut yaw = yaw + delta_yaw;
         let mut pitch = pitch + delta_pitch;
-        const PITCH_LIMIT: f32 = FRAC_PI_2 - 0.01;
-        pitch = pitch.clamp(-PITCH_LIMIT, PITCH_LIMIT);
-        const YAW_LIMIT: f32 = std::f32::consts::PI;
-        yaw = yaw.clamp(-YAW_LIMIT, YAW_LIMIT);
+        // const PITCH_LIMIT: f32 = FRAC_PI_2 - 0.01;
+        // pitch = pitch.clamp(-PITCH_LIMIT, PITCH_LIMIT);
+        // const YAW_LIMIT: f32 = std::f32::consts::PI;
+        // yaw = yaw.clamp(-YAW_LIMIT, YAW_LIMIT);
         transform.rotation = Quat::from_euler(EulerRot::YXZ, yaw, pitch, roll);
     }
 }
@@ -99,10 +99,10 @@ fn player_cam_system(
         let (yaw, pitch, roll) = transform.rotation.to_euler(EulerRot::YXZ);
         let mut yaw = yaw + delta_yaw;
         let mut pitch = pitch + delta_pitch;
-        const PITCH_LIMIT: f32 = FRAC_PI_2 - 0.01;
-        pitch = pitch.clamp(-PITCH_LIMIT, PITCH_LIMIT);
-        const YAW_LIMIT: f32 = FRAC_PI_2;
-        yaw = yaw.clamp(-YAW_LIMIT, YAW_LIMIT);
+        // const PITCH_LIMIT: f32 = FRAC_PI_2 - 0.01;
+        // pitch = pitch.clamp(-PITCH_LIMIT, PITCH_LIMIT);
+        // const YAW_LIMIT: f32 = FRAC_PI_2;
+        // yaw = yaw.clamp(-YAW_LIMIT, YAW_LIMIT);
         transform.rotation = Quat::from_euler(EulerRot::YXZ, yaw, pitch, roll);
     }
 }
