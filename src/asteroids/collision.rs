@@ -1,6 +1,7 @@
 use crate::asteroids::{utils::f, *};
 use crate::globals_structs::Score;
 use crate::player::{Ammo, PlayerHitBox, PLAYER_MASS};
+use crate::spritesheet::{AnimationDuration, AnimationTimer};
 
 use rand::Rng;
 
@@ -97,7 +98,7 @@ pub fn asteroid_player_collision(
             if dist > player_hitbox.radius + asteroid.size {
                 continue;
             }
-            info!("HIT");
+
             let a_body = &mut CollisionBody {
                 tr: hb_transform.translation,
                 vel: player_velocity,
@@ -243,6 +244,33 @@ pub fn asteroid_ammo_collision(
                     RotationVelocity(-new_rotation_velocity),
                 ),
             ]);
+
+            let texture_atlas = TextureAtlas {
+                layout: assets.explosion_layout.clone(),
+                index: 0,
+            };
+
+            commands.spawn((
+                Sprite {
+                    image: assets.explosion_sheet.clone(),
+                    texture_atlas: Some(texture_atlas),
+                    ..default()
+                },
+                Sprite3d {
+                    pixels_per_metre: 360.,
+                    alpha_mode: AlphaMode::Blend,
+                    unlit: true,
+                    ..default()
+                },
+                AnimationTimer(Timer::from_seconds(0.08, TimerMode::Repeating)),
+                AnimationDuration{frame_left: 7},
+                Transform {
+                    translation: ammo_transform.translation,
+                    rotation: ammo_transform.rotation,
+                    scale:asteroid_transform.scale,
+                    ..Default::default()
+                },
+            ));
             return;
         }
     }

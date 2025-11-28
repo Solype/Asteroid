@@ -8,6 +8,7 @@ version = "0.1.0"
 dependencies = [
  "bevy",
  "bevy_hanabi",
+ "bevy_sprite3d",
  "bytemuck",
  "rand",
  "rand_distr",
@@ -1290,6 +1291,15 @@ dependencies = [
  "radsort",
  "tracing",
  "wgpu-types 26.0.0",
+]
+
+[[package]]
+name = "bevy_sprite3d"
+version = "7.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "66683d51a25c4f28089bda87ece5ccf8ef2c71334fd9a9eba78b352d5f4bed51"
+dependencies = [
+ "bevy",
 ]
 
 [[package]]
