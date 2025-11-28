@@ -51,7 +51,7 @@ fn start_game_music(
 
     commands.spawn((
         BackgroundMusic,
-        AudioPlayer::new(asset_server.load("sounds/game.wav")),
+    AudioPlayer::new(asset_server.load("sounds/game.wav")),
         PlaybackSettings::LOOP.with_volume(Volume::Linear(master_volume.volume / 100.0_f32)),
     ));
 }
