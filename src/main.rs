@@ -182,11 +182,7 @@ fn setup_left_screen(
     return (left_id, middle_id, right_id);
 }
 
-fn setup(
-    mut commands: Commands,
-    asset_server: Res<AssetServer>,
-    meshes: ResMut<Assets<Mesh>>,
-) {
+fn setup(mut commands: Commands, asset_server: Res<AssetServer>, meshes: ResMut<Assets<Mesh>>) {
     let player_entity = commands
         .spawn((
             SceneRoot(asset_server.load("Spaceship.glb#Scene0")),
@@ -219,10 +215,12 @@ fn setup(
                 order: 0,
                 ..default()
             },
+            SpatialListener::new(1.0),
+            GlobalTransform::default(),
             Transform::from_xyz(0.0, 1.1, 0.3)
                 .looking_at(Vec3::new(-0.216544, 0.777080, -0.318808), Vec3::Y),
             controller::PlayerCam,
-            //helpers::camera_controller::CameraController::default(),
+            // helpers::camera_controller::CameraController::default(),
             controller::CameraSensitivity::default(),
         ))
         .id();

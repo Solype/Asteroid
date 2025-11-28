@@ -29,6 +29,11 @@ pub struct AsteroidAssets {
 }
 
 #[derive(Resource)]
+pub struct BoomSounds {
+    pub booms: Vec<Handle<AudioSource>>,
+}
+
+#[derive(Resource)]
 pub struct AsteroidConfig {
     max_asteroid: usize,
     size_range: (f32, f32),
@@ -75,7 +80,7 @@ impl Plugin for AsteroidPlugin {
             .insert_resource(AsteroidConfig {
                 max_asteroid: 50,
                 size_range: (1.0, 10.0),
-                spawn_range: 300.0,
+                spawn_range: 30.0,
                 despawn_range: 350.0,
             });
     }
@@ -176,4 +181,11 @@ pub fn setup(
             ..Default::default()
         })),
     ));
+
+    commands.insert_resource(BoomSounds {
+        booms: vec![
+            asset_server.load("sounds/boom1.wav"),
+            asset_server.load("sounds/boom2.wav"),
+        ],
+    });
 }

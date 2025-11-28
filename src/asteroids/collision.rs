@@ -1,8 +1,10 @@
 use crate::asteroids::{utils::f, *};
-use crate::globals_structs::Score;
+use crate::globals_structs::{MusicVolume, Score};
 use crate::player::{Ammo, PlayerHitBox, PLAYER_MASS};
 use crate::spritesheet::{AnimationDuration, AnimationTimer};
 
+use bevy::audio::Volume;
+use rand::seq::IndexedRandom;
 use rand::Rng;
 
 struct CollisionBody {
@@ -140,6 +142,8 @@ pub fn asteroid_ammo_collision(
     mut commands: Commands,
     mut score: ResMut<Score>,
     assets: Res<AsteroidAssets>,
+    audio: Res<BoomSounds>,
+    master_volume: Res<MusicVolume>,
     asteroids_query: Query<
         (Entity, &Asteroid, &Transform),
         (Without<SpawnAnimation>, Without<DespawnAnimation>),
@@ -250,27 +254,42 @@ pub fn asteroid_ammo_collision(
                 index: 0,
             };
 
-            commands.spawn((
-                Sprite {
-                    image: assets.explosion_sheet.clone(),
-                    texture_atlas: Some(texture_atlas),
-                    ..default()
-                },
-                Sprite3d {
-                    pixels_per_metre: 360.,
-                    alpha_mode: AlphaMode::Blend,
-                    unlit: true,
-                    ..default()
-                },
-                AnimationTimer(Timer::from_seconds(0.08, TimerMode::Repeating)),
-                AnimationDuration{frame_left: 7},
-                Transform {
-                    translation: ammo_transform.translation,
-                    rotation: ammo_transform.rotation,
-                    scale:asteroid_transform.scale,
-                    ..Default::default()
-                },
-            ));
+            let mut rng = rand::rng();
+
+            if let Some(handle) = audio.booms.choose(&mut rng) {
+                commands.spawn((
+                    Sprite {
+                        image: assets.explosion_sheet.clone(),
+                        texture_atlas: Some(texture_atlas),
+                        ..default()
+                    },
+                    Sprite3d {
+                        pixels_per_metre: 360.,
+                        alpha_mode: AlphaMode::Blend,
+                        unlit: true,
+                        ..default()
+                    },
+                    AnimationTimer(Timer::from_seconds(0.08, TimerMode::Repeating)),
+                    AnimationDuration { frame_left: 7 },
+                    Transform {
+                        translation: ammo_transform.translation,
+                        rotation: ammo_transform.rotation,
+                        scale: asteroid_transform.scale,
+                        ..Default::default()
+                    },
+                    children![(
+                        AudioPlayer::new(handle.clone()),
+                        PlaybackSettings {
+                            mode: bevy::audio::PlaybackMode::Despawn,
+                            volume: Volume::Linear(master_volume.volume / 100.0_f32),
+                            spatial: true,
+                            ..Default::default()
+                        },
+                        Transform::default(),
+                    )],
+                ));
+
+            }
             return;
         }
     }
