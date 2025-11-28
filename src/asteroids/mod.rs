@@ -1,4 +1,6 @@
-use bevy::{color::palettes::css::WHITE, platform::collections::HashMap, prelude::*};
+use bevy::platform::collections::HashMap;
+use bevy::prelude::*;
+use bevy_sprite3d::Sprite3d;
 
 use crate::game_states::GameState;
 
@@ -22,6 +24,8 @@ pub struct RotationVelocity(Vec3);
 pub struct AsteroidAssets {
     meshes: HashMap<String, Vec<Handle<Mesh>>>,
     materials: HashMap<String, Handle<StandardMaterial>>,
+    explosion_sheet: Handle<Image>,
+    explosion_layout: Handle<TextureAtlasLayout>,
 }
 
 #[derive(Resource)]
@@ -65,7 +69,8 @@ impl Plugin for AsteroidPlugin {
                     spawn::animate_spawn,
                     spawn::animate_despawn,
                     spawn::clear_asteroid,
-                ).run_if(in_state(GameState::Game)),
+                )
+                    .run_if(in_state(GameState::Game)),
             )
             .insert_resource(AsteroidConfig {
                 max_asteroid: 50,
@@ -78,9 +83,9 @@ impl Plugin for AsteroidPlugin {
 
 pub fn setup(
     mut commands: Commands,
-    mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
     asset_server: Res<AssetServer>,
+    mut texture_atlases: ResMut<Assets<TextureAtlasLayout>>,
 ) {
     let mut asteroid_meshes: HashMap<String, Vec<Handle<Mesh>>> = Default::default();
     let mut asteroid_materials: HashMap<String, Handle<StandardMaterial>> = Default::default();
@@ -121,6 +126,14 @@ pub fn setup(
     commands.insert_resource(AsteroidAssets {
         meshes: asteroid_meshes,
         materials: asteroid_materials,
+        explosion_sheet: asset_server.load("explosion_sheet.png"),
+        explosion_layout: texture_atlases.add(TextureAtlasLayout::from_grid(
+            UVec2::new(232, 232),
+            7,
+            1,
+            None,
+            None,
+        )),
     });
 
     let sun_translation = Vec3::new(-1000.0, 1000.0, 0.0);
@@ -133,26 +146,24 @@ pub fn setup(
     });
     commands.spawn((
         Mesh3d(asset_server.load("Sun.glb#Mesh0/Primitive0")),
-        Transform{
+        Transform {
             translation: sun_translation,
             scale: sun_scale,
             ..default()
         },
         MeshMaterial3d(sun_material),
-        children![(
-            PointLight {
-                intensity: 1_000_000_000_000.0,
-                range: 50000.0,
-                radius: 500.0,
-                color: Color::WHITE,
-                shadows_enabled: true,
-                ..default()
-            },
-        )],
+        children![(PointLight {
+            intensity: 1_000_000_000_000.0,
+            range: 50000.0,
+            radius: 500.0,
+            color: Color::WHITE,
+            shadows_enabled: true,
+            ..default()
+        },)],
     ));
     commands.spawn((
         Mesh3d(asset_server.load("Sun.glb#Mesh0/Primitive0")), // slightly larger
-        Transform{
+        Transform {
             translation: sun_translation,
             scale: sun_scale * 1.1,
             ..default()
