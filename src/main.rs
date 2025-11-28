@@ -1,6 +1,5 @@
 use bevy::{
     asset::RenderAssetUsages,
-    math::VectorSpace,
     mesh::{Indices, Mesh},
     prelude::*,
     render::render_resource::PrimitiveTopology,
@@ -13,16 +12,19 @@ mod game_states;
 mod globals_structs;
 mod helpers;
 mod menu;
+mod particules;
 mod player;
 mod score_display;
 mod skybox;
-mod particules;
+mod spritesheet;
 
 use bevy_hanabi::HanabiPlugin;
+use bevy_sprite3d::Sprite3dPlugin;
 use game_states::GameState;
 use globals_structs::*;
 
-use crate::{asteroids::Velocity, player::PlayerHitBox};
+use crate::asteroids::Velocity;
+use crate::player::PlayerHitBox;
 
 fn main() {
     App::new()
@@ -32,6 +34,8 @@ fn main() {
         }))
         .add_systems(Startup, (setup, setup_ui_ressource))
         .add_plugins((
+            HanabiPlugin,
+            Sprite3dPlugin,
             menu::menu_plugin,
             skybox::plugin,
             controller::plugin,
@@ -40,8 +44,8 @@ fn main() {
             player::PlayerPlugin,
             back_camera::back_cam_plugin,
             helpers::CameraControllerPlugin,
-            HanabiPlugin,
-            particules::ParticlesPlugin
+            particules::ParticlesPlugin,
+            spritesheet::SpriteSheetPlugin,
         ))
         .init_state::<GameState>()
         .insert_resource(MusicVolume { volume: 100.0_f32 })
@@ -181,8 +185,7 @@ fn setup_left_screen(
 fn setup(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
+    meshes: ResMut<Assets<Mesh>>,
 ) {
     let player_entity = commands
         .spawn((
