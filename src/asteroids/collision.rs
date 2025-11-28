@@ -98,7 +98,7 @@ pub fn asteroid_player_collision(
             if dist > player_hitbox.radius + asteroid.size {
                 continue;
             }
-            info!("HIT");
+
             let a_body = &mut CollisionBody {
                 tr: hb_transform.translation,
                 vel: player_velocity,
