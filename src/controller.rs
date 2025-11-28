@@ -7,15 +7,17 @@ use bevy::{
 use crate::game_states::GameState;
 use std::f32::consts::FRAC_PI_2;
 use crate::globals_structs::Keybinds;
+use crate::direction_controller;
 
 pub fn plugin(app: &mut App) {
     app.add_systems(OnEnter(GameState::Game), grab_mouse);
     app.add_systems(
         Update,
-        (player_cam_system, player_system, mouse_system)
+        (player_cam_system, direction_controller::mouse_system, direction_controller::rotate_spaceship)
             .in_set(GameSystemSet)
             .run_if(in_state(GameState::Game)),
     );
+    app.add_systems(OnEnter(GameState::Game), direction_controller::setup_ui);
 }
 
 #[derive(SystemSet, Debug, Clone, PartialEq, Eq, Hash)]
@@ -26,9 +28,6 @@ pub struct Player;
 
 #[derive(Component)]
 pub struct PlayerCam;
-
-#[derive(Component)]
-pub struct VirtualMouse;
 
 #[derive(Debug, Component, Deref, DerefMut)]
 pub struct CameraSensitivity(Vec3);
@@ -70,13 +69,6 @@ fn grab_mouse(mut options: Single<&mut CursorOptions, With<PrimaryWindow>>)
 {
     options.visible = false;
     options.grab_mode = CursorGrabMode::Locked;
-}
-
-fn mouse_system(
-    mouse: Single<&MouseVector, With<VirtualMouse>>,
-    accumulated_mouse_motion: Res<AccumulatedMouseMotion>
-) {
-
 }
 
 fn player_system(
