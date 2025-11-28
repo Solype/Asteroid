@@ -1,6 +1,7 @@
 use bevy::{
     input::mouse::AccumulatedMouseMotion,
     prelude::*,
+    window::PrimaryWindow
 };
 
 #[derive(Component, Default)]
@@ -9,17 +10,52 @@ pub struct VirtualMouse {
 }
 
 pub fn mouse_system(
-    mouse: Single<(&mut Node, &mut VirtualMouse)>,
+    mut params: ParamSet<(
+        Single<(&mut Node, &mut VirtualMouse)>,
+        Single<&Window, With<PrimaryWindow>>,
+    )>,
     accumulated_mouse_motion: Res<AccumulatedMouseMotion>,
 ) {
-    let (mut node, mut virtual_mouse) = mouse.into_inner();
-
-    let mouse_delta = accumulated_mouse_motion.delta;
-    virtual_mouse.pos += mouse_delta;
-
-    node.left = Val::Px(virtual_mouse.pos.x);
-    node.top = Val::Px(virtual_mouse.pos.y);
+    let win_dim;
+    {
+        let dim: Vec2 = Vec2{x: params.p1().width(), y: params.p1().height()};
+        win_dim = dim.clone();
+    }
+    let (mut node, mut virtual_mouse) = params.p0().into_inner();
+    virtual_mouse.pos += accumulated_mouse_motion.delta;
+        
+    let center = Vec2::new(win_dim.x / 2.0, win_dim.y / 2.0);
+    let ui_pos = center + virtual_mouse.pos;
+    node.left = Val::Px(ui_pos.x);
+    node.top = Val::Px(ui_pos.y);
 }
+
+
+pub fn rotate_spaceship(
+    mut params: ParamSet<(
+        Single<&mut Transform, With<crate::controller::Player>>,
+        Single<&VirtualMouse>
+    )>,
+    time: Res<Time>,
+) {
+    let mouse_pos: Vec2;
+    { mouse_pos = params.p1().pos; }
+    let mut transform = params.p0().into_inner();
+
+    let mouse_offset = mouse_pos;
+    
+    if mouse_offset.length_squared() > 0.03 {
+        let speed: f32 = 0.0005;
+
+        let target_angle_y = -mouse_offset.x * speed;
+        transform.rotate_local_y(target_angle_y * time.delta_secs());
+
+        let target_angle_x = -mouse_offset.y * speed;
+        transform.rotate_local_x(target_angle_x * time.delta_secs());
+    }
+
+}
+
 
 pub fn setup_ui(
     mut commands: Commands,
