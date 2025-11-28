@@ -1,4 +1,7 @@
-use crate::globals_structs::Keybinds;
+use bevy::audio::Volume;
+use rand::seq::IndexedRandom;
+
+use crate::globals_structs::{Keybinds, MusicVolume};
 use crate::{asteroids::Velocity, controller::Player, player::*};
 
 pub fn shoot_ammo(
@@ -8,6 +11,8 @@ pub fn shoot_ammo(
     mut shoot_side: ResMut<ShootSide>,
     player: Single<&Transform, With<Player>>,
     assets: Res<AmmoAssets>,
+    audio: Res<ShootSounds>,
+    master_volume: Res<MusicVolume>,
     mut commands: Commands,
 ) {
     if !keybinds.shoot.just_pressed(&keyboard, &mouse) {
@@ -42,6 +47,19 @@ pub fn shoot_ammo(
             MeshMaterial3d(assets.material.clone()),
         )],
     ));
+
+    let mut rng = rand::rng();
+
+    if let Some(handle) = audio.shoot_pews.choose(&mut rng) {
+        commands.spawn((
+            AudioPlayer::new(handle.clone()),
+            PlaybackSettings {
+                mode: bevy::audio::PlaybackMode::Despawn,
+                volume: Volume::Linear(master_volume.volume / 100.0_f32),
+                ..Default::default()
+            },
+        ));
+    }
 }
 
 pub fn move_ammos(time: Res<Time>, mut query: Query<(&mut Transform, &Velocity), With<Ammo>>) {

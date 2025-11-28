@@ -3,7 +3,6 @@ use bevy::prelude::*;
 use crate::game_states::GameState;
 pub mod ammo;
 
-
 #[derive(Component)]
 pub struct PlayerHitBox {
     pub radius: f32,
@@ -23,9 +22,12 @@ pub struct AmmoAssets {
     material: Handle<StandardMaterial>,
 }
 
+#[derive(Resource)]
+pub struct ShootSounds {
+    pub shoot_pews: Vec<Handle<AudioSource>>,
+}
 
 pub const PLAYER_MASS: f32 = 216.0; //6³
-
 
 pub struct PlayerPlugin;
 
@@ -43,6 +45,7 @@ pub fn setup(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
+    asset_server: Res<AssetServer>,
 ) {
     let material = materials.add(StandardMaterial {
         base_color: Color::hsl(280.0, 0.8, 0.6), // vivid purple
@@ -57,4 +60,12 @@ pub fn setup(
     });
 
     commands.insert_resource(ShootSide { value: 1.0 });
+    commands.insert_resource(ShootSounds {
+        shoot_pews: vec![
+            asset_server.load("sounds/pew0.wav"),
+            asset_server.load("sounds/pew1.wav"),
+            asset_server.load("sounds/pew2.wav"),
+            asset_server.load("sounds/pew3.wav"),
+        ],
+    });
 }

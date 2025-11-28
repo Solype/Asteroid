@@ -70,7 +70,7 @@ pub fn play_click_sound_system(
     mut out_reader : MessageReader<Pointer<Out>>,
     mut click_reader : MessageReader<Pointer<Click>>,
     audio : Res<MenuSounds>,
-    master_volume : Res<MusicVolume>, 
+    master_volume : Res<MusicVolume>,
     mut commands : Commands,
     query : Query<(&ButtonInfo, Entity)>,
 ) {
