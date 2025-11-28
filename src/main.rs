@@ -1,5 +1,6 @@
 use bevy::{
     asset::RenderAssetUsages,
+    audio::Volume,
     mesh::{Indices, Mesh},
     prelude::*,
     render::render_resource::PrimitiveTopology,
@@ -7,6 +8,7 @@ use bevy::{
 
 mod asteroids;
 mod back_camera;
+mod background_musics;
 mod controller;
 mod game_states;
 mod globals_structs;
@@ -46,6 +48,7 @@ fn main() {
             helpers::CameraControllerPlugin,
             particules::ParticlesPlugin,
             spritesheet::SpriteSheetPlugin,
+            background_musics::BackgroundMusicPlugin,
         ))
         .init_state::<GameState>()
         .insert_resource(MusicVolume { volume: 100.0_f32 })
@@ -219,10 +222,12 @@ fn setup(
                 order: 0,
                 ..default()
             },
+            SpatialListener::new(1.0),
+            GlobalTransform::default(),
             Transform::from_xyz(0.0, 1.1, 0.3)
                 .looking_at(Vec3::new(-0.216544, 0.777080, -0.318808), Vec3::Y),
             controller::PlayerCam,
-            //helpers::camera_controller::CameraController::default(),
+            // helpers::camera_controller::CameraController::default(),
             controller::CameraSensitivity::default(),
         ))
         .id();

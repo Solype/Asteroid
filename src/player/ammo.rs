@@ -1,4 +1,7 @@
-use crate::globals_structs::Keybinds;
+use bevy::audio::Volume;
+use rand::seq::IndexedRandom;
+
+use crate::globals_structs::{Keybinds, MusicVolume};
 use crate::{asteroids::Velocity, controller::Player, player::*};
 
 pub fn shoot_ammo(
@@ -8,6 +11,8 @@ pub fn shoot_ammo(
     mut shoot_side: ResMut<ShootSide>,
     player: Single<&Transform, With<Player>>,
     assets: Res<AmmoAssets>,
+    audio: Res<ShootSounds>,
+    master_volume: Res<MusicVolume>,
     mut commands: Commands,
 ) {
     if !keybinds.shoot.just_pressed(&keyboard, &mouse) {
@@ -20,28 +25,43 @@ pub fn shoot_ammo(
     let spawn_pos = player.transform_point(local_offset);
     let laser_dir = (player.forward().normalize() * 60.0 - spawn_pos).normalize();
 
-    commands.spawn((
-        PointLight {
-            intensity: 100_000.0,
-            range: 20.0,
-            radius: 1.0,
-            color: Color::srgb(1.0, 0.0, 0.5),
-            shadows_enabled: false,
-            ..default()
-        },
-        Transform {
-            translation: spawn_pos,
-            scale: Vec3::new(0.5, 0.5, 5.0), // ellipse shape
-            rotation: Quat::from_rotation_arc(Vec3::Z, laser_dir),
-            ..Default::default()
-        },
-        Ammo,
-        Velocity(laser_dir * 10.0), // fast forward
-        children![(
-            Mesh3d(assets.mesh.clone()),
-            MeshMaterial3d(assets.material.clone()),
-        )],
-    ));
+    let mut rng = rand::rng();
+    if let Some(handle) = audio.shoot_pews.choose(&mut rng) {
+        commands.spawn((
+            PointLight {
+                intensity: 100_000.0,
+                range: 20.0,
+                radius: 1.0,
+                color: Color::srgb(1.0, 0.0, 0.5),
+                shadows_enabled: false,
+                ..default()
+            },
+            Transform {
+                translation: spawn_pos,
+                scale: Vec3::new(0.5, 0.5, 5.0), // ellipse shape
+                rotation: Quat::from_rotation_arc(Vec3::Z, laser_dir),
+                ..Default::default()
+            },
+            Ammo,
+            Velocity(laser_dir * 10.0), // fast forward
+            children![
+                (
+                    Mesh3d(assets.mesh.clone()),
+                    MeshMaterial3d(assets.material.clone()),
+                ),
+                (
+                    AudioPlayer::new(handle.clone()),
+                    PlaybackSettings {
+                        mode: bevy::audio::PlaybackMode::Despawn,
+                        volume: Volume::Linear(master_volume.volume / 100.0_f32),
+                        spatial: true,
+                        ..Default::default()
+                    },
+                    Transform::default(),
+                )
+            ],
+        ));
+    }
 }
 
 pub fn move_ammos(time: Res<Time>, mut query: Query<(&mut Transform, &Velocity), With<Ammo>>) {
