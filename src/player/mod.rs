@@ -62,10 +62,10 @@ pub fn setup(
     commands.insert_resource(ShootSide { value: 1.0 });
     commands.insert_resource(ShootSounds {
         shoot_pews: vec![
-            asset_server.load("sounds/pew0.wav"),
             asset_server.load("sounds/pew1.wav"),
             asset_server.load("sounds/pew2.wav"),
             asset_server.load("sounds/pew3.wav"),
+            asset_server.load("sounds/pew4.wav"),
         ],
     });
 }
