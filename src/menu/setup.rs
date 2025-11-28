@@ -64,8 +64,8 @@ pub fn setup_sound_effect_and_music(mut commands: Commands, asset_server: Res<As
 {
     commands.insert_resource(MenuSounds{
         button_bips: vec![
-            asset_server.load("menu_bip1.wav"),
-            asset_server.load("menu_bip2.wav")
+            asset_server.load("sounds/menu_bip1.wav"),
+            asset_server.load("sounds/menu_bip2.wav")
         ]
     });
 }
