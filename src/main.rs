@@ -10,6 +10,7 @@ mod asteroids;
 mod back_camera;
 mod background_musics;
 mod controller;
+mod direction_controller;
 mod game_states;
 mod globals_structs;
 mod helpers;
@@ -310,18 +311,5 @@ fn setup(
         middle_screen,
         right_screen,
     ]);
-    commands.insert_resource(skybox::CameraHolder(camera_entity));
-
-    commands.spawn(
-            (
-                Node {
-                    ..default()
-                },
-                ImageNode {
-                    image: asset_server.load("niko.jpeg"),
-                    ..default()
-                },
-                UiTargetCamera(camera_entity)
-            ),
-        );
+    // commands.insert_resource(skybox::CameraHolder(camera_entity));
 }
