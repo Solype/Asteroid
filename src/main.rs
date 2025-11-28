@@ -9,6 +9,7 @@ use bevy::{
 mod asteroids;
 mod player;
 mod controller;
+mod direction_controller;
 mod game_states;
 mod globals_structs;
 mod menu;
@@ -206,18 +207,5 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>, meshes: ResMut<
         middle_screen,
         right_screen,
     ]);
-    commands.insert_resource(skybox::CameraHolder(camera_entity));
-
-    commands.spawn(
-            (
-                Node {
-                    ..default()
-                },
-                ImageNode {
-                    image: asset_server.load("niko.jpeg"),
-                    ..default()
-                },
-                UiTargetCamera(camera_entity)
-            ),
-        );
+    // commands.insert_resource(skybox::CameraHolder(camera_entity));
 }
