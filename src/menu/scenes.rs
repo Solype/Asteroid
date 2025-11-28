@@ -1,10 +1,9 @@
-use bevy::{
-    prelude::*,
-};
 use crate::game_states::GameState;
+use crate::globals_structs::UIRessources;
 use crate::globals_structs::{Action, Keybinds, MusicVolume};
 use crate::menu::structs::*;
-use crate::globals_structs::UIRessources;
+use bevy::audio::Volume;
+use bevy::prelude::*;
 
 static BORDER_HOVER: BorderColor = BorderColor {
     top: Color::srgba(0.0, 1.0, 1.0, 0.9),
@@ -30,13 +29,13 @@ static BORDER_RADIUS_SQUARE: BorderRadius = BorderRadius {
 pub fn create_main_menu_scene(
     mut commands: Commands,
     camera_components: Single<(Entity, &mut Camera), With<MenuCameraComponent>>,
-    menu_ressources: Res<UIRessources>
+    menu_ressources: Res<UIRessources>,
 ) {
     let (cam_entity, mut camera) = camera_components.into_inner();
     camera.is_active = true;
 
     let font: Handle<Font> = menu_ressources.font.clone();
-    let background : Handle<Image> = menu_ressources.bg.clone();
+    let background: Handle<Image> = menu_ressources.bg.clone();
 
     let node = Node {
         width: Val::Px(300.0),
@@ -47,44 +46,50 @@ pub fn create_main_menu_scene(
         ..default()
     };
 
-    commands.spawn((
-        DespawnOnExit(MenuState::Main),
-        Node {
-            width: Val::Percent(100.0),
-            height: Val::Percent(100.0),
-            justify_content: JustifyContent::Center,
-            align_items: AlignItems::Center,
-            flex_direction: FlexDirection::Column,
-            ..default()
-        },
-        ImageNode {
-            image: background,
-            ..default()
-        },
-        UiTargetCamera(cam_entity),
-    )).with_children(|parent| {
-        parent.spawn((
-            Text::new("STARSHIP DASHBOARD"),
-            TextFont { font: font.clone(), font_size: 60.0, ..default() },
-            TextColor(Color::srgb(0.0, 1.0, 1.0)),
+    commands
+        .spawn((
+            DespawnOnExit(MenuState::Main),
             Node {
-                margin: UiRect::all(Val::Px(30.0)),
-                ..default()
-            },
-        ));
-        parent.spawn((
-            Node {
-                width: Val::Px(300.0),
-                height: Val::Auto,
+                width: Val::Percent(100.0),
+                height: Val::Percent(100.0),
                 justify_content: JustifyContent::Center,
                 align_items: AlignItems::Center,
                 flex_direction: FlexDirection::Column,
-                margin: UiRect::all(Val::Px(10.0)),
-                row_gap: Val::Px(15.0),
                 ..default()
             },
-        )).with_children(|parent| {
+            ImageNode {
+                image: background,
+                ..default()
+            },
+            UiTargetCamera(cam_entity),
+        ))
+        .with_children(|parent| {
             parent.spawn((
+                Text::new("STARSHIP DASHBOARD"),
+                TextFont {
+                    font: font.clone(),
+                    font_size: 60.0,
+                    ..default()
+                },
+                TextColor(Color::srgb(0.0, 1.0, 1.0)),
+                Node {
+                    margin: UiRect::all(Val::Px(30.0)),
+                    ..default()
+                },
+            ));
+            parent
+                .spawn((Node {
+                    width: Val::Px(300.0),
+                    height: Val::Auto,
+                    justify_content: JustifyContent::Center,
+                    align_items: AlignItems::Center,
+                    flex_direction: FlexDirection::Column,
+                    margin: UiRect::all(Val::Px(10.0)),
+                    row_gap: Val::Px(15.0),
+                    ..default()
+                },))
+                .with_children(|parent| {
+                    parent.spawn((
                 node.clone(),
                 BORDER_NORMAL,
                 BackgroundColor(Color::srgba(0.0, 0.2, 0.4, 0.8)), // dark blue transparent
@@ -101,9 +106,7 @@ pub fn create_main_menu_scene(
                 next_state.set(GameState::Game);
             });
 
-
-
-            parent.spawn((
+                    parent.spawn((
                 node.clone(),
                 BORDER_NORMAL,
                 BackgroundColor(Color::srgba(0.0, 0.2, 0.0, 0.8)), // dark green transparent
@@ -120,25 +123,36 @@ pub fn create_main_menu_scene(
                 next_state.set(MenuState::Options);
             });
 
-
-            parent.spawn((
-                node.clone(),
-                BORDER_NORMAL,
-                BackgroundColor(Color::srgba(0.4, 0.0, 0.0, 0.8)), // dark red transparent
-                children![(
-                    Text::new("EJECT"),
-                    TextFont { font: font.clone(), font_size: 28.0, ..default() },
-                    TextColor(Color::srgb(1.0, 0.0, 0.0)),
-                )],
-            )).observe(|over: On<Pointer<Over>>, mut colors: Query<&mut BorderColor>| {
-                *(colors.get_mut(over.entity).unwrap()) = BORDER_HOVER;
-            }).observe(|out: On<Pointer<Out>>, mut colors: Query<&mut BorderColor>| {
-                *(colors.get_mut(out.entity).unwrap()) = BORDER_NORMAL;
-            }).observe(|_: On<Pointer<Click>>, mut exit: MessageWriter<AppExit>| {
-                exit.write(AppExit::Success);
-            });
+                    parent
+                        .spawn((
+                            node.clone(),
+                            BORDER_NORMAL,
+                            BackgroundColor(Color::srgba(0.4, 0.0, 0.0, 0.8)), // dark red transparent
+                            children![(
+                                Text::new("EJECT"),
+                                TextFont {
+                                    font: font.clone(),
+                                    font_size: 28.0,
+                                    ..default()
+                                },
+                                TextColor(Color::srgb(1.0, 0.0, 0.0)),
+                            )],
+                        ))
+                        .observe(
+                            |over: On<Pointer<Over>>, mut colors: Query<&mut BorderColor>| {
+                                *(colors.get_mut(over.entity).unwrap()) = BORDER_HOVER;
+                            },
+                        )
+                        .observe(
+                            |out: On<Pointer<Out>>, mut colors: Query<&mut BorderColor>| {
+                                *(colors.get_mut(out.entity).unwrap()) = BORDER_NORMAL;
+                            },
+                        )
+                        .observe(|_: On<Pointer<Click>>, mut exit: MessageWriter<AppExit>| {
+                            exit.write(AppExit::Success);
+                        });
+                });
         });
-    });
 }
 
 pub fn create_options_menu_scene(
@@ -245,10 +259,13 @@ pub fn create_options_menu_scene(
                                 VolumeText
                             )
                         ],
-                    )).observe(|_: On<Pointer<Click>>, mut master_volume: ResMut<MusicVolume>, mut texts: Query<&mut Text, With<VolumeText>>| {
+                    )).observe(|_: On<Pointer<Click>>, mut master_volume: ResMut<MusicVolume>, mut texts: Query<&mut Text, With<VolumeText>>, query: Query<&mut AudioSink>| {
                         master_volume.volume = (master_volume.volume - 10.0).rem_euclid(110.0);
                         for mut text in &mut texts {
                             *text = Text::new(format!("{}%", master_volume.volume as i32));
+                        }
+                        for mut audio_sink in query {
+                            audio_sink.set_volume(Volume::Linear(master_volume.volume / 100.0_f32));
                         }
                     });
 

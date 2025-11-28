@@ -1,5 +1,6 @@
 use bevy::{
     asset::RenderAssetUsages,
+    audio::Volume,
     mesh::{Indices, Mesh},
     prelude::*,
     render::render_resource::PrimitiveTopology,
@@ -7,6 +8,7 @@ use bevy::{
 
 mod asteroids;
 mod back_camera;
+mod background_musics;
 mod controller;
 mod game_states;
 mod globals_structs;
@@ -46,6 +48,7 @@ fn main() {
             helpers::CameraControllerPlugin,
             particules::ParticlesPlugin,
             spritesheet::SpriteSheetPlugin,
+            background_musics::BackgroundMusicPlugin,
         ))
         .init_state::<GameState>()
         .insert_resource(MusicVolume { volume: 100.0_f32 })
@@ -182,7 +185,11 @@ fn setup_left_screen(
     return (left_id, middle_id, right_id);
 }
 
-fn setup(mut commands: Commands, asset_server: Res<AssetServer>, meshes: ResMut<Assets<Mesh>>) {
+fn setup(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    meshes: ResMut<Assets<Mesh>>,
+) {
     let player_entity = commands
         .spawn((
             SceneRoot(asset_server.load("Spaceship.glb#Scene0")),

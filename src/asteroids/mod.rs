@@ -80,7 +80,7 @@ impl Plugin for AsteroidPlugin {
             .insert_resource(AsteroidConfig {
                 max_asteroid: 50,
                 size_range: (1.0, 10.0),
-                spawn_range: 30.0,
+                spawn_range: 300.0,
                 despawn_range: 350.0,
             });
     }
