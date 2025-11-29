@@ -34,6 +34,7 @@ To install the project, please satisfy the following dependencies:
 <summary>Local Installation</summary>
 
 - Rust
+- Cargo
 
 </details>
 
@@ -44,7 +45,7 @@ To install the project, please satisfy the following dependencies:
 Build the project using:
 
 ```bash
-make build
+cargo build
 ```
 
 ---
@@ -52,7 +53,7 @@ make build
 ## 🚀 Launch the game
 
 ```bash
-make run
+cargo run
 ```
 
 ---
