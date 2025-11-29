@@ -2,6 +2,10 @@ import bpy
 import random
 import os
 
+### NOTICE ###
+# This script is a blender script use to generate asteroid like meshes using random displacement
+# Running the script by itself wont result in any mesh
+
 # User config
 u_subdivision = 2
 u_scale = 1
