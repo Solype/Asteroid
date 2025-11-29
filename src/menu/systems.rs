@@ -46,6 +46,7 @@ pub fn remove_focus_menu(mut command: Commands, entity: Single<Entity, With<Play
         speed: Some(3.0),
         fov: Some(60.0_f32.to_radians()),
         position: Some(Vec3::new(0.0, 1.2, 0.3)),
+        look_at: Some(Vec3::new(0.0, 1.2, 0.0)),
         ..Default::default()
     });
 }
