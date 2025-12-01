@@ -26,7 +26,7 @@ pub fn menu_plugin(app: &mut App)
 
     // Initialisation of the systems to enter Menu state of the game
     app.add_systems(OnEnter(GameState::Menu), (focus_main_screen, enter_menu_state, release_mouse));
-    app.add_systems(OnExit(GameState::Menu), (remove_focus_menu, leave_menu_state));
+    app.add_systems(OnExit(GameState::Menu), leave_menu_state);
 
 
     // Init the scene after entering into a specific menu state

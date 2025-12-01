@@ -1,5 +1,5 @@
 use bevy::math::{Vec2, Vec3};
-use bevy::prelude::{Component, Deref, DerefMut, SystemSet, States};
+use bevy::prelude::{Component, Deref, DerefMut, States};
 
 #[derive(Component)]
 pub struct Player;
@@ -26,8 +26,8 @@ pub struct VirtualMouse {
 
 #[derive(Clone, Copy, Default, Eq, PartialEq, Debug, Hash, States)]
 pub enum ControllerState {
-    #[default]
     FreeLook,
     Driving,
+    #[default]
     None,
 }
