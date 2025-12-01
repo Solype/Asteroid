@@ -3,6 +3,8 @@ use bevy::{
     prelude::*,
     window::PrimaryWindow
 };
+use crate::controller::{Player, RotationalVelocity};
+use crate::globals_structs::Keybinds;
 
 #[derive(Component, Default)]
 pub struct VirtualMouse {
@@ -56,6 +58,41 @@ pub fn rotate_spaceship(
 
 }
 
+pub fn roll_spaceship(
+    time: Res<Time>,
+    player: Single<(&mut Transform, &mut RotationalVelocity), With<Player>>,
+    keybinds: Res<Keybinds>,
+    keyboard: Res<ButtonInput<KeyCode>>,
+    mouse: Res<ButtonInput<MouseButton>>,
+) {
+    let (mut transform, mut rota_velocity) = player.into_inner();
+
+    let base_speed = 200.0_f32.to_radians(); // ≈3.49 rad/s
+    let dt = time.delta_secs();
+
+    let mut accel_roll  = 0.0;
+
+    if keybinds.rotate_left.pressed(&keyboard, &mouse) {
+        accel_roll += base_speed;
+    }
+    if keybinds.rotate_right.pressed(&keyboard, &mouse) {
+        accel_roll -= base_speed;
+    }
+
+    // Apply input acceleration to angular velocity
+    rota_velocity.z += accel_roll * dt;
+
+    const DAMPING: f32 = 0.99f32; // 1.0 = no damping
+    if rota_velocity.z.abs() < 2.0 { rota_velocity.z *= DAMPING; }
+
+    rota_velocity.z = rota_velocity.z.clamp(-5.0, 5.0);
+
+    let delta_roll  = rota_velocity.z * dt;
+
+    // Build a small rotation from the angular increments
+    let delta_rot = Quat::from_euler(EulerRot::YXZ, 0.0, 0.0, delta_roll);
+    transform.rotation *= delta_rot;
+}
 
 pub fn setup_ui(
     mut commands: Commands,
