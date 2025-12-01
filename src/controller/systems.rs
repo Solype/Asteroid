@@ -1,4 +1,4 @@
-use crate::controller::structs::{Player, RotationalVelocity, VirtualMouse};
+use crate::controller::structs::{ControllerState, Player, RotationalVelocity, VirtualMouse};
 use std::f32::consts::FRAC_PI_2;
 use bevy::asset::AssetServer;
 use bevy::input::ButtonInput;
@@ -12,34 +12,41 @@ use crate::game_states::GameState;
 use crate::globals_structs::Keybinds;
 
 pub fn player_system(
-    accumulated_mouse_motion: Res<AccumulatedMouseMotion>,
-    player: Single<(&mut Transform, &CameraSensitivity), With<PlayerCam>>,
     keybinds: Res<Keybinds>,
     keyboard: Res<ButtonInput<KeyCode>>,
     mouse: Res<ButtonInput<MouseButton>>,
-    mut next_state: ResMut<NextState<GameState>>,
+    mut next_state_game: ResMut<NextState<GameState>>,
+    mut next_state_gamemod: ResMut<NextState<ControllerState>>,
 ) {
-    if keybinds.menu.pressed(&keyboard, &mouse) {
-        next_state.set(GameState::Menu);
+    if keybinds.menu.just_pressed(&keyboard, &mouse) {
+        next_state_game.set(GameState::Menu);
     }
-    if keybinds.free_look.pressed(&keyboard, &mouse) {
-        let (mut transform, camera_sensitivity) = player.into_inner();
-        let delta = accumulated_mouse_motion.delta;
-        if delta != Vec2::ZERO {
-            let delta_yaw = -delta.x * camera_sensitivity.x;
-            let delta_pitch = -delta.y * camera_sensitivity.y;
-            let (yaw, pitch, roll) = transform.rotation.to_euler(EulerRot::YXZ);
-            let mut yaw = yaw + delta_yaw;
-            let mut pitch = pitch + delta_pitch;
-            const PITCH_LIMIT: f32 = FRAC_PI_2 - 0.01;
-            pitch = pitch.clamp(-PITCH_LIMIT, PITCH_LIMIT);
-            const YAW_LIMIT: f32 = FRAC_PI_2;
-            yaw = yaw.clamp(-YAW_LIMIT, YAW_LIMIT);
-            info!("yaw: {}", yaw);
-            info!("pitch: {}", pitch);
-            info!("roll: {}", roll);
-            transform.rotation = Quat::from_euler(EulerRot::YXZ, yaw, pitch, roll);
-        }
+    if keybinds.free_look.just_pressed(&keyboard, &mouse) {
+        next_state_gamemod.set(ControllerState::FreeLook);
+    }
+    if keybinds.free_look.just_released(&keyboard, &mouse) {
+        next_state_gamemod.set(ControllerState::Driving);
+    }
+}
+
+pub fn free_look_system(
+    accumulated_mouse_motion: Res<AccumulatedMouseMotion>,
+    player: Single<(&mut Transform, &CameraSensitivity), With<PlayerCam>>,
+) {
+
+    let (mut transform, camera_sensitivity) = player.into_inner();
+    let delta = accumulated_mouse_motion.delta;
+    if delta != Vec2::ZERO {
+        let delta_yaw = -delta.x * camera_sensitivity.x;
+        let delta_pitch = -delta.y * camera_sensitivity.y;
+        let (yaw, pitch, roll) = transform.rotation.to_euler(EulerRot::YXZ);
+        let mut yaw = yaw + delta_yaw;
+        let mut pitch = pitch + delta_pitch;
+        const PITCH_LIMIT: f32 = FRAC_PI_2 - 0.01;
+        pitch = pitch.clamp(-PITCH_LIMIT, PITCH_LIMIT);
+        const YAW_LIMIT: f32 = FRAC_PI_2;
+        yaw = yaw.clamp(-YAW_LIMIT, YAW_LIMIT);
+        transform.rotation = Quat::from_euler(EulerRot::YXZ, yaw, pitch, roll);
     }
 }
 
@@ -188,7 +195,7 @@ pub fn setup_ui(
 ) {
     let parent = commands
         .spawn((
-            DespawnOnExit(crate::GameState::Game),
+            DespawnOnExit(ControllerState::Driving),
             Node {
                 width: Val::Percent(100.0),
                 height: Val::Percent(100.0),
