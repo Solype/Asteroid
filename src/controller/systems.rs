@@ -93,20 +93,32 @@ pub fn mouse_system(
     )>,
     accumulated_mouse_motion: Res<AccumulatedMouseMotion>,
 ) {
-    let win_dim;
-    {
-        let dim: Vec2 = Vec2{x: params.p1().width(), y: params.p1().height()};
-        win_dim = dim.clone();
-    }
-    let (mut node, mut virtual_mouse) = params.p0().into_inner();
-    virtual_mouse.pos += accumulated_mouse_motion.delta;
+    let win_dim: Vec2 = Vec2 {
+        x: params.p1().width(),
+        y: params.p1().height(),
+    };
 
     let center = Vec2::new(win_dim.x / 2.0, win_dim.y / 2.0);
+    let radius = 150.0;
+
+    let (mut node, mut virtual_mouse) = params.p0().into_inner();
+
+    virtual_mouse.pos += accumulated_mouse_motion.delta;
+
+    // Clamp the virtual_mouse.pos to the circle
+    let pos_from_center = virtual_mouse.pos;
+    let dist_from_center = pos_from_center.length();
+
+    if dist_from_center > radius {
+        // Normalize and scale to radius
+        let direction = pos_from_center.normalize_or_zero();
+        virtual_mouse.pos = direction * radius;
+    }
+
     let ui_pos = center + virtual_mouse.pos;
     node.left = Val::Px(ui_pos.x);
     node.top = Val::Px(ui_pos.y);
 }
-
 
 pub fn rotate_spaceship(
     mut params: ParamSet<(
@@ -122,7 +134,7 @@ pub fn rotate_spaceship(
     let mouse_offset = mouse_pos;
 
     if mouse_offset.length_squared() > 0.03 {
-        let speed: f32 = 0.0005;
+        let speed: f32 = 0.005;
 
         let target_angle_y = -mouse_offset.x * speed;
         transform.rotate_local_y(target_angle_y * time.delta_secs());
