@@ -35,7 +35,7 @@ pub fn plugin(app: &mut App) {
     app.add_systems(OnEnter(GameState::Game), (grab_mouse, enter_game_state));
     app.add_systems(OnExit(GameState::Game), leave_game_state);
 
-    app.add_systems(OnEnter(ControllerState::Driving), systems::setup_ui);
+    app.add_systems(OnEnter(ControllerState::Driving), (systems::setup_ui, systems::enter_driving_mod));
 
     app.add_systems(Update, systems::player_system.run_if(in_state(GameState::Game)));
 
