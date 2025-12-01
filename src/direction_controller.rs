@@ -3,7 +3,7 @@ use bevy::{
     prelude::*,
     window::PrimaryWindow
 };
-use crate::controller::{Player, RotationalVelocity};
+use crate::controller::{Player, RotationalVelocity, TranslationalVelocity};
 use crate::globals_structs::Keybinds;
 
 #[derive(Component, Default)]
@@ -92,6 +92,74 @@ pub fn roll_spaceship(
     // Build a small rotation from the angular increments
     let delta_rot = Quat::from_euler(EulerRot::YXZ, 0.0, 0.0, delta_roll);
     transform.rotation *= delta_rot;
+}
+
+pub fn trans_spaceship(
+    time: Res<Time>,
+    mut player: Single<(&mut Transform, &mut TranslationalVelocity), With<Player>>,
+    keybinds: Res<Keybinds>,
+    keyboard: Res<ButtonInput<KeyCode>>,
+    mouse: Res<ButtonInput<MouseButton>>,
+) {
+    let (mut transform, mut trans_velocity) = player.into_inner();
+    let dt = time.delta_secs();
+
+    // Get local forward, right, and up vectors from the spaceship's transform
+    let forward = transform.forward(); // Local forward direction
+    let right = transform.right();     // Local right direction
+    let up = transform.up();           // Local up direction
+
+    let mut accel_x = 0.0;
+    let mut accel_y = 0.0;
+    let mut accel_z = 0.0;
+    let base_speed = 20f32;
+
+    // Apply input to local axes
+    if keybinds.forward.pressed(&keyboard, &mouse) {
+        accel_x += base_speed;
+    }
+    if keybinds.backward.pressed(&keyboard, &mouse) {
+        accel_x -= base_speed;
+    }
+    if keybinds.right.pressed(&keyboard, &mouse) {
+        accel_y += base_speed;
+    }
+    if keybinds.left.pressed(&keyboard, &mouse) {
+        accel_y -= base_speed;
+    }
+    if keybinds.up.pressed(&keyboard, &mouse) {
+        accel_z += base_speed;
+    }
+    if keybinds.down.pressed(&keyboard, &mouse) {
+        accel_z -= base_speed;
+    }
+
+    // Apply acceleration to translational velocity
+    trans_velocity.x += accel_x * dt;
+    trans_velocity.y += accel_y * dt;
+    trans_velocity.z += accel_z * dt;
+
+    // Clamp velocities
+    trans_velocity.x = trans_velocity.x.clamp(-75.0, 75.0);
+    trans_velocity.y = trans_velocity.y.clamp(-75.0, 75.0);
+    trans_velocity.z = trans_velocity.z.clamp(-75.0, 75.0);
+
+    println!("x: {}", trans_velocity.x);
+    println!("y: {}", trans_velocity.y);
+    println!("z: {}", trans_velocity.z);
+
+    // Apply movement in local space: convert velocity to world space
+    let delta_translation = Vec3::new(
+        trans_velocity.x * forward.x + trans_velocity.y * right.x + trans_velocity.z * up.x,
+        trans_velocity.x * forward.y + trans_velocity.y * right.y + trans_velocity.z * up.y,
+        trans_velocity.x * forward.z + trans_velocity.y * right.z + trans_velocity.z * up.z,
+    ) * dt;
+
+    // Apply translation to the transform
+    transform.translation += delta_translation;
+
+    // Optional: Debug print
+    println!("Translation: {:?}", transform.translation);
 }
 
 pub fn setup_ui(
