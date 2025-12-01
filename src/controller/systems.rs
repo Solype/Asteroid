@@ -2,10 +2,12 @@ use crate::controller::structs::{ControllerState, Player, RotationalVelocity, Vi
 use crate::menu::structs::SmoothCamMove;
 use std::f32::consts::FRAC_PI_2;
 use bevy::asset::AssetServer;
+use bevy::color::Color;
 use bevy::input::ButtonInput;
 use bevy::input::mouse::AccumulatedMouseMotion;
 use bevy::math::{EulerRot, Quat, Vec2, Vec3};
 use bevy::prelude::{default, Commands, DespawnOnExit, Entity, ImageNode, KeyCode, MouseButton, NextState, Node, ParamSet, PositionType, Res, ResMut, Single, Time, Transform, UiTargetCamera, Val, Window, With};
+use bevy::ui::{BorderColor, BorderRadius, UiRect};
 use bevy::window::PrimaryWindow;
 use crate::controller::structs::{CameraSensitivity, PlayerCam};
 use crate::game_states::GameState;
@@ -233,5 +235,26 @@ pub fn setup_ui(
     ))
         .id();
 
-    commands.entity(parent).add_child(mouse_node);
+    let size = 300.0;
+
+    let circle = commands.spawn((Node {
+            width: Val::Px(size),
+            height: Val::Px(size),
+            left: Val::Percent(50.0),
+            top: Val::Percent(50.0),
+            position_type: PositionType::Absolute,
+            border: UiRect::all(Val::Px(2.0)),
+            ..default()
+        },
+        BorderColor{
+            top: Color::srgba(1.0, 1.0, 1.0, 1.0),
+            bottom: Color::srgba(1.0, 1.0, 1.0, 1.0),
+            left: Color::srgba(1.0, 1.0, 1.0, 1.0),
+            right: Color::srgba(1.0, 1.0, 1.0, 1.0),
+        },
+        BorderRadius::all(Val::Percent(50.0)),
+    )).id();
+
+
+    commands.entity(parent).add_children(&[circle, mouse_node]);
 }
