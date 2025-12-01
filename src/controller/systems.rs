@@ -1,15 +1,27 @@
 use crate::controller::structs::{ControllerState, Player, RotationalVelocity, VirtualMouse};
+use crate::menu::structs::SmoothCamMove;
 use std::f32::consts::FRAC_PI_2;
 use bevy::asset::AssetServer;
 use bevy::input::ButtonInput;
 use bevy::input::mouse::AccumulatedMouseMotion;
-use bevy::log::info;
 use bevy::math::{EulerRot, Quat, Vec2, Vec3};
 use bevy::prelude::{default, Commands, DespawnOnExit, Entity, ImageNode, KeyCode, MouseButton, NextState, Node, ParamSet, PositionType, Res, ResMut, Single, Time, Transform, UiTargetCamera, Val, Window, With};
 use bevy::window::PrimaryWindow;
 use crate::controller::structs::{CameraSensitivity, PlayerCam};
 use crate::game_states::GameState;
 use crate::globals_structs::Keybinds;
+
+pub fn enter_driving_mod(mut command: Commands, entity: Single<Entity, With<PlayerCam>>) {
+    let player = entity.into_inner();
+
+    command.entity(player).insert(SmoothCamMove {
+        speed: Some(3.0),
+        fov: Some(60.0_f32.to_radians()),
+        position: Some(Vec3::new(0.0, 1.2, 0.3)),
+        look_at: Some(Vec3::new(0.0, 1.2, 0.0)),
+        ..Default::default()
+    });
+}
 
 pub fn player_system(
     keybinds: Res<Keybinds>,
