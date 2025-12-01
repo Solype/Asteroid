@@ -4,7 +4,7 @@ use crate::menu::structs::*;
 pub fn smooth_look_at_system(
     time: Res<Time>,
     mut commands: Commands,
-    mut q: Query<(Entity, &mut Transform, &mut SmoothCamMove, &mut Projection), With<Camera>>,
+    mut q: Query<(Entity, &mut Transform, &mut SmoothCamMove, &mut Projection)>,
 ) {
     let dt = time.delta_secs();
 
