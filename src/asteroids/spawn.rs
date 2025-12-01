@@ -1,6 +1,6 @@
 use crate::asteroids::utils::*;
 use crate::asteroids::*;
-use crate::controller::Player;
+use crate::controller::structs::Player;
 use rand::Rng;
 
 pub fn asteroid_wave(

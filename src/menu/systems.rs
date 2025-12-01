@@ -1,6 +1,6 @@
 use crate::menu::structs::*;
 use crate::{
-    controller::PlayerCam,
+    controller::structs::PlayerCam,
     globals_structs::{Action, InputButton, Keybinds, MusicVolume},
 };
 use bevy::{

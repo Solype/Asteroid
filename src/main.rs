@@ -1,4 +1,3 @@
-use std::process::id;
 use bevy::{
     prelude::*,
     asset::RenderAssetUsages,
@@ -9,7 +8,6 @@ use bevy::{
 mod asteroids;
 mod player;
 mod controller;
-mod direction_controller;
 mod game_states;
 mod globals_structs;
 mod menu;
@@ -179,9 +177,9 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>, meshes: ResMut<
     let player_entity = commands
         .spawn((
             SceneRoot(asset_server.load("Spaceship.glb#Scene0")),
-            controller::Player,
+            controller::structs::Player,
             Velocity(Vec3::default()),
-            controller::RotationalVelocity::default(),
+            controller::structs::RotationalVelocity::default(),
             Transform::from_xyz(0.0, 0.0, 0.0).looking_at(Vec3::ZERO, Vec3::Y),
         ))
         .id();
@@ -197,8 +195,8 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>, meshes: ResMut<
             },
             Transform::from_xyz(0.0, 1.1, 0.3)
                 .looking_at(Vec3::new(-0.216544, 0.777080, -0.318808), Vec3::Y),
-            controller::PlayerCam,
-            controller::CameraSensitivity::default(),
+            controller::structs::PlayerCam,
+            controller::structs::CameraSensitivity::default(),
         ))
         .id();
 

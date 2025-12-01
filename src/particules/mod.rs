@@ -83,7 +83,7 @@ fn create_rocket_effect() -> EffectAsset {
 pub fn spawn_particles(
     mut commands: Commands,
     mut effects: ResMut<Assets<EffectAsset>>,
-    ship: Single<Entity, With<crate::controller::Player>>
+    ship: Single<Entity, With<crate::controller::structs::Player>>
 ) {
     let position1 = Vec3::new(-0.7, 1.0, 5.0);
     let position2 = Vec3::new(0.7, 1.0, 5.0);
