@@ -7,7 +7,7 @@ use bevy::render::render_resource::{
 use crate::back_camera::structs::{BackCameraComponent, BackCameraRenderTargetImage};
 use crate::game_states::GameState;
 use crate::menu::structs::{MenuPlane};
-use crate::controller::Player;
+use crate::controller::structs::Player;
 
 mod structs;
 
