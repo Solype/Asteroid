@@ -22,6 +22,8 @@ use bevy_hanabi::HanabiPlugin;
 use game_states::GameState;
 use globals_structs::*;
 
+use crate::asteroids::Velocity;
+
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins.set(AssetPlugin {
@@ -178,7 +180,7 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>, meshes: ResMut<
         .spawn((
             SceneRoot(asset_server.load("Spaceship.glb#Scene0")),
             controller::Player,
-            controller::TranslationalVelocity::default(),
+            Velocity(Vec3::default()),
             controller::RotationalVelocity::default(),
             Transform::from_xyz(0.0, 0.0, 0.0).looking_at(Vec3::ZERO, Vec3::Y),
         ))
