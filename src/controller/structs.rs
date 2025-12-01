@@ -1,8 +1,5 @@
 use bevy::math::{Vec2, Vec3};
-use bevy::prelude::{Component, Deref, DerefMut, SystemSet};
-
-#[derive(SystemSet, Debug, Clone, PartialEq, Eq, Hash)]
-pub struct GameSystemSet;
+use bevy::prelude::{Component, Deref, DerefMut, SystemSet, States};
 
 #[derive(Component)]
 pub struct Player;
@@ -25,4 +22,12 @@ pub struct RotationalVelocity(Vec3);
 #[derive(Component, Default)]
 pub struct VirtualMouse {
     pub pos: Vec2
+}
+
+#[derive(Clone, Copy, Default, Eq, PartialEq, Debug, Hash, States)]
+pub enum ControllerState {
+    #[default]
+    FreeLook,
+    Driving,
+    None,
 }
