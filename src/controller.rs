@@ -13,7 +13,12 @@ pub fn plugin(app: &mut App) {
     app.add_systems(OnEnter(GameState::Game), grab_mouse);
     app.add_systems(
         Update,
-        (player_system, direction_controller::mouse_system, direction_controller::rotate_spaceship, direction_controller::roll_spaceship)
+        (player_system,
+         direction_controller::mouse_system,
+         direction_controller::rotate_spaceship,
+         direction_controller::roll_spaceship,
+         direction_controller::trans_spaceship
+        )
             .in_set(GameSystemSet)
             .run_if(in_state(GameState::Game)),
     );
