@@ -149,6 +149,11 @@ pub fn setup(
         unlit: false,
         ..Default::default()
     });
+    let wireframe_material = materials.add(StandardMaterial {
+        base_color: Color::srgb(1.0, 0.5, 0.1),
+        unlit: true,
+        ..Default::default()
+    });
     commands.spawn((
         Mesh3d(asset_server.load("Sun.glb#Mesh0/Primitive0")),
         Transform {
@@ -165,6 +170,15 @@ pub fn setup(
             shadows_enabled: true,
             ..default()
         },)],
+    ));
+    commands.spawn((
+        Mesh3d(asset_server.load("sun_wireframe.glb#Mesh0/Primitive0")), // wireframe
+        Transform {
+            translation: sun_translation,
+            scale: sun_scale * 1.001,
+            ..default()
+        },
+        MeshMaterial3d(wireframe_material),
     ));
     commands.spawn((
         Mesh3d(asset_server.load("Sun.glb#Mesh0/Primitive0")), // slightly larger
