@@ -84,7 +84,7 @@ pub fn spawn_particles(
     mut commands: Commands,
     mut effects: ResMut<Assets<EffectAsset>>,
     gameconfig: Res<crate::config::structs::GameConfig>,
-    ship: Single<Entity, With<crate::controller::Player>>
+    ship: Single<Entity, With<crate::controller::structs::Player>>
 ) {
     let position1 = gameconfig.ship.thruster_left;
     let position2 = gameconfig.ship.thruster_right;
