@@ -19,6 +19,7 @@ mod score_display;
 mod skybox;
 mod spritesheet;
 mod game_over;
+mod config;
 
 use bevy_hanabi::HanabiPlugin;
 use bevy_sprite3d::Sprite3dPlugin;
@@ -28,12 +29,32 @@ use globals_structs::*;
 use crate::asteroids::Velocity;
 use crate::player::PlayerHitBox;
 
+
 fn main() {
-    App::new()
-        .add_plugins(DefaultPlugins.set(AssetPlugin {
+    let gameconfig = config::load_game_config("assets/manifest.xml");
+
+    let width = if gameconfig.window.x > 0.0 { gameconfig.window.x as u32 } else { 1280 };
+    let height = if gameconfig.window.y > 0.0 { gameconfig.window.y as u32 } else { 720 };
+
+    println!("Size of the window: {} {}", width, height);
+
+    let mut app = App::new();
+
+    app.insert_resource(gameconfig.clone());
+
+    app.add_plugins(DefaultPlugins.set(AssetPlugin {
             watch_for_changes_override: Some(true),
             ..default()
-        }))
+        }).set(
+            WindowPlugin {
+                primary_window: Some(Window {
+                    title: gameconfig.window_title.into(),
+                    name: Some(gameconfig.window_name.into()),
+                    resolution: (width, height).into(),
+                    ..default()
+                }),
+                ..default()
+            } ))
         .add_systems(Startup, (setup, setup_ui_ressource))
         .add_plugins((
             HanabiPlugin,
@@ -57,7 +78,7 @@ fn main() {
         .insert_resource(Score::default())
         .add_systems(
             Update,
-            start_after_startup.run_if(in_state(GameState::Startup)),
+            (start_after_startup).run_if(in_state(GameState::Startup)),
         )
         .run();
 }
@@ -71,9 +92,24 @@ fn setup_ui_ressource(mut command: Commands, asset_server: Res<AssetServer>) {
     });
 }
 
-fn start_after_startup(mut next_state: ResMut<NextState<GameState>>) {
+
+fn start_after_startup(
+    // mut windows: Query<&mut Window, With<PrimaryWindow>>,
+    // game_config: Res<config::structs::GameConfig>,
+    mut next_state: ResMut<NextState<GameState>>,
+    mut frame_count: Local<u32>,
+) {
+    *frame_count += 1;
+    if *frame_count < 10 { // wait one frame
+        return;
+    }
+
+    // for mut win in windows.iter_mut() {
+    //     win.resolution.set(game_config.window.x, game_config.window.y);
+    // }
     next_state.set(GameState::Menu);
 }
+
 
 fn create_quad(
     top_left: Vec3,
