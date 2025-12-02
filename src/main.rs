@@ -19,6 +19,7 @@ mod score_display;
 mod skybox;
 mod spritesheet;
 mod game_over;
+mod config;
 
 use bevy_hanabi::HanabiPlugin;
 use bevy_sprite3d::Sprite3dPlugin;
@@ -28,12 +29,32 @@ use globals_structs::*;
 use crate::asteroids::Velocity;
 use crate::player::PlayerHitBox;
 
+
 fn main() {
-    App::new()
-        .add_plugins(DefaultPlugins.set(AssetPlugin {
+    let gameconfig = config::load_game_config("assets/manifest.xml");
+
+    let width = if gameconfig.window.x > 0.0 { gameconfig.window.x as u32 } else { 1280 };
+    let height = if gameconfig.window.y > 0.0 { gameconfig.window.y as u32 } else { 720 };
+
+    println!("Size of the window: {} {}", width, height);
+
+    let mut app = App::new();
+
+    app.insert_resource(gameconfig.clone());
+
+    app.add_plugins(DefaultPlugins.set(AssetPlugin {
             watch_for_changes_override: Some(true),
             ..default()
-        }))
+        }).set(
+            WindowPlugin {
+                primary_window: Some(Window {
+                    title: gameconfig.window_title.into(),
+                    name: Some(gameconfig.window_name.into()),
+                    resolution: (width, height).into(),
+                    ..default()
+                }),
+                ..default()
+            } ))
         .add_systems(Startup, (setup, setup_ui_ressource))
         .add_plugins((
             HanabiPlugin,
@@ -57,7 +78,7 @@ fn main() {
         .insert_resource(Score::default())
         .add_systems(
             Update,
-            start_after_startup.run_if(in_state(GameState::Startup)),
+            (start_after_startup).run_if(in_state(GameState::Startup)),
         )
         .run();
 }
@@ -71,9 +92,18 @@ fn setup_ui_ressource(mut command: Commands, asset_server: Res<AssetServer>) {
     });
 }
 
-fn start_after_startup(mut next_state: ResMut<NextState<GameState>>) {
-    next_state.set(GameState::Menu);
+
+fn start_after_startup(
+    mut next_state: ResMut<NextState<GameState>>,
+    mut frame_count: Local<u32>,
+) {
+    *frame_count += 1;
+    if *frame_count < 10 { // wait one frame
+        return;
+    }
+    next_state.set(GameState::Game);
 }
+
 
 fn create_quad(
     top_left: Vec3,
@@ -125,26 +155,42 @@ fn create_quad(
 
 fn setup_left_screen(
     commands: &mut Commands,
+    gameconfig: Res<config::structs::GameConfig>,
     mut meshes: ResMut<Assets<Mesh>>,
 ) -> (Entity, Entity, Entity) {
+
     let left_points: Vec<Vec3> = vec![
-        Vec3::new(-0.610449, 0.755574, -0.205797),
-        Vec3::new(-0.502950, 0.752438, -0.251174),
-        Vec3::new(-0.502971, 0.657055, -0.211015),
-        Vec3::new(-0.610428, 0.681590, -0.174664),
+        gameconfig.ship.screen_left.tl,
+        gameconfig.ship.screen_left.tr,
+        gameconfig.ship.screen_left.br,
+        gameconfig.ship.screen_left.bl,
     ];
     let right_points: Vec<Vec3> = vec![
-        Vec3::new(0.502982, 0.752438, -0.251174),
-        Vec3::new(0.610481, 0.755575, -0.205797),
-        Vec3::new(0.610460, 0.681590, -0.174664),
-        Vec3::new(0.503003, 0.657055, -0.211015),
+        gameconfig.ship.screen_right.tl,
+        gameconfig.ship.screen_right.tr,
+        gameconfig.ship.screen_right.br,
+        gameconfig.ship.screen_right.bl,
     ];
     let middle_points: Vec<Vec3> = vec![
-        Vec3::new(-0.216544, 0.777080, -0.318808),
-        Vec3::new(0.216575, 0.777080, -0.318808),
-        Vec3::new(0.216575, 0.640333, -0.261248),
-        Vec3::new(-0.216544, 0.640333, -0.261248),
+        gameconfig.ship.screen_center.tl,
+        gameconfig.ship.screen_center.tr,
+        gameconfig.ship.screen_center.br,
+        gameconfig.ship.screen_center.bl,
     ];
+    println!("Left screen points:");
+    for p in &left_points {
+        println!("  {:?}", p);
+    }
+
+    println!("Right screen points:");
+    for p in &right_points {
+        println!("  {:?}", p);
+    }
+
+    println!("Middle screen points:");
+    for p in &middle_points {
+        println!("  {:?}", p);
+    }
 
     // let left_points: Vec<Vec3> = vec![
     //     Vec3::new(-0.3396, 0.250517, 0.487824),
@@ -208,11 +254,12 @@ fn setup_left_screen(
 fn setup(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
+    gameconfig: Res<config::structs::GameConfig>,
     meshes: ResMut<Assets<Mesh>>,
 ) {
     let player_entity = commands
         .spawn((
-            SceneRoot(asset_server.load("Spaceship.glb#Scene0")),
+            SceneRoot(asset_server.load(gameconfig.ship.asset.clone())),
             controller::Player,
             Velocity(Vec3::ZERO),
             controller::CameraSensitivity::default(),
@@ -252,7 +299,7 @@ fn setup(
         ))
         .id();
 
-    let (left_screen, middle_screen, right_screen) = setup_left_screen(&mut commands, meshes);
+    let (left_screen, middle_screen, right_screen) = setup_left_screen(&mut commands, gameconfig, meshes);
     commands.entity(player_entity).add_children(&[
         camera_entity,
         left_screen,
