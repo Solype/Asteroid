@@ -1,28 +1,36 @@
+use crate::game_over::GameOverState;
 use crate::menu::structs::*;
 use crate::{
     controller::PlayerCam,
     globals_structs::{Action, InputButton, Keybinds, MusicVolume},
 };
 use bevy::{
-    // app::AppExit,
-    audio::Volume, input::mouse::{MouseScrollUnit, MouseWheel}, picking::hover::HoverMap, prelude::*, window::{
-        CursorGrabMode, CursorOptions,PrimaryWindow
-    }
+    audio::Volume,
+    input::mouse::{MouseScrollUnit, MouseWheel},
+    picking::hover::HoverMap,
+    prelude::*,
+    window::{CursorGrabMode, CursorOptions, PrimaryWindow},
 };
 
 use rand::prelude::IndexedRandom;
 
-
 pub fn enter_menu_state(
     mut next_state: ResMut<NextState<MenuState>>,
+    gameover_state: ResMut<State<GameOverState>>,
     screens: Query<(&MenuPlane, Entity)>,
     mut commands: Commands,
-    render_target: Res<MenuCameraTarget>
+    render_target: Res<MenuCameraTarget>,
 ) {
-    next_state.set(MenuState::Main);
+    next_state.set(if gameover_state.get() == &GameOverState::Menu {
+        MenuState::GameOver
+    } else {
+        MenuState::Main
+    });
 
     for (_, entity) in screens.iter() {
-        commands.entity(entity).insert(MeshMaterial3d(render_target.material.clone()));
+        commands
+            .entity(entity)
+            .insert(MeshMaterial3d(render_target.material.clone()));
     }
 }
 
@@ -67,13 +75,13 @@ pub fn focus_main_screen(mut command: Commands, player_entity: Single<Entity, Wi
 }
 
 pub fn play_click_sound_system(
-    mut over_reader : MessageReader<Pointer<Over>>,
-    mut out_reader : MessageReader<Pointer<Out>>,
-    mut click_reader : MessageReader<Pointer<Click>>,
-    audio : Res<MenuSounds>,
-    master_volume : Res<MusicVolume>,
-    mut commands : Commands,
-    query : Query<(&ButtonInfo, Entity)>,
+    mut over_reader: MessageReader<Pointer<Over>>,
+    mut out_reader: MessageReader<Pointer<Out>>,
+    mut click_reader: MessageReader<Pointer<Click>>,
+    audio: Res<MenuSounds>,
+    master_volume: Res<MusicVolume>,
+    mut commands: Commands,
+    query: Query<(&ButtonInfo, Entity)>,
 ) {
     for over in over_reader.read() {
         let Ok((button_info, entity)) = query.get(over.entity) else {
@@ -94,15 +102,14 @@ pub fn play_click_sound_system(
                 AudioPlayer::new(handle.clone()),
                 PlaybackSettings {
                     mode: bevy::audio::PlaybackMode::Despawn,
-                    volume : Volume::Linear(master_volume.volume / 100.0_f32),
+                    volume: Volume::Linear(master_volume.volume / 100.0_f32),
                     ..Default::default()
-                }
+                },
             ));
         }
         click_reader.clear();
     }
 }
-
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////

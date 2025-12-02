@@ -6,7 +6,7 @@ use crate::menu::structs::{MenuState, WaitingForRebind};
 
 pub mod structs;
 mod plane_cast;
-mod systems;
+pub mod systems;
 mod setup;
 mod camera_manipulation;
 mod scenes;
@@ -32,6 +32,7 @@ pub fn menu_plugin(app: &mut App)
     // Init the scene after entering into a specific menu state
     app.add_systems(OnEnter(MenuState::Main), create_main_menu_scene);
     app.add_systems(OnEnter(MenuState::Options), create_options_menu_scene);
+    app.add_systems(OnEnter(MenuState::GameOver), create_gameover_menu_scene);
 
     app.add_systems(Update, (send_scroll_events, rebind_key, play_click_sound_system).run_if(in_state(GameState::Menu)));
     app.add_observer(on_scroll_handler);

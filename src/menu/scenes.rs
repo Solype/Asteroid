@@ -1,6 +1,6 @@
 use crate::game_states::GameState;
-use crate::globals_structs::UIRessources;
 use crate::globals_structs::{Action, Keybinds, MusicVolume};
+use crate::globals_structs::{Score, UIRessources};
 use crate::menu::structs::*;
 use bevy::audio::Volume;
 use bevy::prelude::*;
@@ -346,4 +346,130 @@ pub fn create_options_menu_scene(
                 next_state.set(MenuState::Main);
             });
     });
+}
+
+pub fn create_gameover_menu_scene(
+    mut commands: Commands,
+    camera_components: Single<(Entity, &mut Camera), With<MenuCameraComponent>>,
+    menu_ressources: Res<UIRessources>,
+    score: Res<Score>,
+) {
+    let (cam_entity, mut camera) = camera_components.into_inner();
+    camera.is_active = true;
+
+    let font: Handle<Font> = menu_ressources.font.clone();
+    let background: Handle<Image> = menu_ressources.bg.clone();
+
+    let node = Node {
+        width: Val::Px(300.0),
+        height: Val::Px(60.0),
+        justify_content: JustifyContent::Center,
+        align_items: AlignItems::Center,
+        border: UiRect::all(Val::Px(2.0)),
+        ..default()
+    };
+
+    commands
+        .spawn((
+            DespawnOnExit(MenuState::GameOver),
+            Node {
+                width: Val::Percent(100.0),
+                height: Val::Percent(100.0),
+                justify_content: JustifyContent::Center,
+                align_items: AlignItems::Center,
+                flex_direction: FlexDirection::Column,
+                ..default()
+            },
+            ImageNode {
+                image: background,
+                ..default()
+            },
+            UiTargetCamera(cam_entity),
+        ))
+        .with_children(|parent| {
+            parent.spawn((
+                Text::new("GAME OVER"),
+                TextFont {
+                    font: font.clone(),
+                    font_size: 70.0,
+                    ..default()
+                },
+                TextColor(Color::srgb(1.0, 0.0, 0.0)),
+                Node {
+                    margin: UiRect::new(Val::Px(0.0), Val::Px(0.0), Val::Px(45.0), Val::Px(15.0)),
+                    ..default()
+                },
+            ));
+            parent.spawn((
+                Text::new(format!("{} $", score.into_inner().value)),
+                TextFont {
+                    font: font.clone(),
+                    font_size: 60.0,
+                    ..default()
+                },
+                TextColor(Color::srgb(0.0, 1.0, 1.0)),
+                Node {
+                    margin: UiRect::bottom(Val::Px(60.0)),
+                    ..default()
+                },
+            ));
+            parent
+                .spawn((Node {
+                    width: Val::Px(300.0),
+                    height: Val::Auto,
+                    justify_content: JustifyContent::Center,
+                    align_items: AlignItems::Center,
+                    flex_direction: FlexDirection::Column,
+                    margin: UiRect::all(Val::Px(10.0)),
+                    row_gap: Val::Px(15.0),
+                    ..default()
+                },))
+                .with_children(|parent| {
+                    parent.spawn((
+                node.clone(),
+                BORDER_NORMAL,
+                BackgroundColor(Color::srgba(0.0, 0.2, 0.4, 0.8)), // dark blue transparent
+                children![(
+                    Text::new("MAIN MENU"),
+                    TextFont { font: font.clone(), font_size: 28.0, ..default() },
+                    TextColor(Color::srgb(0.0, 1.0, 1.0)),
+                )],
+            )).observe(|over: On<Pointer<Over>>, mut colors: Query<&mut BorderColor>| {
+                *(colors.get_mut(over.entity).unwrap()) = BORDER_HOVER;
+            }).observe(|out: On<Pointer<Out>>, mut colors: Query<&mut BorderColor>| {
+                *(colors.get_mut(out.entity).unwrap()) = BORDER_NORMAL;
+            }).observe(|_: On<Pointer<Click>>, mut next_state: ResMut<NextState<MenuState>>| {
+                next_state.set(MenuState::Main);
+            });
+
+                    parent
+                        .spawn((
+                            node.clone(),
+                            BORDER_NORMAL,
+                            BackgroundColor(Color::srgba(0.4, 0.0, 0.0, 0.8)), // dark red transparent
+                            children![(
+                                Text::new("EJECT"),
+                                TextFont {
+                                    font: font.clone(),
+                                    font_size: 28.0,
+                                    ..default()
+                                },
+                                TextColor(Color::srgb(1.0, 0.0, 0.0)),
+                            )],
+                        ))
+                        .observe(
+                            |over: On<Pointer<Over>>, mut colors: Query<&mut BorderColor>| {
+                                *(colors.get_mut(over.entity).unwrap()) = BORDER_HOVER;
+                            },
+                        )
+                        .observe(
+                            |out: On<Pointer<Out>>, mut colors: Query<&mut BorderColor>| {
+                                *(colors.get_mut(out.entity).unwrap()) = BORDER_NORMAL;
+                            },
+                        )
+                        .observe(|_: On<Pointer<Click>>, mut exit: MessageWriter<AppExit>| {
+                            exit.write(AppExit::Success);
+                        });
+                });
+        });
 }
