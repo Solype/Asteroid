@@ -1,19 +1,23 @@
-use crate::controller::structs::{ControllerState, Player, RotationalVelocity, VirtualMouse};
-use crate::menu::structs::SmoothCamMove;
-use std::f32::consts::FRAC_PI_2;
-use bevy::asset::{AssetServer, Handle};
-use bevy::color::Color;
-use bevy::input::ButtonInput;
-use bevy::input::mouse::AccumulatedMouseMotion;
-use bevy::math::{EulerRot, Quat, Vec2, Vec3};
-use bevy::prelude::{default, Commands, DespawnOnExit, Entity, ImageNode, KeyCode, MouseButton, NextState, Node, ParamSet, PositionType, Res, ResMut, Single, Time, Transform, UiTargetCamera, Val, Window, With, Image};
-use bevy::ui::{BorderColor, BorderRadius, UiRect};
-use bevy::window::PrimaryWindow;
 use crate::controller::structs::{CameraSensitivity, PlayerCam};
+use crate::controller::structs::{ControllerState, Player, RotationalVelocity, VirtualMouse};
+use crate::controller::DrivingUI;
 use crate::game_states::GameState;
 use crate::globals_structs::Keybinds;
+use crate::menu::structs::SmoothCamMove;
+use bevy::asset::{AssetServer, Handle};
+use bevy::input::mouse::AccumulatedMouseMotion;
+use bevy::input::ButtonInput;
+use bevy::math::{EulerRot, Quat, Vec2, Vec3};
+use bevy::prelude::*;
+use bevy::ui::{BorderRadius, UiRect};
+use bevy::window::PrimaryWindow;
+use std::f32::consts::FRAC_PI_2;
 
-pub fn enter_driving_mod(mut command: Commands, entity: Single<Entity, With<PlayerCam>>) {
+pub fn enter_driving_mod(
+    mut command: Commands,
+    entity: Single<Entity, With<PlayerCam>>,
+    mut ui_entities: Query<&mut Visibility, With<DrivingUI>>,
+) {
     let player = entity.into_inner();
 
     command.entity(player).insert(SmoothCamMove {
@@ -23,6 +27,24 @@ pub fn enter_driving_mod(mut command: Commands, entity: Single<Entity, With<Play
         look_at: Some(Vec3::new(0.0, 1.2, 0.0)),
         ..Default::default()
     });
+
+    for mut ui_visibility in &mut ui_entities {
+        ui_visibility.toggle_visible_hidden();
+    }
+}
+
+pub fn enter_free_look_mod(
+    mut commands: Commands,
+    cam_move_entity_option: Option<Single<Entity, With<SmoothCamMove>>>,
+    mut ui_entities: Query<&mut Visibility, With<DrivingUI>>,
+) {
+    if let Some(cam_move_entity) = cam_move_entity_option {
+        commands.entity(*cam_move_entity).remove::<SmoothCamMove>();
+    }
+
+    for mut ui_visibility in &mut ui_entities {
+        ui_visibility.toggle_visible_hidden();
+    }
 }
 
 pub fn player_system(
@@ -44,10 +66,11 @@ pub fn player_system(
 }
 
 pub fn free_look_system(
+    time: Res<Time>,
     accumulated_mouse_motion: Res<AccumulatedMouseMotion>,
     player: Single<(&mut Transform, &CameraSensitivity), With<PlayerCam>>,
+    mut vm: Single<&mut VirtualMouse>,
 ) {
-
     let (mut transform, camera_sensitivity) = player.into_inner();
     let delta = accumulated_mouse_motion.delta;
     if delta != Vec2::ZERO {
@@ -62,6 +85,9 @@ pub fn free_look_system(
         yaw = yaw.clamp(-YAW_LIMIT, YAW_LIMIT);
         transform.rotation = Quat::from_euler(EulerRot::YXZ, yaw, pitch, roll);
     }
+
+    let decay_speed = 2.0; // higher = faster return
+    vm.pos = vm.pos.lerp(Vec2::ZERO, decay_speed * time.delta_secs());
 }
 
 pub fn move_player_system(
@@ -142,28 +168,36 @@ pub fn mouse_system(
 }
 
 pub fn rotate_spaceship(
-    mut params: ParamSet<(
-        Single<&mut Transform, With<Player>>,
-        Single<&VirtualMouse>
-    )>,
+    mut transform: Single<&mut Transform, With<Player>>,
+    mut vm: Single<&mut VirtualMouse>,
     time: Res<Time>,
 ) {
-    let mouse_pos: Vec2;
-    { mouse_pos = params.p1().pos; }
-    let mut transform = params.p0().into_inner();
+    // --- Configurable values ---
+    let dead_radius = 24.0; // No rotation inside this radius
+    let max_radius = 150.0; // Where rotation reaches full speed
+    let base_speed = 1.0;
 
-    let mouse_offset = mouse_pos;
+    let offset = vm.pos;
+    let dist = offset.length();
 
-    if mouse_offset.length_squared() > 0.03 {
-        let speed: f32 = 0.005;
+    let delta = time.delta_secs();
+    if dist > dead_radius {
+        let scaled = ((dist - dead_radius) / (max_radius - dead_radius)).clamp(0.0, 1.0);
 
-        let target_angle_y = -mouse_offset.x * speed;
-        transform.rotate_local_y(target_angle_y * time.delta_secs());
+        let effective_offset = offset.normalize() * scaled;
 
-        let target_angle_x = -mouse_offset.y * speed;
-        transform.rotate_local_x(target_angle_x * time.delta_secs());
+        transform.rotate_local_y(-effective_offset.x * base_speed * delta);
+        transform.rotate_local_x(-effective_offset.y * base_speed * delta);
+    } else if dist > 0.0 {
+        let return_speed = 15.0; // higher = faster return
+
+        let step = return_speed * delta;
+        if dist <= step {
+            vm.pos = Vec2::ZERO;
+        } else {
+            vm.pos -= offset.normalize() * step;
+        }
     }
-
 }
 
 pub fn roll_spaceship(
@@ -178,7 +212,7 @@ pub fn roll_spaceship(
     let base_speed = 200.0_f32.to_radians(); // ≈3.49 rad/s
     let dt = time.delta_secs();
 
-    let mut accel_roll  = 0.0;
+    let mut accel_roll = 0.0;
 
     if keybinds.rotate_left.pressed(&keyboard, &mouse) {
         accel_roll += base_speed;
@@ -191,11 +225,13 @@ pub fn roll_spaceship(
     rota_velocity.z += accel_roll * dt;
 
     const DAMPING: f32 = 0.99f32; // 1.0 = no damping
-    if rota_velocity.z.abs() < 2.0 { rota_velocity.z *= DAMPING; }
+    if rota_velocity.z.abs() < 2.0 {
+        rota_velocity.z *= DAMPING;
+    }
 
     rota_velocity.z = rota_velocity.z.clamp(-5.0, 5.0);
 
-    let delta_roll  = rota_velocity.z * dt;
+    let delta_roll = rota_velocity.z * dt;
 
     // Build a small rotation from the angular increments
     let delta_rot = Quat::from_euler(EulerRot::YXZ, 0.0, 0.0, delta_roll);
@@ -208,64 +244,72 @@ pub fn setup_ui(
     mut params: ParamSet<(
         Single<Entity, With<PlayerCam>>,
         Single<&Window, With<PrimaryWindow>>,
-    )>
+    )>,
 ) {
     let win_dim: Vec2;
     {
-        win_dim = Vec2 { x: params.p1().width(), y: params.p1().height() } ;
+        win_dim = Vec2 {
+            x: params.p1().width(),
+            y: params.p1().height(),
+        };
     }
     let target_camera = params.p0();
 
-    let parent = commands
-        .spawn((
-            DespawnOnExit(ControllerState::Driving),
-            Node {
-                width: Val::Percent(100.0),
-                height: Val::Percent(100.0),
-                position_type: PositionType::Absolute,
-                ..default()
-            },
-        ))
-        .id();
-
-    let image: Handle<Image> = asset_server.load("niko.jpeg");
-
-    let mouse_node = commands.spawn((
-        Node {
-            width: Val::Px(32.0),
-            height: Val::Px(32.0),
-            position_type: PositionType::Absolute,
-            ..default()
-        },
-        ImageNode {
-            image: image.clone(),
-            ..default()
-        },
-        VirtualMouse::default(),
-        UiTargetCamera(target_camera.into_inner()),
-    ))
-        .id();
-
+    let cursor: Handle<Image> = asset_server.load("cursor.png");
+    let cursor_external: Handle<Image> = asset_server.load("cursor_external.png");
     let size = 300.0;
 
-    let circle = commands.spawn((Node {
-            width: Val::Px(size),
-            height: Val::Px(size),
-            left: Val::Px(win_dim.x / 2. - size / 2.),
-            top: Val::Px(win_dim.y / 2. - size / 2.),
+    commands.spawn((
+        DespawnOnExit(GameState::Game),
+        Node {
+            width: Val::Percent(100.),
+            height: Val::Percent(100.),
             position_type: PositionType::Absolute,
-            border: UiRect::all(Val::Px(2.0)),
             ..default()
         },
-        BorderColor{
-            top: Color::srgba(1.0, 1.0, 1.0, 1.0),
-            bottom: Color::srgba(1.0, 1.0, 1.0, 1.0),
-            left: Color::srgba(1.0, 1.0, 1.0, 1.0),
-            right: Color::srgba(1.0, 1.0, 1.0, 1.0),
-        },
-        BorderRadius::all(Val::Percent(50.0)),
-    )).id();
-
-
-    commands.entity(parent).add_children(&[circle, mouse_node]);
+        Visibility::Hidden,
+        DrivingUI,
+        children![
+            (
+                Node {
+                    width: Val::Px(32.0),
+                    height: Val::Px(32.0),
+                    position_type: PositionType::Absolute,
+                    ..default()
+                },
+                ImageNode {
+                    image: cursor.clone(),
+                    ..default()
+                },
+                VirtualMouse::default(),
+                UiTargetCamera(target_camera.into_inner()),
+            ),
+            (
+                Node {
+                    left: Val::Px(win_dim.x / 2. - 24.),
+                    top: Val::Px(win_dim.y / 2. - 24.),
+                    width: Val::Px(48.0),
+                    height: Val::Px(48.0),
+                    position_type: PositionType::Absolute,
+                    ..default()
+                },
+                ImageNode {
+                    image: cursor_external.clone(),
+                    ..default()
+                },
+            ),
+            (
+                Node {
+                    width: Val::Px(size),
+                    height: Val::Px(size),
+                    left: Val::Px(win_dim.x / 2. - size / 2.),
+                    top: Val::Px(win_dim.y / 2. - size / 2.),
+                    position_type: PositionType::Absolute,
+                    border: UiRect::all(Val::Px(2.0)),
+                    ..default()
+                },
+                BorderRadius::all(Val::Percent(50.0)),
+            )
+        ],
+    ));
 }
