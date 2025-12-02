@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 
 use crate::{
-    controller::Player, game_states::GameState, menu::structs::MenuState,
+    controller::structs::Player, game_states::GameState, menu::structs::MenuState,
     menu::systems::focus_main_screen,
 };
 
