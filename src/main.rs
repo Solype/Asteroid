@@ -259,10 +259,10 @@ fn setup(
 ) {
     let player_entity = commands
         .spawn((
-            SceneRoot(asset_server.load(gameconfig.ship.asset.clone())),
-            controller::Player,
-            Velocity(Vec3::ZERO),
-            controller::CameraSensitivity::default(),
+            SceneRoot(asset_server.load("Spaceship.glb#Scene0")),
+            controller::structs::Player,
+            Velocity(Vec3::default()),
+            controller::structs::RotationalVelocity::default(),
             Transform::from_xyz(0.0, 0.0, 0.0).looking_at(Vec3::ZERO, Vec3::Y),
             children![
                 (
@@ -281,6 +281,7 @@ fn setup(
         ))
         .id();
 
+
     let camera_entity = commands
         .spawn((
             Projection::from(PerspectiveProjection::default()),
@@ -293,9 +294,8 @@ fn setup(
             GlobalTransform::default(),
             Transform::from_xyz(0.0, 1.1, 0.3)
                 .looking_at(Vec3::new(-0.216544, 0.777080, -0.318808), Vec3::Y),
-            controller::PlayerCam,
-            // helpers::camera_controller::CameraController::default(),
-            controller::CameraSensitivity::default(),
+            controller::structs::PlayerCam,
+            controller::structs::CameraSensitivity::default(),
         ))
         .id();
 
@@ -306,4 +306,5 @@ fn setup(
         middle_screen,
         right_screen,
     ]);
+    // commands.insert_resource(skybox::CameraHolder(camera_entity));
 }
