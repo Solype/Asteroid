@@ -13,6 +13,7 @@ pub enum MenuState {
     None,
     Main,
     Options,
+    GameOver
 }
 
 ////////////////////////////////////////////////////
