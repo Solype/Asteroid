@@ -1,4 +1,5 @@
 use crate::asteroids::{utils::f, *};
+use crate::game_over::GameOverState;
 use crate::globals_structs::{MusicVolume, Score};
 use crate::player::{Ammo, PlayerHitBox, PLAYER_MASS};
 use crate::spritesheet::{AnimationDuration, AnimationTimer};
@@ -82,17 +83,14 @@ pub fn asteroid_asteroid_collision(
 }
 
 pub fn asteroid_player_collision(
-    mut commands: Commands,
-    mut next_state: ResMut<NextState<GameState>>,
+    mut next_state: ResMut<NextState<GameOverState>>,
     player_hitboxes: Query<(&Transform, &PlayerHitBox), Without<Asteroid>>,
     //todo mut player_velocity: Single<&mut Velocity, (With<Player>, Without<Asteroid>)>,
-    mut asteroids_query: Query<(Entity, &mut Transform, &Asteroid, &mut Velocity)>,
+    mut asteroids_query: Query<(&mut Transform, &Asteroid, &mut Velocity)>,
 ) {
     let player_velocity = Vec3::ZERO;
     for (hb_transform, player_hitbox) in &player_hitboxes {
-        for (asteroid_entity, mut asteroid_transform, asteroid, mut asteroid_velocity) in
-            &mut asteroids_query
-        {
+        for (mut asteroid_transform, asteroid, mut asteroid_velocity) in &mut asteroids_query {
             let dist = hb_transform
                 .translation
                 .distance(asteroid_transform.translation);
@@ -120,7 +118,7 @@ pub fn asteroid_player_collision(
 
             asteroid_velocity.0 = b_body.vel;
 
-            // next_state.set(GameState::GameOver);
+            next_state.set(GameOverState::Drift);
             return;
         }
     }
@@ -288,7 +286,6 @@ pub fn asteroid_ammo_collision(
                         Transform::default(),
                     )],
                 ));
-
             }
             return;
         }

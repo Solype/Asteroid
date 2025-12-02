@@ -1,6 +1,5 @@
 use bevy::{
     asset::RenderAssetUsages,
-    audio::Volume,
     mesh::{Indices, Mesh},
     prelude::*,
     render::render_resource::PrimitiveTopology,
@@ -19,6 +18,7 @@ mod player;
 mod score_display;
 mod skybox;
 mod spritesheet;
+mod game_over;
 
 use bevy_hanabi::HanabiPlugin;
 use bevy_sprite3d::Sprite3dPlugin;
@@ -49,6 +49,7 @@ fn main() {
             particules::ParticlesPlugin,
             spritesheet::SpriteSheetPlugin,
             background_musics::BackgroundMusicPlugin,
+            game_over::GameOverPlugin
         ))
         .init_state::<GameState>()
         .insert_resource(MusicVolume { volume: 100.0_f32 })

@@ -1,6 +1,6 @@
 use bevy::{audio::Volume, prelude::*};
 
-use crate::{game_states::GameState, globals_structs::MusicVolume};
+use crate::{game_over::GameOverState, game_states::GameState, globals_structs::MusicVolume, menu::structs::MenuState};
 
 #[derive(Component)]
 pub struct BackgroundMusic;
@@ -10,9 +10,9 @@ pub struct BackgroundMusicPlugin;
 impl Plugin for BackgroundMusicPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, setup)
-            .add_systems(OnEnter(GameState::Menu), start_menu_music)
+            .add_systems(OnEnter(MenuState::Main), start_menu_music)
             .add_systems(OnEnter(GameState::Game), start_game_music)
-            .add_systems(OnEnter(GameState::GameOver), start_gameover_music);
+            .add_systems(OnEnter(GameOverState::Drift), start_gameover_music);
     }
 }
 
