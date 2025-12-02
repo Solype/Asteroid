@@ -1,4 +1,4 @@
-use bevy::prelude::{Vec2, Vec3};
+use bevy::{prelude::{Vec2, Vec3}};
 use xml::reader::{EventReader, XmlEvent};
 use std::fs::File;
 
