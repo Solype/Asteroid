@@ -1,12 +1,12 @@
 use crate::controller::structs::{ControllerState, Player, RotationalVelocity, VirtualMouse};
 use crate::menu::structs::SmoothCamMove;
 use std::f32::consts::FRAC_PI_2;
-use bevy::asset::AssetServer;
+use bevy::asset::{AssetServer, Handle};
 use bevy::color::Color;
 use bevy::input::ButtonInput;
 use bevy::input::mouse::AccumulatedMouseMotion;
 use bevy::math::{EulerRot, Quat, Vec2, Vec3};
-use bevy::prelude::{default, Commands, DespawnOnExit, Entity, ImageNode, KeyCode, MouseButton, NextState, Node, ParamSet, PositionType, Res, ResMut, Single, Time, Transform, UiTargetCamera, Val, Window, With};
+use bevy::prelude::{default, Commands, DespawnOnExit, Entity, ImageNode, KeyCode, MouseButton, NextState, Node, ParamSet, PositionType, Res, ResMut, Single, Time, Transform, UiTargetCamera, Val, Window, With, Image};
 use bevy::ui::{BorderColor, BorderRadius, UiRect};
 use bevy::window::PrimaryWindow;
 use crate::controller::structs::{CameraSensitivity, PlayerCam};
@@ -137,8 +137,8 @@ pub fn mouse_system(
     }
 
     let ui_pos = center + virtual_mouse.pos;
-    node.left = Val::Px(ui_pos.x);
-    node.top = Val::Px(ui_pos.y);
+    node.left = Val::Px(ui_pos.x - 16.);
+    node.top = Val::Px(ui_pos.y - 16.);
 }
 
 pub fn rotate_spaceship(
@@ -205,8 +205,17 @@ pub fn roll_spaceship(
 pub fn setup_ui(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    target_camera: Single<Entity, With<PlayerCam>>,
+    mut params: ParamSet<(
+        Single<Entity, With<PlayerCam>>,
+        Single<&Window, With<PrimaryWindow>>,
+    )>
 ) {
+    let win_dim: Vec2;
+    {
+        win_dim = Vec2 { x: params.p1().width(), y: params.p1().height() } ;
+    }
+    let target_camera = params.p0();
+
     let parent = commands
         .spawn((
             DespawnOnExit(ControllerState::Driving),
@@ -219,6 +228,8 @@ pub fn setup_ui(
         ))
         .id();
 
+    let image: Handle<Image> = asset_server.load("niko.jpeg");
+
     let mouse_node = commands.spawn((
         Node {
             width: Val::Px(32.0),
@@ -227,7 +238,7 @@ pub fn setup_ui(
             ..default()
         },
         ImageNode {
-            image: asset_server.load("niko.jpeg"),
+            image: image.clone(),
             ..default()
         },
         VirtualMouse::default(),
@@ -240,8 +251,8 @@ pub fn setup_ui(
     let circle = commands.spawn((Node {
             width: Val::Px(size),
             height: Val::Px(size),
-            left: Val::Percent(50.0),
-            top: Val::Percent(50.0),
+            left: Val::Px(win_dim.x / 2. - size / 2.),
+            top: Val::Px(win_dim.y / 2. - size / 2.),
             position_type: PositionType::Absolute,
             border: UiRect::all(Val::Px(2.0)),
             ..default()
