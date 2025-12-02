@@ -48,7 +48,8 @@ fn setup_back_cam(
     mut commands: Commands,
     mut images: ResMut<Assets<Image>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
-    player: Single<Entity, With<Player>>
+    player: Single<Entity, With<Player>>,
+    config: Res<crate::config::structs::GameConfig>
 ) {
 
     let mut image = Image {
@@ -70,6 +71,8 @@ fn setup_back_cam(
 
     let image_handle: Handle<Image> = images.add(image);
 
+    info!("IMPORTANT {} {}", config.ship.backcamera_position, config.ship.backcamera_look_at);
+
     let back_cam = commands.spawn((
         Projection::from(PerspectiveProjection::default()),
         Camera3d::default(),
@@ -79,8 +82,8 @@ fn setup_back_cam(
             ..Default::default()
         },
         BackCameraComponent,
-        Transform::from_xyz(0.0, 1.1, 4.0)
-                .looking_at(Vec3::new(0.0, 1.1,5.0), Vec3::Y),
+        Transform::from_translation(config.ship.backcamera_position)
+                .looking_at(config.ship.backcamera_look_at, Vec3::Y),
     )).id();
 
 

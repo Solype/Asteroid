@@ -94,8 +94,6 @@ fn setup_ui_ressource(mut command: Commands, asset_server: Res<AssetServer>) {
 
 
 fn start_after_startup(
-    // mut windows: Query<&mut Window, With<PrimaryWindow>>,
-    // game_config: Res<config::structs::GameConfig>,
     mut next_state: ResMut<NextState<GameState>>,
     mut frame_count: Local<u32>,
 ) {
@@ -103,10 +101,6 @@ fn start_after_startup(
     if *frame_count < 10 { // wait one frame
         return;
     }
-
-    // for mut win in windows.iter_mut() {
-    //     win.resolution.set(game_config.window.x, game_config.window.y);
-    // }
     next_state.set(GameState::Menu);
 }
 

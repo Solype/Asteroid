@@ -1,4 +1,4 @@
-use bevy::prelude::{Vec2, Vec3};
+use bevy::{prelude::{Vec2, Vec3}};
 use xml::reader::{EventReader, XmlEvent};
 use std::fs::File;
 
@@ -32,29 +32,29 @@ pub fn load_game_config(path: &str) -> structs::GameConfig {
                     "vec3" => {
                         let v = parse_vec3(&attributes);
                         match scope_path(&scope).as_str() {
-                            "game/ship/backcamera/position" => cfg.ship.backcamera_position = v,
-                            "game/ship/backcamera/look_at" => cfg.ship.backcamera_look_at = v,
+                            "game/ship/backcamera/position/vec3" => cfg.ship.backcamera_position = v,
+                            "game/ship/backcamera/look_at/vec3" => cfg.ship.backcamera_look_at = v,
 
-                            "game/ship/thruster/right" => cfg.ship.thruster_right = v,
-                            "game/ship/thruster/left" => cfg.ship.thruster_left = v,
+                            "game/ship/thruster/right/vec3" => cfg.ship.thruster_right = v,
+                            "game/ship/thruster/left/vec3" => cfg.ship.thruster_left = v,
 
-                            "game/ship/gun/right" => cfg.ship.gun_right = v,
-                            "game/ship/gun/left" => cfg.ship.gun_left = v,
+                            "game/ship/gun/right/vec3" => cfg.ship.gun_right = v,
+                            "game/ship/gun/left/vec3" => cfg.ship.gun_left = v,
 
-                            "game/ship/screens/right/tr" => cfg.ship.screen_right.tr = v,
-                            "game/ship/screens/right/tl" => cfg.ship.screen_right.tl = v,
-                            "game/ship/screens/right/br" => cfg.ship.screen_right.br = v,
-                            "game/ship/screens/right/bl" => cfg.ship.screen_right.bl = v,
+                            "game/ship/screens/right/tr/vec3" => cfg.ship.screen_right.tr = v,
+                            "game/ship/screens/right/tl/vec3" => cfg.ship.screen_right.tl = v,
+                            "game/ship/screens/right/br/vec3" => cfg.ship.screen_right.br = v,
+                            "game/ship/screens/right/bl/vec3" => cfg.ship.screen_right.bl = v,
 
-                            "game/ship/screens/center/tr" => cfg.ship.screen_center.tr = v,
-                            "game/ship/screens/center/tl" => cfg.ship.screen_center.tl = v,
-                            "game/ship/screens/center/br" => cfg.ship.screen_center.br = v,
-                            "game/ship/screens/center/bl" => cfg.ship.screen_center.bl = v,
+                            "game/ship/screens/center/tr/vec3" => cfg.ship.screen_center.tr = v,
+                            "game/ship/screens/center/tl/vec3" => cfg.ship.screen_center.tl = v,
+                            "game/ship/screens/center/br/vec3" => cfg.ship.screen_center.br = v,
+                            "game/ship/screens/center/bl/vec3" => cfg.ship.screen_center.bl = v,
 
-                            "game/ship/screens/left/tr" => cfg.ship.screen_left.tr = v,
-                            "game/ship/screens/left/tl" => cfg.ship.screen_left.tl = v,
-                            "game/ship/screens/left/br" => cfg.ship.screen_left.br = v,
-                            "game/ship/screens/left/bl" => cfg.ship.screen_left.bl = v,
+                            "game/ship/screens/left/tr/vec3" => cfg.ship.screen_left.tr = v,
+                            "game/ship/screens/left/tl/vec3" => cfg.ship.screen_left.tl = v,
+                            "game/ship/screens/left/br/vec3" => cfg.ship.screen_left.br = v,
+                            "game/ship/screens/left/bl/vec3" => cfg.ship.screen_left.bl = v,
 
                             _ => {}
                         }
@@ -75,6 +75,12 @@ pub fn load_game_config(path: &str) -> structs::GameConfig {
                     "asset" => {
                         if let Some(src) = find_attr(&attributes, "src") {
                             cfg.ship.asset = src.to_string();
+                        }
+                    }
+
+                    "mouseasset" => {
+                        if let Some(src) = find_attr(&attributes, "src") {
+                            cfg.ui.mouseasset = src.to_string();
                         }
                     }
 

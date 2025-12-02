@@ -15,6 +15,7 @@ pub struct UIConfig {
     pub background: String,
     pub font: String,
     pub dimension: Vec2,
+    pub mouseasset: String
 }
 
 #[derive(Debug, Clone, Default)]

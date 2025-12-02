@@ -7,13 +7,15 @@
 	<ui>
 		<background src=""/>
 		<font src=""/>
+		<mouseasset src=""/>
 		<dimension><vec2 x="90" y="90"/></dimension>
 	</ui>
 	<ship>
 		<asset src=""/>
 		<backcamera>
-			<position><vec3 x="0.0" y="0.0" z="0.0"/></position>
-			<look_at><vec3 x="0.0" y="0.1" z="0.0"/></look_at>
+			<position><vec3 x="0.0" y="1.1" z="4.0"/></position>
+			<look_at><vec3 x="0.0" y="1.1" z="5.0"/></look_at>
+			<dimension><vec2 x="384.0" y="128"/></dimension>
 		</backcamera>
 		<thruster>
 			<right>
