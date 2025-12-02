@@ -101,7 +101,7 @@ fn start_after_startup(
     if *frame_count < 10 { // wait one frame
         return;
     }
-    next_state.set(GameState::Menu);
+    next_state.set(GameState::Game);
 }
 
 
@@ -158,6 +158,24 @@ fn setup_left_screen(
     gameconfig: Res<config::structs::GameConfig>,
     mut meshes: ResMut<Assets<Mesh>>,
 ) -> (Entity, Entity, Entity) {
+    // let left_points: Vec<Vec3> = vec![
+    //     Vec3::new(-0.610449, 0.755574, -0.205797),
+    //     Vec3::new(-0.502950, 0.752438, -0.251174),
+    //     Vec3::new(-0.502971, 0.657055, -0.211015),
+    //     Vec3::new(-0.610428, 0.681590, -0.174664),
+    // ];
+    // let right_points: Vec<Vec3> = vec![
+    //     Vec3::new(0.502982, 0.752438, -0.251174),
+    //     Vec3::new(0.610481, 0.755575, -0.205797),
+    //     Vec3::new(0.610460, 0.681590, -0.174664),
+    //     Vec3::new(0.503003, 0.657055, -0.211015),
+    // ];
+    // let middle_points: Vec<Vec3> = vec![
+    //     Vec3::new(-0.216544, 0.777080, -0.318808),
+    //     Vec3::new(0.216575, 0.777080, -0.318808),
+    //     Vec3::new(0.216575, 0.640333, -0.261248),
+    //     Vec3::new(-0.216544, 0.640333, -0.261248),
+    // ];
 
     let left_points: Vec<Vec3> = vec![
         gameconfig.ship.screen_left.tl,
@@ -191,25 +209,6 @@ fn setup_left_screen(
     for p in &middle_points {
         println!("  {:?}", p);
     }
-
-    // let left_points: Vec<Vec3> = vec![
-    //     Vec3::new(-0.3396, 0.250517, 0.487824),
-    //     Vec3::new(-0.12397, 0.250517, 0.487824),
-    //     Vec3::new(-0.12397, 0.185115, 0.325565),
-    //     Vec3::new(-0.3396, 0.185115, 0.325565),
-    // ];
-    // let right_points: Vec<Vec3> = vec![
-    //     Vec3::new(0.12397, 0.250517, 0.487824),
-    //     Vec3::new(0.3396, 0.250517, 0.487824),
-    //     Vec3::new(0.3396, 0.185115, 0.325565),
-    //     Vec3::new(0.12397, 0.185115, 0.325565),
-    // ];
-    // let middle_points: Vec<Vec3> = vec![
-    //     Vec3::new(-0.073463, 0.145232, 0.282566),
-    //     Vec3::new(0.073463, 0.145232, 0.282566),
-    //     Vec3::new(0.075941, 0.021161, 0.192003),
-    //     Vec3::new(-0.075941, 0.021161, 0.192003),
-    // ];
 
     let (left_mesh, _left_normal, _left_center) = create_quad(
         left_points[0],
