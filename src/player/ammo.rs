@@ -1,4 +1,7 @@
-use crate::globals_structs::Keybinds;
+use bevy::audio::Volume;
+use rand::seq::IndexedRandom;
+
+use crate::globals_structs::{Keybinds, MusicVolume};
 use crate::{asteroids::Velocity, controller::structs::Player, player::*};
 
 pub fn shoot_ammo(
