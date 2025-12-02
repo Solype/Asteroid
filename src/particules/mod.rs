@@ -83,10 +83,11 @@ fn create_rocket_effect() -> EffectAsset {
 pub fn spawn_particles(
     mut commands: Commands,
     mut effects: ResMut<Assets<EffectAsset>>,
+    gameconfig: Res<crate::config::structs::GameConfig>,
     ship: Single<Entity, With<crate::controller::Player>>
 ) {
-    let position1 = Vec3::new(-0.7, 1.0, 5.0);
-    let position2 = Vec3::new(0.7, 1.0, 5.0);
+    let position1 = gameconfig.ship.thruster_left;
+    let position2 = gameconfig.ship.thruster_right;
 
     let effect = effects.add(create_rocket_effect());
     let particules1 = commands.spawn((

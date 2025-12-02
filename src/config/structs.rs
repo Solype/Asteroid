@@ -3,12 +3,19 @@ use bevy::prelude::{Resource, Vec3, Vec2};
 #[derive(Debug, Clone, Default, Resource)]
 pub struct GameConfig {
     pub window: Vec2,
-    pub window_title: String, // new
-    pub window_name: String,  // new
+    pub window_title: String,
+    pub window_name: String,
+    pub main_cam: CamConfig,
     pub ui: UIConfig,
     pub ship: ShipConfig,
 }
 
+#[derive(Debug, Clone, Default)]
+pub struct CamConfig {
+    pub position: Vec3,
+    pub look_at_forward: Vec3,
+    pub look_at_menu: Vec3,
+}
 
 #[derive(Debug, Clone, Default)]
 pub struct UIConfig {

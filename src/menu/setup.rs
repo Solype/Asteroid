@@ -8,8 +8,8 @@ use bevy::render::render_resource::{
 
 use crate::menu::structs::*;
 
-static SCREEN_WIDTH : u32 = 96 * 16;
-static SCREEN_HEIGHT : u32 = 32 * 16;
+static SCREEN_WIDTH : u32 = 1280;
+static SCREEN_HEIGHT : u32 = 512;
 
 pub fn apply_texture_to_quad(mut commands: Commands, screens: Query<(&MenuPlane, Entity)>, menu_texture: Res<MenuCameraTarget>)
 {
@@ -20,12 +20,30 @@ pub fn apply_texture_to_quad(mut commands: Commands, screens: Query<(&MenuPlane,
     }
 }
 
-pub fn setup_texture_camera(mut commands: Commands, mut images: ResMut<Assets<Image>>, mut materials: ResMut<Assets<StandardMaterial>>)
-{
+pub fn setup_texture_camera(
+    mut commands: Commands, mut images: ResMut<Assets<Image>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+    config: Res<crate::config::structs::GameConfig>,
+) {
+    let mut screen_size: Vec2 = Vec2::new(
+        (config.ship.screen_center.tl - config.ship.screen_center.tr).length(),
+        (config.ship.screen_center.tl - config.ship.screen_center.bl).length(),
+    );
+
+    if screen_size.x <= 0.0 {
+        screen_size.x = SCREEN_WIDTH as f32;
+    }
+    if screen_size.y <= 0.0 {
+        screen_size.y = SCREEN_HEIGHT as f32;
+    }
+    let ratio = screen_size.x / screen_size.y;
+    let screen_height_scaled = (SCREEN_WIDTH as f32) / ratio;
+    info!("Screen width: {}, Screen height: {}", SCREEN_WIDTH, screen_height_scaled);
+
     let mut image = Image {
         texture_descriptor: TextureDescriptor {
             label: Some("menu_camera_target"),
-            size: Extent3d { width: SCREEN_WIDTH, height: SCREEN_HEIGHT, depth_or_array_layers: 1 },
+            size: Extent3d { width: SCREEN_WIDTH, height: screen_height_scaled as u32, depth_or_array_layers: 1 },
             dimension: TextureDimension::D2,
             format: TextureFormat::Bgra8UnormSrgb,
             mip_level_count: 1,
@@ -38,7 +56,7 @@ pub fn setup_texture_camera(mut commands: Commands, mut images: ResMut<Assets<Im
         ..default()
     };
 
-    image.resize(Extent3d { width: SCREEN_WIDTH, height: SCREEN_HEIGHT, depth_or_array_layers: 1 });
+    image.resize(Extent3d { width: SCREEN_WIDTH, height: screen_height_scaled as u32, depth_or_array_layers: 1 });
     let handler = images.add(image);
 
     let mat_handler = materials.add(StandardMaterial {

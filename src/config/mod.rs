@@ -32,6 +32,10 @@ pub fn load_game_config(path: &str) -> structs::GameConfig {
                     "vec3" => {
                         let v = parse_vec3(&attributes);
                         match scope_path(&scope).as_str() {
+                            "game/ship/camera/position/vec3" => cfg.main_cam.position = v,
+                            "game/ship/camera/look_at_menu/vec3" => cfg.main_cam.look_at_menu = v,
+                            "game/ship/camera/look_at_forward/vec3" => cfg.main_cam.look_at_forward = v,
+
                             "game/ship/backcamera/position/vec3" => cfg.ship.backcamera_position = v,
                             "game/ship/backcamera/look_at/vec3" => cfg.ship.backcamera_look_at = v,
 
