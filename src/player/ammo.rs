@@ -37,8 +37,6 @@ pub fn shoot_ammo(
     let world_offset = player_tr.rotation * local_offset;
     let tangential_vel = player_rot.cross(world_offset);
 
-    info!("{}", tangential_vel);
-
     let final_vel = player_vel.0 // inherit ship movement
               + tangential_vel// inherit rotational motion
               + laser_dir * 20.0; // base speed
