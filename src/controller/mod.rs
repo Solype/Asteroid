@@ -64,6 +64,7 @@ pub fn plugin(app: &mut App) {
             systems::rotate_spaceship,
             systems::roll_spaceship,
             systems::move_player_system,
+            systems::move_player
         )
             .run_if(in_state(GameState::Game)),
     );
