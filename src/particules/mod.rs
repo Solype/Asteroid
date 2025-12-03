@@ -1,34 +1,47 @@
 use bevy::prelude::*;
 use bevy_hanabi::prelude::*;
 
+use crate::game_states::GameState;
+
 pub struct ParticlesPlugin;
 
 impl Plugin for ParticlesPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(PostStartup, spawn_particles);
-        // app.add_systems(Update, update_rocket_velocity_system);
+        app.add_systems(Update, enable_disable_rockets_particules.run_if(in_state(GameState::Game)));
     }
 }
 
 fn create_rocket_effect() -> EffectAsset {
+    // 2) Crée le writer et utilise les propriétés
     let writer = ExprWriter::new();
 
-    // Position initiale dans un cercle (zone de sortie du réacteur)
+    
+    let direction_handle = writer.add_property("direction", Vec3::Y.into()); // Vec3
+    let speed_handle = writer.add_property("speed", 100.0.into());           // f32
+
+    // récupère les WriterExpr (ne pas appeler .expr() ici)
+    let direction = writer.prop(direction_handle);
+    let speed = writer.prop(speed_handle);
+
+
+    let velocity = (direction * speed).expr();
+    let init_vel = SetAttributeModifier::new(Attribute::VELOCITY, velocity);
+    
+    // let random_vec = writer.rand(VectorType::VEC3F);
+    // let mapped_vec = random_vec * writer.lit(2.) - writer.lit(1.);
+    // let direction = mapped_vec.normalized();
+    // let speed = writer.lit(1.);
+    // let velocity = (direction * speed).expr();
+    // let init_vel = SetAttributeModifier::new(Attribute::VELOCITY,velocity);
+
     let init_pos = SetPositionCircleModifier {
         center: writer.lit(Vec3::ZERO).expr(), // on placera le transform plus tard
         axis: writer.lit(Vec3::X).expr(),
         radius: writer.lit(0.5).expr(),
         dimension: ShapeDimension::Volume,
     };
-
-    let vel = writer.rand(VectorType::VEC3F);
-    let vel = vel * writer.lit(2.) - writer.lit(1.); // remap [0:1] to [-1:1]
-    let vel = vel.normalized();
-    let speed = writer.lit(1.); //.uniform(writer.lit(4.));
-    let vel = (vel * speed).expr();
-    let init_vel = SetAttributeModifier::new(Attribute::VELOCITY, vel);
-
-
+    
     let age = writer.lit(0.).expr();
     let init_age = SetAttributeModifier::new(Attribute::AGE, age);
 
@@ -55,7 +68,7 @@ fn create_rocket_effect() -> EffectAsset {
     color_gradient.add_key(0.8, Vec4::new(1.0, 1.0, 1.0, 1.0)); // blanc chaud
     color_gradient.add_key(1.0, Vec4::new(1.0, 1.0, 1.0, 0.0)); // blanc fade
 
-    EffectAsset::new(30000, spawner, writer.finish())
+    EffectAsset::new(3000, spawner, writer.finish())
         .with_name("rocket")
         .init(init_pos)
         .init(init_vel)
@@ -79,7 +92,27 @@ fn create_rocket_effect() -> EffectAsset {
         })
 }
 
-/// Spawn le réacteur avec les particules attachées
+pub fn enable_disable_rockets_particules(
+    keyboard: Res<ButtonInput<KeyCode>>,
+    mouse: Res<ButtonInput<MouseButton>>,
+    keybinds: Res<crate::globals_structs::Keybinds>,
+    mut query: Query<(&mut EffectSpawner, &mut EffectProperties, &GlobalTransform), With<ParticleEffect>>,
+) {
+    let enabled = keybinds.forward.pressed(&keyboard, &mouse);
+
+    if enabled {
+        for (mut spawner, mut effect, transform) in &mut query {
+            spawner.active = enabled;
+            let forward: Vec3 = transform.forward().into();
+            (*effect).set("direction", Value::Vector(VectorValue::new_vec3(-forward)));
+        }
+    } else {
+        for (mut spawner, _, _) in &mut query {
+            spawner.active = enabled;
+        }
+    }
+}
+
 pub fn spawn_particles(
     mut commands: Commands,
     mut effects: ResMut<Assets<EffectAsset>>,
@@ -89,17 +122,24 @@ pub fn spawn_particles(
     let position1 = gameconfig.ship.thruster_left;
     let position2 = gameconfig.ship.thruster_right;
 
+    let mut props: EffectProperties = EffectProperties::default();
+    props.set("direction", Value::Vector(VectorValue::new_vec3(Vec3::Y)));
+    props.set("speed", Value::Scalar(ScalarValue::Float(10.0)));
+
     let effect = effects.add(create_rocket_effect());
     let particules1 = commands.spawn((
         Name::new("rocket1"),
         Transform::from_translation(position1),
-        ParticleEffect::new(effect.clone())
+        ParticleEffect::new(effect.clone()),
+        props.clone()
     )).id();
+
 
     let particules2 = commands.spawn((
         Name::new("rocket2"),
         Transform::from_translation(position2),
-        ParticleEffect::new(effect.clone())
+        ParticleEffect::new(effect.clone()),
+        props.clone()
     )).id();
 
     let e = ship.into_inner();
