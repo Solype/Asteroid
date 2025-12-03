@@ -101,7 +101,7 @@ fn start_after_startup(
     if *frame_count < 10 { // wait one frame
         return;
     }
-    next_state.set(GameState::Game);
+    next_state.set(GameState::Menu);
 }
 
 
@@ -117,7 +117,7 @@ fn create_quad(
 
     let mut mesh = Mesh::new(PrimitiveTopology::TriangleList, RenderAssetUsages::all());
 
-    let epsilon = 0.001;
+    let epsilon = 0.0;
     let offset = normal * epsilon;
 
     let positions = vec![
@@ -192,25 +192,6 @@ fn setup_left_screen(
         println!("  {:?}", p);
     }
 
-    // let left_points: Vec<Vec3> = vec![
-    //     Vec3::new(-0.3396, 0.250517, 0.487824),
-    //     Vec3::new(-0.12397, 0.250517, 0.487824),
-    //     Vec3::new(-0.12397, 0.185115, 0.325565),
-    //     Vec3::new(-0.3396, 0.185115, 0.325565),
-    // ];
-    // let right_points: Vec<Vec3> = vec![
-    //     Vec3::new(0.12397, 0.250517, 0.487824),
-    //     Vec3::new(0.3396, 0.250517, 0.487824),
-    //     Vec3::new(0.3396, 0.185115, 0.325565),
-    //     Vec3::new(0.12397, 0.185115, 0.325565),
-    // ];
-    // let middle_points: Vec<Vec3> = vec![
-    //     Vec3::new(-0.073463, 0.145232, 0.282566),
-    //     Vec3::new(0.073463, 0.145232, 0.282566),
-    //     Vec3::new(0.075941, 0.021161, 0.192003),
-    //     Vec3::new(-0.075941, 0.021161, 0.192003),
-    // ];
-
     let (left_mesh, _left_normal, _left_center) = create_quad(
         left_points[0],
         left_points[1],
@@ -259,11 +240,11 @@ fn setup(
 ) {
     let player_entity = commands
         .spawn((
-            SceneRoot(asset_server.load("Spaceship.glb#Scene0")),
+            SceneRoot(asset_server.load(gameconfig.ship.asset.clone())),
             controller::structs::Player,
             Velocity(Vec3::default()),
             controller::structs::RotationalVelocity::default(),
-            Transform::from_xyz(0.0, 0.0, 0.0).looking_at(Vec3::ZERO, Vec3::Y),
+            Transform::default(),
             children![
                 (
                     PlayerHitBox { radius: 1.0 },
