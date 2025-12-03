@@ -13,7 +13,7 @@ pub struct Ammo;
 
 #[derive(Resource)]
 pub struct ShootSide {
-    value: f32,
+    left: bool,
 }
 
 #[derive(Resource)]
@@ -59,7 +59,7 @@ pub fn setup(
         material: material,
     });
 
-    commands.insert_resource(ShootSide { value: 1.0 });
+    commands.insert_resource(ShootSide { left: true });
     commands.insert_resource(ShootSounds {
         shoot_pews: vec![
             asset_server.load("sounds/pew1.wav"),

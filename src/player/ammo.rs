@@ -1,29 +1,47 @@
 use bevy::audio::Volume;
 use rand::seq::IndexedRandom;
 
+use crate::config::structs::GameConfig;
+use crate::controller::structs::RotationalVelocity;
 use crate::globals_structs::{Keybinds, MusicVolume};
 use crate::{asteroids::Velocity, controller::structs::Player, player::*};
 
 pub fn shoot_ammo(
+    game_config: Res<GameConfig>,
+    mut commands: Commands,
     keybinds: Res<Keybinds>,
     keyboard: Res<ButtonInput<KeyCode>>,
     mouse: Res<ButtonInput<MouseButton>>,
     mut shoot_side: ResMut<ShootSide>,
-    player: Single<&Transform, With<Player>>,
+    player: Single<(&Transform, &Velocity, &RotationalVelocity), With<Player>>,
     assets: Res<AmmoAssets>,
     audio: Res<ShootSounds>,
     master_volume: Res<MusicVolume>,
-    mut commands: Commands,
 ) {
     if !keybinds.shoot.just_pressed(&keyboard, &mouse) {
         return;
     }
 
-    let local_offset = Vec3::new(shoot_side.value * 0.9, 1.0, -2.5);
-    shoot_side.value = -shoot_side.value;
+    let (player_tr, player_vel, player_rot) = player.into_inner();
 
-    let spawn_pos = player.transform_point(local_offset);
-    let laser_dir = (player.forward().normalize() * 60.0 - spawn_pos).normalize();
+    let local_offset = Vec3::from(if shoot_side.left {
+        game_config.ship.gun_left
+    } else {
+        game_config.ship.gun_right
+    });
+    shoot_side.left = !shoot_side.left;
+
+    let spawn_pos = player_tr.transform_point(local_offset);
+    let laser_dir = (player_tr.forward().normalize() * 60.0 - local_offset).normalize();
+
+    let world_offset = player_tr.rotation * local_offset;
+    let tangential_vel = player_rot.cross(world_offset);
+
+    info!("{}", tangential_vel);
+
+    let final_vel = player_vel.0 // inherit ship movement
+              + tangential_vel// inherit rotational motion
+              + laser_dir * 20.0; // base speed
 
     let mut rng = rand::rng();
     if let Some(handle) = audio.shoot_pews.choose(&mut rng) {
@@ -43,7 +61,7 @@ pub fn shoot_ammo(
                 ..Default::default()
             },
             Ammo,
-            Velocity(laser_dir * 10.0), // fast forward
+            Velocity(final_vel), // fast forward
             children![
                 (
                     Mesh3d(assets.mesh.clone()),
