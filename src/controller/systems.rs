@@ -90,15 +90,24 @@ pub fn free_look_system(
     vm.pos = vm.pos.lerp(Vec2::ZERO, decay_speed * time.delta_secs());
 }
 
+pub fn move_player(
+    time: Res<Time>,
+    player: Single<(&mut Transform, &crate::asteroids::Velocity), With<Player>>,
+) {
+    let (mut transform, velocity) = player.into_inner();
+
+    transform.translation += **velocity * time.delta_secs();
+}
+
 pub fn move_player_system(
     time: Res<Time>,
     keybinds: Res<Keybinds>,
     keyboard: Res<ButtonInput<KeyCode>>,
     mouse: Res<ButtonInput<MouseButton>>,
-    player: Single<(&mut Transform, &mut crate::asteroids::Velocity), With<Player>>,
+    player: Single<(&Transform, &mut crate::asteroids::Velocity), With<Player>>,
 ) {
     let mut speed_to_add = Vec3::default();
-    let (mut transform, mut velocity) = player.into_inner();
+    let (transform, mut velocity) = player.into_inner();
 
     if keybinds.right.pressed(&keyboard, &mouse) {
         speed_to_add.x += 1.0_f32;
@@ -123,14 +132,21 @@ pub fn move_player_system(
     if speed_to_add.length_squared() == 0.0 {
         return;
     }
-    speed_to_add = speed_to_add.normalize() * 2.0;
-    speed_to_add *= time.delta_secs();
     speed_to_add = transform.rotation * speed_to_add;
-    transform.translation += speed_to_add * time.delta_secs();
+    speed_to_add = speed_to_add.normalize() * time.delta_secs() * 3.;
     velocity.0 += speed_to_add;
-    if velocity.0.length() > 10.0_f32 {
-        velocity.0 = velocity.0.normalize() * 10.0_f32;
-    }
+    velocity.0 = velocity.0.clamp(
+        Vec3 {
+            x: -10.,
+            y: -10.,
+            z: -10.,
+        },
+        Vec3 {
+            x: 10.,
+            y: 10.,
+            z: 10.,
+        },
+    );
 }
 
 pub fn mouse_system(
