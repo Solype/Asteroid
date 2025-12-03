@@ -273,7 +273,6 @@ fn setup(
             },
             SpatialListener::new(1.0),
             GlobalTransform::default(),
-            helpers::camera_controller::CameraController::default(),
             Transform::from_xyz(0.0, 1.1, 0.3)
                 .looking_at(Vec3::new(-0.216544, 0.777080, -0.318808), Vec3::Y),
             controller::structs::PlayerCam,
