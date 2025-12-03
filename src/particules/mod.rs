@@ -1,4 +1,4 @@
-use bevy::prelude::*;
+use bevy::{math::VectorSpace, prelude::*};
 use bevy_hanabi::prelude::*;
 
 use crate::game_states::GameState;
@@ -96,18 +96,28 @@ pub fn enable_disable_rockets_particules(
     keyboard: Res<ButtonInput<KeyCode>>,
     mouse: Res<ButtonInput<MouseButton>>,
     keybinds: Res<crate::globals_structs::Keybinds>,
-    mut query: Query<(&mut EffectSpawner, &mut EffectProperties, &GlobalTransform), With<ParticleEffect>>,
+    mut query: ParamSet<(
+            Query<(&mut EffectSpawner, &mut EffectProperties, &GlobalTransform), With<ParticleEffect>>,
+            Single<&crate::asteroids::Velocity, With<crate::controller::structs::Player>>
+    )>
 ) {
     let enabled = keybinds.forward.pressed(&keyboard, &mouse);
+    let vel : Vec3;
+    {
+        vel = query.p1().0;
+    }
+    let speed : f32 = vel.length();
 
     if enabled {
-        for (mut spawner, mut effect, transform) in &mut query {
+        for (mut spawner, mut effect, transform) in &mut query.p0() {
             spawner.active = enabled;
             let forward: Vec3 = transform.forward().into();
-            (*effect).set("direction", Value::Vector(VectorValue::new_vec3(-forward)));
+            let dot = forward.dot(vel);
+            let new_speed = if dot > 0.0_f32 {Vec3::ZERO} else {(-forward).normalize() * speed * 0.7};
+            (*effect).set("direction", Value::Vector(VectorValue::new_vec3(new_speed)));
         }
     } else {
-        for (mut spawner, _, _) in &mut query {
+        for (mut spawner, _, _) in &mut query.p0() {
             spawner.active = enabled;
         }
     }
