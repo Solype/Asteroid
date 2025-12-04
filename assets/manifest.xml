@@ -20,9 +20,9 @@
 		<camera>
 			<transition><value value="3.0"/></transition>
 			<menu>
-				<position_at><vec3 x="0.0" y="1.2" z="4.0"/></position_at>
-				<look_at><vec3 x="0.0" y="1.2" z="5.0"/></look_at>
-				<fov><value value="60.0"/></fov>
+				<look><vec3 x="0.0" y="0.7087065" z="-0.29002798"/></look>
+				<position><vec3 x="0.0" y="1.05" z="0.27"/></position>
+				<fov><value value="30.0"/></fov>
 			</menu>
 			<driving>
 				<position><vec3 x="0.0" y="1.2" z="0.3"/></position>

@@ -44,6 +44,7 @@ pub fn load_game_config(path: &str) -> structs::GameConfig {
 
                     "vec3" => {
                         let v = parse_vec3(&attributes);
+                        println!("found value {} at {}", v, scope_path(&scope).as_str());
                         match scope_path(&scope).as_str() {
                             "game/ship/camera/driving/position/vec3" => cfg.main_cam.driving.position = v,
                             "game/ship/camera/driving/look/vec3" => cfg.main_cam.driving.look_at = v,
