@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 use bevy::{prelude::{Vec2, Vec3}};
+=======
+use bevy::prelude::{Vec2, Vec3};
+>>>>>>> b3f6beb (feat(manifest.xml): now it reads the manifest, create a ressource based on it and use it for the size, name and title of the window)
 use xml::reader::{EventReader, XmlEvent};
 use std::fs::File;
 
@@ -82,12 +86,15 @@ pub fn load_game_config(path: &str) -> structs::GameConfig {
                         }
                     }
 
+<<<<<<< HEAD
                     "mouseasset" => {
                         if let Some(src) = find_attr(&attributes, "src") {
                             cfg.ui.mouseasset = src.to_string();
                         }
                     }
 
+=======
+>>>>>>> b3f6beb (feat(manifest.xml): now it reads the manifest, create a ressource based on it and use it for the size, name and title of the window)
                     _ => {}
                 }
             }

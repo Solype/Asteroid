@@ -12,8 +12,9 @@ pub struct GameConfig {
 
 #[derive(Debug, Clone, Default)]
 pub struct CamConfig {
-    pub position: Vec3,
-    pub look_at_forward: Vec3,
+    pub position_menu: Vec3,
+    pub position_driving: Vec3,
+    pub look_at_driving: Vec3,
     pub look_at_menu: Vec3,
 }
 
