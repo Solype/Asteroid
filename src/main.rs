@@ -36,8 +36,6 @@ fn main() {
     let width = if gameconfig.window.x > 0.0 { gameconfig.window.x as u32 } else { 1280 };
     let height = if gameconfig.window.y > 0.0 { gameconfig.window.y as u32 } else { 720 };
 
-    println!("Size of the window: {} {}", width, height);
-
     let mut app = App::new();
 
     app.insert_resource(gameconfig.clone());
@@ -83,9 +81,14 @@ fn main() {
         .run();
 }
 
-fn setup_ui_ressource(mut command: Commands, asset_server: Res<AssetServer>) {
-    let font = asset_server.load("font.ttf");
-    let background = asset_server.load("menu_bg.jpg");
+fn setup_ui_ressource(
+    mut command: Commands,
+    asset_server: Res<AssetServer>,
+    gameconfig: Res<crate::config::structs::GameConfig>
+) {
+    let font = asset_server.load(gameconfig.ui.font.clone());
+    let background = asset_server.load(gameconfig.ui.background.clone());
+
     command.insert_resource(UIRessources {
         font: font.clone(),
         bg: background.clone(),
@@ -177,20 +180,6 @@ fn setup_left_screen(
         gameconfig.ship.screen_center.br,
         gameconfig.ship.screen_center.bl,
     ];
-    println!("Left screen points:");
-    for p in &left_points {
-        println!("  {:?}", p);
-    }
-
-    println!("Right screen points:");
-    for p in &right_points {
-        println!("  {:?}", p);
-    }
-
-    println!("Middle screen points:");
-    for p in &middle_points {
-        println!("  {:?}", p);
-    }
 
     let (left_mesh, _left_normal, _left_center) = create_quad(
         left_points[0],

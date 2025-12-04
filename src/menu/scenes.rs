@@ -317,7 +317,6 @@ pub fn create_options_menu_scene(
                             }
                             if let Ok(act) = action.get(click.entity) {
                                 waiting.0 = Some(*act);
-                                info!("Now waiting for new key for {:?}", waiting.0);
                             }
                         });
                     }

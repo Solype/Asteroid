@@ -17,6 +17,20 @@ pub fn load_game_config(path: &str) -> structs::GameConfig {
                 scope.push(name.local_name.clone());
 
                 match name.local_name.as_str() {
+
+                    "value" => {
+                        let v = parse_value(&attributes);
+                        match scope_path(&scope).as_str() {
+                            "game/ship/speed/value" => cfg.ship.speed = v,
+                            "game/ship/gun/ammo/speed/value" => cfg.ship.ammo.speed = v,
+                            "game/ship/gun/ammo/despawn_distance/value" => cfg.ship.ammo.distance_despawn = v,
+                            "game/ship/camera/transition/value" => cfg.main_cam.speed_transition = v,
+                            "game/ship/camera/menu/fov/value" => cfg.main_cam.menu.fov = v,
+                            "game/ship/camera/driving/fov/value" => cfg.main_cam.driving.fov = v,
+                            _ => {}
+                        }
+                    }
+
                     "vec2" => {
                         let v = parse_vec2(&attributes);
 
@@ -32,9 +46,11 @@ pub fn load_game_config(path: &str) -> structs::GameConfig {
                     "vec3" => {
                         let v = parse_vec3(&attributes);
                         match scope_path(&scope).as_str() {
-                            "game/ship/camera/position/vec3" => cfg.main_cam.position = v,
-                            "game/ship/camera/look_at_menu/vec3" => cfg.main_cam.look_at_menu = v,
-                            "game/ship/camera/look_at_forward/vec3" => cfg.main_cam.look_at_forward = v,
+                            "game/ship/camera/driving/position/vec3" => cfg.main_cam.driving.position = v,
+                            "game/ship/camera/driving/look/vec3" => cfg.main_cam.driving.look_at = v,
+
+                            "game/ship/camera/menu/position/vec3" => cfg.main_cam.menu.position = v,
+                            "game/ship/camera/menu/look/vec3" => cfg.main_cam.menu.look_at = v,
 
                             "game/ship/backcamera/position/vec3" => cfg.ship.backcamera_position = v,
                             "game/ship/backcamera/look_at/vec3" => cfg.ship.backcamera_look_at = v,
@@ -42,6 +58,7 @@ pub fn load_game_config(path: &str) -> structs::GameConfig {
                             "game/ship/thruster/right/vec3" => cfg.ship.thruster_right = v,
                             "game/ship/thruster/left/vec3" => cfg.ship.thruster_left = v,
 
+                            "game/ship/gun/ammo/color/vec3" => cfg.ship.ammo.color = v,
                             "game/ship/gun/right/vec3" => cfg.ship.gun_right = v,
                             "game/ship/gun/left/vec3" => cfg.ship.gun_left = v,
 
@@ -64,27 +81,20 @@ pub fn load_game_config(path: &str) -> structs::GameConfig {
                         }
                     }
 
-                    "background" => {
-                        if let Some(src) = find_attr(&attributes, "src") {
-                            cfg.ui.background = src.to_string();
-                        }
-                    }
-
-                    "font" => {
-                        if let Some(src) = find_attr(&attributes, "src") {
-                            cfg.ui.font = src.to_string();
-                        }
-                    }
-
                     "asset" => {
                         if let Some(src) = find_attr(&attributes, "src") {
-                            cfg.ship.asset = src.to_string();
-                        }
-                    }
-
-                    "mouseasset" => {
-                        if let Some(src) = find_attr(&attributes, "src") {
-                            cfg.ui.mouseasset = src.to_string();
+                            let path = src.to_string();
+                            println!("found {} at {}", path, scope_path(&scope).as_str());
+                            match scope_path(&scope).as_str() {
+                                "game/ship/asset" => cfg.ship.asset = path,
+                                "game/ui/background/asset" => cfg.ui.background = path,
+                                "game/ui/font/asset" => cfg.ui.font = path,
+                                "game/ui/sounds/asset" => cfg.ui.sounds.push(path),
+                                "game/ship/gun/ammo/sounds/asset" => cfg.ship.ammo.sounds.push(path),
+                                "game/ship/music/asset" => cfg.ship.music = path, 
+                                "game/ui/music/asset" => cfg.ui.music = path, 
+                                _ => {}
+                            }
                         }
                     }
 
@@ -124,6 +134,10 @@ fn parse_vec2(attrs: &[xml::attribute::OwnedAttribute]) -> Vec2 {
         x: find_attr(attrs, "x").unwrap_or("0").parse().unwrap_or(0.0),
         y: find_attr(attrs, "y").unwrap_or("0").parse().unwrap_or(0.0),
     }
+}
+
+fn parse_value(attrs: &[xml::attribute::OwnedAttribute]) -> f32 {
+    return find_attr(attrs, "value").unwrap_or("0").parse().unwrap_or(0.0);
 }
 
 fn parse_vec3(attrs: &[xml::attribute::OwnedAttribute]) -> Vec3 {

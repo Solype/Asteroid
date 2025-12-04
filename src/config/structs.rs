@@ -1,20 +1,27 @@
-use bevy::prelude::{Resource, Vec3, Vec2};
+use bevy::{prelude::{Resource, Vec2, Vec3}};
 
 #[derive(Debug, Clone, Default, Resource)]
 pub struct GameConfig {
     pub window: Vec2,
     pub window_title: String,
     pub window_name: String,
-    pub main_cam: CamConfig,
+    pub main_cam: MainCamConfig,
     pub ui: UIConfig,
     pub ship: ShipConfig,
 }
 
 #[derive(Debug, Clone, Default)]
+pub struct MainCamConfig {
+    pub speed_transition: f32,
+    pub driving: CamConfig,
+    pub menu: CamConfig
+}
+
+#[derive(Debug, Clone, Default)]
 pub struct CamConfig {
     pub position: Vec3,
-    pub look_at_forward: Vec3,
-    pub look_at_menu: Vec3,
+    pub look_at: Vec3,
+    pub fov: f32
 }
 
 #[derive(Debug, Clone, Default)]
@@ -22,11 +29,22 @@ pub struct UIConfig {
     pub background: String,
     pub font: String,
     pub dimension: Vec2,
-    pub mouseasset: String
+    pub sounds: Vec<String>,
+    pub music: String,
+}
+
+#[derive(Debug, Clone, Default)]
+pub struct AmmoConfig {
+    pub speed: f32,
+    pub distance_despawn: f32,
+    pub color: Vec3,
+    pub sounds: Vec<String>,
 }
 
 #[derive(Debug, Clone, Default)]
 pub struct ShipConfig {
+    pub music: String,
+    pub speed: f32,
     pub asset: String,
     pub backcamera_position: Vec3,
     pub backcamera_look_at: Vec3,
@@ -34,6 +52,7 @@ pub struct ShipConfig {
     pub thruster_left: Vec3,
     pub gun_right: Vec3,
     pub gun_left: Vec3,
+    pub ammo: AmmoConfig,
     pub screen_right: ScreenQuad,
     pub screen_center: ScreenQuad,
     pub screen_left: ScreenQuad,

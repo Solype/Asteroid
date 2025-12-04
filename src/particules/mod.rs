@@ -1,4 +1,4 @@
-use bevy::{math::VectorSpace, prelude::*};
+use bevy::{prelude::*};
 use bevy_hanabi::prelude::*;
 
 use crate::game_states::GameState;
@@ -17,26 +17,18 @@ fn create_rocket_effect() -> EffectAsset {
     let writer = ExprWriter::new();
 
     
-    let direction_handle = writer.add_property("direction", Vec3::Y.into()); // Vec3
-    let speed_handle = writer.add_property("speed", 100.0.into());           // f32
+    let direction_handle = writer.add_property("direction", Vec3::Y.into());
+    let speed_handle = writer.add_property("speed", 100.0.into());
 
-    // récupère les WriterExpr (ne pas appeler .expr() ici)
     let direction = writer.prop(direction_handle);
     let speed = writer.prop(speed_handle);
 
 
     let velocity = (direction * speed).expr();
     let init_vel = SetAttributeModifier::new(Attribute::VELOCITY, velocity);
-    
-    // let random_vec = writer.rand(VectorType::VEC3F);
-    // let mapped_vec = random_vec * writer.lit(2.) - writer.lit(1.);
-    // let direction = mapped_vec.normalized();
-    // let speed = writer.lit(1.);
-    // let velocity = (direction * speed).expr();
-    // let init_vel = SetAttributeModifier::new(Attribute::VELOCITY,velocity);
 
     let init_pos = SetPositionCircleModifier {
-        center: writer.lit(Vec3::ZERO).expr(), // on placera le transform plus tard
+        center: writer.lit(Vec3::ZERO).expr(),
         axis: writer.lit(Vec3::X).expr(),
         radius: writer.lit(0.5).expr(),
         dimension: ShapeDimension::Volume,

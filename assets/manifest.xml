@@ -5,21 +5,35 @@
 		<name>Ast3roiD</name>
 	</window>
 	<ui>
-		<background src=""/>
-		<font src=""/>
-		<mouseasset src=""/>
+		<background><asset src="menu_bg.jpg"/></background>
+		<font><asset src="font.ttf"/></font>
 		<dimension><vec2 x="90" y="90"/></dimension>
+		<sounds>
+			<asset src="sounds/menu_bip1.wav"/>
+			<asset src="sounds/menu_bip2.wav"/>
+		</sounds>
+		<music><asset src="sounds/menu.wav"/></music>
 	</ui>
 	<ship>
+		<music><asset src="sounds/game.wav"/></music>
 		<asset src="Spaceship.glb#Scene0"/>
+		<speed><value value="10."/></speed>
 		<backcamera>
 			<position><vec3 x="0.0" y="1.1" z="4.0"/></position>
 			<look_at><vec3 x="0.0" y="1.1" z="5.0"/></look_at>
 		</backcamera>
 		<camera>
-			<position><vec3 x="0.0" y="1.1" z="4.0"/></position>
-			<look_at_menu><vec3 x="0.0" y="1.1" z="5.0"/></look_at_menu>
-			<look_at_forward><vec3 x="0.0" y="1.1" z="5.0"/></look_at_forward>
+			<transition><value value="3.0"/></transition>
+			<menu>
+				<look><vec3 x="0.0" y="0.75" z="-0.29"/></look>
+				<position><vec3 x="0.0" y="1.05" z="0.27"/></position>
+				<fov><value value="15.0"/></fov>
+			</menu>
+			<driving>
+				<position><vec3 x="0.0" y="1.2" z="0.3"/></position>
+				<look><vec3 x="0.0" y="1.2" z="0.0"/></look>
+				<fov><value value="80.0"/></fov>
+			</driving>
 		</camera>
 		<thruster>
 			<right>
@@ -31,6 +45,17 @@
 		</thruster>
 
 		<gun>
+			<ammo>
+				<speed><value value="50"/></speed>
+				<color><vec3 x="1.0" y="0.0" z="0.0"/></color>
+				<despawn_distance><value value="100"/></despawn_distance>
+				<sounds>
+					<asset src="sounds/pew1.wav"/>
+					<asset src="sounds/pew2.wav"/>
+					<asset src="sounds/pew3.wav"/>
+					<asset src="sounds/pew4.wav"/>
+				</sounds>
+			</ammo>
 			<right>
 				<vec3 x="0.715" y="0.895" z="-0.06"/>
 			</right>

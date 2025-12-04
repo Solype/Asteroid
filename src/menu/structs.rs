@@ -78,7 +78,7 @@ pub struct ButtonInfo {
 /// 
 ////////////////////////////////////////////////////
 
-#[derive(Resource)]
+#[derive(Resource, Default)]
 pub struct MenuSounds {
     pub button_bips: Vec<Handle<AudioSource>>,
 }

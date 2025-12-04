@@ -4,6 +4,7 @@ use crate::controller::DrivingUI;
 use crate::game_states::GameState;
 use crate::globals_structs::Keybinds;
 use crate::menu::structs::SmoothCamMove;
+use crate::config::structs::GameConfig;
 use bevy::asset::{AssetServer, Handle};
 use bevy::input::mouse::AccumulatedMouseMotion;
 use bevy::input::ButtonInput;
@@ -15,16 +16,17 @@ use std::f32::consts::FRAC_PI_2;
 
 pub fn enter_driving_mod(
     mut command: Commands,
+    gameconfig: Res<GameConfig>,
     entity: Single<Entity, With<PlayerCam>>,
     mut ui_entities: Query<&mut Visibility, With<DrivingUI>>,
 ) {
     let player = entity.into_inner();
 
     command.entity(player).insert(SmoothCamMove {
-        speed: Some(3.0),
-        fov: Some(60.0_f32.to_radians()),
-        position: Some(Vec3::new(0.0, 1.2, 0.3)),
-        look_at: Some(Vec3::new(0.0, 1.2, 0.0)),
+        speed: Some(gameconfig.main_cam.speed_transition),
+        fov: Some(gameconfig.main_cam.driving.fov.to_radians()),
+        position: Some(gameconfig.main_cam.driving.position),
+        look_at: Some(gameconfig.main_cam.driving.look_at),
         ..Default::default()
     });
 
@@ -104,6 +106,7 @@ pub fn move_player_system(
     keybinds: Res<Keybinds>,
     keyboard: Res<ButtonInput<KeyCode>>,
     mouse: Res<ButtonInput<MouseButton>>,
+    gameconfig: Res<GameConfig>,
     player: Single<(&Transform, &mut crate::asteroids::Velocity), With<Player>>,
 ) {
     let mut speed_to_add = Vec3::default();
@@ -133,7 +136,7 @@ pub fn move_player_system(
         return;
     }
     speed_to_add = transform.rotation * speed_to_add;
-    speed_to_add = speed_to_add.normalize() * time.delta_secs() * 3.;
+    speed_to_add = speed_to_add.normalize() * time.delta_secs() * gameconfig.ship.speed;
     velocity.0 += speed_to_add;
     velocity.0 = velocity.0.clamp(
         Vec3 {

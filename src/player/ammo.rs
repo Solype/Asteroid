@@ -39,7 +39,10 @@ pub fn shoot_ammo(
 
     let final_vel = player_vel.0 // inherit ship movement
               + tangential_vel// inherit rotational motion
-              + laser_dir * 20.0; // base speed
+              + laser_dir * game_config.ship.ammo.speed; // base speed
+
+    let color_vec3: Vec3 = game_config.ship.ammo.color;
+    let color: Color = Color::srgb(color_vec3.x, color_vec3.y, color_vec3.z);
 
     let mut rng = rand::rng();
     if let Some(handle) = audio.shoot_pews.choose(&mut rng) {
@@ -48,7 +51,7 @@ pub fn shoot_ammo(
                 intensity: 100_000.0,
                 range: 20.0,
                 radius: 1.0,
-                color: Color::srgb(1.0, 0.0, 0.5),
+                color: color,
                 shadows_enabled: false,
                 ..default()
             },
@@ -90,10 +93,11 @@ pub fn clear_ammos(
     mut commands: Commands,
     player: Single<&Transform, With<Player>>,
     mut query: Query<(Entity, &Transform), With<Ammo>>,
+    game_config: Res<GameConfig>,
 ) {
     for (entity, transform) in &mut query {
         let distance = transform.translation.distance(player.translation);
-        if distance > 50.0 {
+        if distance > game_config.ship.ammo.distance_despawn {
             commands.entity(entity).despawn();
         }
     }
