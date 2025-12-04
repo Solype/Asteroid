@@ -1,21 +1,27 @@
-use bevy::prelude::{Resource, Vec3, Vec2};
+use bevy::{prelude::{Resource, Vec2, Vec3}};
 
 #[derive(Debug, Clone, Default, Resource)]
 pub struct GameConfig {
     pub window: Vec2,
     pub window_title: String,
     pub window_name: String,
-    pub main_cam: CamConfig,
+    pub main_cam: MainCamConfig,
     pub ui: UIConfig,
     pub ship: ShipConfig,
 }
 
 #[derive(Debug, Clone, Default)]
+pub struct MainCamConfig {
+    pub speed_transition: f32,
+    pub driving: CamConfig,
+    pub menu: CamConfig
+}
+
+#[derive(Debug, Clone, Default)]
 pub struct CamConfig {
-    pub position_menu: Vec3,
-    pub position_driving: Vec3,
-    pub look_at_driving: Vec3,
-    pub look_at_menu: Vec3,
+    pub position: Vec3,
+    pub look_at: Vec3,
+    pub fov: f32
 }
 
 #[derive(Debug, Clone, Default)]

@@ -12,15 +12,23 @@
 	</ui>
 	<ship>
 		<asset src="Spaceship.glb#Scene0"/>
+		<speed><value value="10."/></speed>
 		<backcamera>
 			<position><vec3 x="0.0" y="1.1" z="4.0"/></position>
 			<look_at><vec3 x="0.0" y="1.1" z="5.0"/></look_at>
 		</backcamera>
 		<camera>
-			<position_at_driving><vec3 x="0.0" y="1.1" z="4.0"/></position>
-			<position_at_menu><vec3 x="0.0" y="1.1" z="4.0"/></position>
-			<look_at_menu><vec3 x="0.0" y="1.1" z="5.0"/></look_at_menu>
-			<look_at_driving><vec3 x="0.0" y="1.1" z="5.0"/></look_at_forward>
+			<transition><value value="3.0"/></transition>
+			<menu>
+				<position_at><vec3 x="0.0" y="1.2" z="4.0"/></position_at>
+				<look_at><vec3 x="0.0" y="1.2" z="5.0"/></look_at>
+				<fov><value value="60.0"/></fov>
+			</menu>
+			<driving>
+				<position><vec3 x="0.0" y="1.2" z="0.3"/></position>
+				<look><vec3 x="0.0" y="1.2" z="0.0"/></look>
+				<fov><value value="80.0"/></fov>
+			</driving>
 		</camera>
 		<thruster>
 			<right>
