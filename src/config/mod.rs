@@ -84,12 +84,15 @@ pub fn load_game_config(path: &str) -> structs::GameConfig {
                     "asset" => {
                         if let Some(src) = find_attr(&attributes, "src") {
                             let path = src.to_string();
+                            println!("found {} at {}", path, scope_path(&scope).as_str());
                             match scope_path(&scope).as_str() {
                                 "game/ship/asset" => cfg.ship.asset = path,
                                 "game/ui/background/asset" => cfg.ui.background = path,
                                 "game/ui/font/asset" => cfg.ui.font = path,
                                 "game/ui/sounds/asset" => cfg.ui.sounds.push(path),
                                 "game/ship/gun/ammo/sounds/asset" => cfg.ship.ammo.sounds.push(path),
+                                "game/ship/music/asset" => cfg.ship.music = path, 
+                                "game/ui/music/asset" => cfg.ui.music = path, 
                                 _ => {}
                             }
                         }

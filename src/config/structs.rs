@@ -30,6 +30,7 @@ pub struct UIConfig {
     pub font: String,
     pub dimension: Vec2,
     pub sounds: Vec<String>,
+    pub music: String,
 }
 
 #[derive(Debug, Clone, Default)]
@@ -42,6 +43,7 @@ pub struct AmmoConfig {
 
 #[derive(Debug, Clone, Default)]
 pub struct ShipConfig {
+    pub music: String,
     pub speed: f32,
     pub asset: String,
     pub backcamera_position: Vec3,

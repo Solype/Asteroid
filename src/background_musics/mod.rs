@@ -7,6 +7,12 @@ pub struct BackgroundMusic;
 
 pub struct BackgroundMusicPlugin;
 
+#[derive(Resource, Default)]
+struct MusicResources {
+    pub menu_music: Handle<AudioSource>,
+    pub game_music: Handle<AudioSource>
+}
+
 impl Plugin for BackgroundMusicPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, setup)
@@ -16,13 +22,22 @@ impl Plugin for BackgroundMusicPlugin {
     }
 }
 
-fn setup(mut commands: Commands) {
+fn setup(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    gameconfig: Res<crate::config::structs::GameConfig>
+) {
     commands.spawn((BackgroundMusic,));
+    let mut resource = MusicResources::default();
+
+    resource.game_music = asset_server.load(gameconfig.ship.music.clone());
+    resource.menu_music = asset_server.load(gameconfig.ui.music.clone());
+    commands.insert_resource(resource);
 }
 
 fn start_menu_music(
     mut commands: Commands,
-    asset_server: Res<AssetServer>,
+    music_resource: Res<MusicResources>,
     music: Single<(Entity, Option<&AudioSink>), With<BackgroundMusic>>,
     master_volume: Res<MusicVolume>,
 ) {
@@ -33,14 +48,14 @@ fn start_menu_music(
 
     commands.spawn((
         BackgroundMusic,
-        AudioPlayer::new(asset_server.load("sounds/menu.wav")),
+        AudioPlayer::new(music_resource.menu_music.clone()),
         PlaybackSettings::LOOP.with_volume(Volume::Linear(master_volume.volume / 100.0_f32)),
     ));
 }
 
 fn start_game_music(
     mut commands: Commands,
-    asset_server: Res<AssetServer>,
+    music_resource: Res<MusicResources>,
     music: Single<(Entity, Option<&AudioSink>), With<BackgroundMusic>>,
     master_volume: Res<MusicVolume>,
 ) {
@@ -51,7 +66,7 @@ fn start_game_music(
 
     commands.spawn((
         BackgroundMusic,
-    AudioPlayer::new(asset_server.load("sounds/game.wav")),
+        AudioPlayer::new(music_resource.game_music.clone()),
         PlaybackSettings::LOOP.with_volume(Volume::Linear(master_volume.volume / 100.0_f32)),
     ));
 }

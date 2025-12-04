@@ -12,8 +12,10 @@
 			<asset src="sounds/menu_bip1.wav"/>
 			<asset src="sounds/menu_bip2.wav"/>
 		</sounds>
+		<music><asset src="sounds/menu.wav"/></music>
 	</ui>
 	<ship>
+		<music><asset src="sounds/game.wav"/></music>
 		<asset src="Spaceship.glb#Scene0"/>
 		<speed><value value="10."/></speed>
 		<backcamera>
