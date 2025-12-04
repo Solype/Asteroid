@@ -15,7 +15,6 @@ pub fn apply_texture_to_quad(mut commands: Commands, screens: Query<(&MenuPlane,
 {
     for (_, entity) in screens.iter() {
         commands.entity(entity).insert(MeshMaterial3d(menu_texture.material.clone()));
-        info!("Texture applied");
         return;
     }
 }
@@ -38,7 +37,6 @@ pub fn setup_texture_camera(
     }
     let ratio = screen_size.x / screen_size.y;
     let screen_height_scaled = (SCREEN_WIDTH as f32) / ratio;
-    info!("Screen width: {}, Screen height: {}", SCREEN_WIDTH, screen_height_scaled);
 
     let mut image = Image {
         texture_descriptor: TextureDescriptor {
@@ -78,12 +76,16 @@ pub fn setup_texture_camera(
     ));
 }
 
-pub fn setup_sound_effect_and_music(mut commands: Commands, asset_server: Res<AssetServer>)
-{
-    commands.insert_resource(MenuSounds{
-        button_bips: vec![
-            asset_server.load("sounds/menu_bip1.wav"),
-            asset_server.load("sounds/menu_bip2.wav")
-        ]
-    });
+pub fn setup_sound_effect_and_music(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    gameconfig: Res<crate::config::structs::GameConfig>
+) {
+    let mut resource = MenuSounds::default();
+
+    for path in gameconfig.ui.sounds.iter() {
+        info!("path: {}", path);
+        resource.button_bips.push(asset_server.load(path));
+    }
+    commands.insert_resource(resource);
 }

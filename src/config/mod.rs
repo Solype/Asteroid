@@ -88,6 +88,8 @@ pub fn load_game_config(path: &str) -> structs::GameConfig {
                                 "game/ship/asset" => cfg.ship.asset = path,
                                 "game/ui/background/asset" => cfg.ui.background = path,
                                 "game/ui/font/asset" => cfg.ui.font = path,
+                                "game/ui/sounds/asset" => cfg.ui.sounds.push(path),
+                                "game/ship/gun/ammo/sounds/asset" => cfg.ship.ammo.sounds.push(path),
                                 _ => {}
                             }
                         }

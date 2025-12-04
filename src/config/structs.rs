@@ -29,6 +29,7 @@ pub struct UIConfig {
     pub background: String,
     pub font: String,
     pub dimension: Vec2,
+    pub sounds: Vec<String>,
 }
 
 #[derive(Debug, Clone, Default)]
@@ -36,6 +37,7 @@ pub struct AmmoConfig {
     pub speed: f32,
     pub distance_despawn: f32,
     pub color: Vec3,
+    pub sounds: Vec<String>,
 }
 
 #[derive(Debug, Clone, Default)]

@@ -54,8 +54,6 @@ pub fn focus_main_screen(
 ) {
     let player = player_entity.into_inner();
 
-    info!("position: {} look_at: {} fov: {}", gameconfig.main_cam.menu.position, gameconfig.main_cam.menu.look_at, gameconfig.main_cam.menu.fov);
-
     command.entity(player).insert(SmoothCamMove {
         look_at: Some(gameconfig.main_cam.menu.look_at),
         position: Some(gameconfig.main_cam.menu.position),
@@ -213,7 +211,6 @@ pub fn rebind_key(
             set_bind(&mut keybinds, action, button);
             update_text(&mut texts, action, button);
             waiting.0 = None;
-            info!("Has bind  with keyboard!");
             return;
         }
         if let Some(code) = mouse.get_just_pressed().last() {
@@ -221,7 +218,6 @@ pub fn rebind_key(
             set_bind(&mut keybinds, action, button);
             update_text(&mut texts, action, button);
             waiting.0 = None;
-            info!("Has bind  with mouse!");
             return;
         }
     }

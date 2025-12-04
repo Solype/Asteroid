@@ -43,7 +43,6 @@ pub fn shoot_ammo(
 
     let color_vec3: Vec3 = game_config.ship.ammo.color;
     let color: Color = Color::srgb(color_vec3.x, color_vec3.y, color_vec3.z);
-    info!("color: {}, speed: {}", color_vec3, game_config.ship.ammo.speed);
 
     let mut rng = rand::rng();
     if let Some(handle) = audio.shoot_pews.choose(&mut rng) {

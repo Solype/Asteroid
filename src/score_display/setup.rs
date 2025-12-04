@@ -64,7 +64,6 @@ pub fn apply_texture_to_quad(mut commands: Commands, screens: Query<(&ScorePlane
 
     for (_, entity) in screens.iter() {
         commands.entity(entity).insert(MeshMaterial3d(mat_handler));
-        info!("Texture applied");
         return;
     }
 }
@@ -90,5 +89,4 @@ pub fn setup_texture_camera(mut commands: Commands, mut images: ResMut<Assets<Im
     image.resize(Extent3d { width: SCREEN_WIDTH, height: SCREEN_HEIGHT, depth_or_array_layers: 1 });
 
     commands.insert_resource(ScoreCameraTarget { image: images.add(image) });
-    info!("Texture set !")
 }
