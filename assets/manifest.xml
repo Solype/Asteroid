@@ -48,8 +48,10 @@
 				<color><vec3 x="1.0" y="0.0" z="0.0"/></color>
 				<despawn_distance><value value="100"/></despawn_distance>
 				<sounds>
-					<asset src=""/>
-					<asset src=""/>
+					<asset src="sounds/pew1.wav"/>
+					<asset src="sounds/pew2.wav"/>
+					<asset src="sounds/pew3.wav"/>
+					<asset src="sounds/pew4.wav"/>
 				</sounds>
 			</ammo>
 			<right>

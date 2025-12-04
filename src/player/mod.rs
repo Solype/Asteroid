@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::game_states::GameState;
+use crate::{config::structs::GameConfig, game_states::GameState};
 pub mod ammo;
 
 #[derive(Component)]
@@ -22,7 +22,7 @@ pub struct AmmoAssets {
     material: Handle<StandardMaterial>,
 }
 
-#[derive(Resource)]
+#[derive(Resource, Default)]
 pub struct ShootSounds {
     pub shoot_pews: Vec<Handle<AudioSource>>,
 }
@@ -46,6 +46,7 @@ pub fn setup(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
     asset_server: Res<AssetServer>,
+    gameconfig: Res<GameConfig>
 ) {
     let material = materials.add(StandardMaterial {
         base_color: Color::hsl(280.0, 0.8, 0.6), // vivid purple
@@ -60,12 +61,10 @@ pub fn setup(
     });
 
     commands.insert_resource(ShootSide { left: true });
-    commands.insert_resource(ShootSounds {
-        shoot_pews: vec![
-            asset_server.load("sounds/pew1.wav"),
-            asset_server.load("sounds/pew2.wav"),
-            asset_server.load("sounds/pew3.wav"),
-            asset_server.load("sounds/pew4.wav"),
-        ],
-    });
+    let mut resource = ShootSounds::default();
+    for path in gameconfig.ship.ammo.sounds.iter() {
+        resource.shoot_pews.push(asset_server.load(path))
+    }
+
+    commands.insert_resource(resource);
 }
