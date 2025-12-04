@@ -22,7 +22,7 @@ pub fn load_game_config(path: &str) -> structs::GameConfig {
                         let v = parse_value(&attributes);
                         println!("found value {} at {}", v, scope_path(&scope).as_str());
                         match scope_path(&scope).as_str() {
-                            "game/ship/speed/value" => {},
+                            "game/ship/speed/value" => cfg.ship.speed = v,
                             "game/ship/camera/transition/value" => cfg.main_cam.speed_transition = v,
                             "game/ship/camera/menu/fov/value" => cfg.main_cam.menu.fov = v,
                             "game/ship/camera/driving/fov/value" => cfg.main_cam.driving.fov = v,

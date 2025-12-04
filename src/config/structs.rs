@@ -34,6 +34,7 @@ pub struct UIConfig {
 
 #[derive(Debug, Clone, Default)]
 pub struct ShipConfig {
+    pub speed: f32,
     pub asset: String,
     pub backcamera_position: Vec3,
     pub backcamera_look_at: Vec3,

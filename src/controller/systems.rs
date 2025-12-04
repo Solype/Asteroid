@@ -106,6 +106,7 @@ pub fn move_player_system(
     keybinds: Res<Keybinds>,
     keyboard: Res<ButtonInput<KeyCode>>,
     mouse: Res<ButtonInput<MouseButton>>,
+    gameconfig: Res<GameConfig>,
     player: Single<(&Transform, &mut crate::asteroids::Velocity), With<Player>>,
 ) {
     let mut speed_to_add = Vec3::default();
@@ -135,7 +136,7 @@ pub fn move_player_system(
         return;
     }
     speed_to_add = transform.rotation * speed_to_add;
-    speed_to_add = speed_to_add.normalize() * time.delta_secs() * 3.;
+    speed_to_add = speed_to_add.normalize() * time.delta_secs() * gameconfig.ship.speed;
     velocity.0 += speed_to_add;
     velocity.0 = velocity.0.clamp(
         Vec3 {
