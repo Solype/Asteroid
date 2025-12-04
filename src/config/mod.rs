@@ -20,7 +20,6 @@ pub fn load_game_config(path: &str) -> structs::GameConfig {
 
                     "value" => {
                         let v = parse_value(&attributes);
-                        println!("found value {} at {}", v, scope_path(&scope).as_str());
                         match scope_path(&scope).as_str() {
                             "game/ship/speed/value" => cfg.ship.speed = v,
                             "game/ship/gun/ammo/speed/value" => cfg.ship.ammo.speed = v,
@@ -46,7 +45,6 @@ pub fn load_game_config(path: &str) -> structs::GameConfig {
 
                     "vec3" => {
                         let v = parse_vec3(&attributes);
-                        println!("found value {} at {}", v, scope_path(&scope).as_str());
                         match scope_path(&scope).as_str() {
                             "game/ship/camera/driving/position/vec3" => cfg.main_cam.driving.position = v,
                             "game/ship/camera/driving/look/vec3" => cfg.main_cam.driving.look_at = v,
@@ -83,27 +81,15 @@ pub fn load_game_config(path: &str) -> structs::GameConfig {
                         }
                     }
 
-                    "background" => {
-                        if let Some(src) = find_attr(&attributes, "src") {
-                            cfg.ui.background = src.to_string();
-                        }
-                    }
-
-                    "font" => {
-                        if let Some(src) = find_attr(&attributes, "src") {
-                            cfg.ui.font = src.to_string();
-                        }
-                    }
-
                     "asset" => {
                         if let Some(src) = find_attr(&attributes, "src") {
-                            cfg.ship.asset = src.to_string();
-                        }
-                    }
-
-                    "mouseasset" => {
-                        if let Some(src) = find_attr(&attributes, "src") {
-                            cfg.ui.mouseasset = src.to_string();
+                            let path = src.to_string();
+                            match scope_path(&scope).as_str() {
+                                "game/ship/asset" => cfg.ship.asset = path,
+                                "game/ui/background/asset" => cfg.ui.background = path,
+                                "game/ui/font/asset" => cfg.ui.font = path,
+                                _ => {}
+                            }
                         }
                     }
 

@@ -83,9 +83,14 @@ fn main() {
         .run();
 }
 
-fn setup_ui_ressource(mut command: Commands, asset_server: Res<AssetServer>) {
-    let font = asset_server.load("font.ttf");
-    let background = asset_server.load("menu_bg.jpg");
+fn setup_ui_ressource(
+    mut command: Commands,
+    asset_server: Res<AssetServer>,
+    gameconfig: Res<crate::config::structs::GameConfig>
+) {
+    let font = asset_server.load(gameconfig.ui.font.clone());
+    let background = asset_server.load(gameconfig.ui.background.clone());
+
     command.insert_resource(UIRessources {
         font: font.clone(),
         bg: background.clone(),

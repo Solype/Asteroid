@@ -5,9 +5,8 @@
 		<name>Ast3roiD</name>
 	</window>
 	<ui>
-		<background src=""/>
-		<font src=""/>
-		<mouseasset src=""/>
+		<background><asset src="menu_bg.jpg"/></background>
+		<font><asset src="font.ttf"/></font>
 		<dimension><vec2 x="90" y="90"/></dimension>
 	</ui>
 	<ship>
