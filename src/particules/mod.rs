@@ -13,6 +13,7 @@ impl Plugin for ParticlesPlugin {
 }
 
 fn create_rocket_effect() -> EffectAsset {
+    // 2) Crée le writer et utilise les propriétés
     let writer = ExprWriter::new();
 
     
