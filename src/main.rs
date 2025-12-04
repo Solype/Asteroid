@@ -101,7 +101,7 @@ fn start_after_startup(
     if *frame_count < 10 { // wait one frame
         return;
     }
-    next_state.set(GameState::Game);
+    next_state.set(GameState::Menu);
 }
 
 

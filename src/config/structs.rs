@@ -33,6 +33,13 @@ pub struct UIConfig {
 }
 
 #[derive(Debug, Clone, Default)]
+pub struct AmmoConfig {
+    pub speed: f32,
+    pub distance_despawn: f32,
+    pub color: Vec3,
+}
+
+#[derive(Debug, Clone, Default)]
 pub struct ShipConfig {
     pub speed: f32,
     pub asset: String,
@@ -42,6 +49,7 @@ pub struct ShipConfig {
     pub thruster_left: Vec3,
     pub gun_right: Vec3,
     pub gun_left: Vec3,
+    pub ammo: AmmoConfig,
     pub screen_right: ScreenQuad,
     pub screen_center: ScreenQuad,
     pub screen_left: ScreenQuad,

@@ -23,6 +23,8 @@ pub fn load_game_config(path: &str) -> structs::GameConfig {
                         println!("found value {} at {}", v, scope_path(&scope).as_str());
                         match scope_path(&scope).as_str() {
                             "game/ship/speed/value" => cfg.ship.speed = v,
+                            "game/ship/gun/ammo/speed/value" => cfg.ship.ammo.speed = v,
+                            "game/ship/gun/ammo/despawn_distance/value" => cfg.ship.ammo.distance_despawn = v,
                             "game/ship/camera/transition/value" => cfg.main_cam.speed_transition = v,
                             "game/ship/camera/menu/fov/value" => cfg.main_cam.menu.fov = v,
                             "game/ship/camera/driving/fov/value" => cfg.main_cam.driving.fov = v,
@@ -58,6 +60,7 @@ pub fn load_game_config(path: &str) -> structs::GameConfig {
                             "game/ship/thruster/right/vec3" => cfg.ship.thruster_right = v,
                             "game/ship/thruster/left/vec3" => cfg.ship.thruster_left = v,
 
+                            "game/ship/gun/ammo/color/vec3" => cfg.ship.ammo.color = v,
                             "game/ship/gun/right/vec3" => cfg.ship.gun_right = v,
                             "game/ship/gun/left/vec3" => cfg.ship.gun_left = v,
 

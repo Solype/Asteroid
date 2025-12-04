@@ -40,6 +40,11 @@
 		</thruster>
 
 		<gun>
+			<ammo>
+				<speed><value value="50"/></speed>
+				<color><vec3 x="1.0" y="0.0" z="0.0"/></color>
+				<despawn_distance><value value="100"/></despawn_distance>
+			</ammo>
 			<right>
 				<vec3 x="0.715" y="0.895" z="-0.06"/>
 			</right>
