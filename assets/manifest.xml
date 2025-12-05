@@ -14,13 +14,24 @@
 		</sounds>
 		<music><asset src="sounds/menu.wav"/></music>
 	</ui>
+	<asteroids>
+		<spawn_range><value value="150"/></spawn_range>
+		<despawn_range><value value="200"/></despawn_range>
+		<size_range>
+			<min><value value="1.0"/></min>
+			<max><value value="10.0"/></max>
+		</size_range>
+		<max_number><value value="100"/></max_number>
+		<speed><value value="1"/></speed>
+		<rotationnal_speed><value value="4"/></rotationnal_speed>
+	</asteroids>
 	<ship>
 		<music><asset src="sounds/game.wav"/></music>
 		<asset src="Spaceship.glb#Scene0"/>
 		<speed><value value="10."/></speed>
 		<backcamera>
-			<position><vec3 x="0.0" y="1.1" z="4.0"/></position>
-			<look_at><vec3 x="0.0" y="1.1" z="5.0"/></look_at>
+			<position><vec3 x="0.0" y="1.1" z="2.0"/></position>
+			<look_at><vec3 x="0.0" y="1.1" z="3.0"/></look_at>
 		</backcamera>
 		<camera>
 			<transition><value value="3.0"/></transition>
@@ -42,6 +53,10 @@
 			<left>
 				<vec3 x="-0.328276" z="1.51121" y="1.00635"/>
 			</left>
+			<particules_color>
+				<from><vec3 x="1.0" y="0.0" z="0.0"/></from>
+				<to><vec3 x="1.0" y="1.0" z="1.0"/></to>
+			</particules_color>
 		</thruster>
 
 		<gun>

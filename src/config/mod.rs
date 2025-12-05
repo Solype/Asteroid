@@ -27,6 +27,13 @@ pub fn load_game_config(path: &str) -> structs::GameConfig {
                             "game/ship/camera/transition/value" => cfg.main_cam.speed_transition = v,
                             "game/ship/camera/menu/fov/value" => cfg.main_cam.menu.fov = v,
                             "game/ship/camera/driving/fov/value" => cfg.main_cam.driving.fov = v,
+                            "game/asteroids/spawn_range/value" => cfg.asteroids.spawn_range = v,
+                            "game/asteroids/despawn_range/value" => cfg.asteroids.despawn_range = v,
+                            "game/asteroids/max_number/value" => cfg.asteroids.max_asteroid = v as usize,
+                            "game/asteroids/speed/value" => cfg.asteroids.speed = v,
+                            "game/asteroids/rotationnal_speed/value" => cfg.asteroids.rotationnal_speed = v,
+                            "game/asteroids/size_range/min/value" => cfg.asteroids.size_range.0 = v,
+                            "game/asteroids/size_range/max/value" => cfg.asteroids.size_range.1 = v,
                             _ => {}
                         }
                     }
@@ -54,6 +61,9 @@ pub fn load_game_config(path: &str) -> structs::GameConfig {
 
                             "game/ship/backcamera/position/vec3" => cfg.ship.backcamera_position = v,
                             "game/ship/backcamera/look_at/vec3" => cfg.ship.backcamera_look_at = v,
+
+                            "game/ship/thruster/particules_color/from/vec3" => cfg.ship.color_particules.0 = v,
+                            "game/ship/thruster/particules_color/to/vec3" => cfg.ship.color_particules.1 = v,
 
                             "game/ship/thruster/right/vec3" => cfg.ship.thruster_right = v,
                             "game/ship/thruster/left/vec3" => cfg.ship.thruster_left = v,

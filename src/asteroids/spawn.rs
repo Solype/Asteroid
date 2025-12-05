@@ -5,11 +5,13 @@ use rand::Rng;
 
 pub fn asteroid_wave(
     mut commands: Commands,
-    config: ResMut<AsteroidConfig>,
+    gameconfig: Res<crate::config::structs::GameConfig>,
     query: Query<Entity, With<Asteroid>>,
     assets: Res<AsteroidAssets>,
     player: Single<&Transform, With<Player>>,
 ) {
+    let config = gameconfig.asteroids.clone();
+
     let current = query.iter().count();
     if current >= config.max_asteroid {
         return;
@@ -47,7 +49,7 @@ pub fn asteroid_wave(
 
         let rounded_size = size.round();
 
-        let velocity = -(position.normalize() + random_dir * 0.3).normalize() * f(size);
+        let velocity = -(position.normalize() + random_dir * 0.3).normalize() * f(size) * config.speed;
         let rotation_velocity = Vec3::new(
             rng.random_range(-1.0..1.0),
             rng.random_range(-1.0..1.0),
@@ -55,7 +57,7 @@ pub fn asteroid_wave(
         )
         .normalize()
             * f(size)
-            * 0.3;
+            * config.rotationnal_speed;
         commands.spawn((
             Mesh3d(assets.meshes.get(size_type).unwrap()[rng.random_range(0..4)].clone()),
             MeshMaterial3d(assets.materials.get(size_type).unwrap().clone()),
@@ -107,10 +109,11 @@ pub fn animate_despawn(
 
 pub fn clear_asteroid(
     mut commands: Commands,
-    config: ResMut<AsteroidConfig>,
+    gameconfig: Res<crate::config::structs::GameConfig>,
     player: Single<&Transform, With<Player>>,
     mut query: Query<(Entity, &Transform), (With<Asteroid>, Without<DespawnAnimation>)>,
 ) {
+    let config = gameconfig.asteroids.clone();
     for (entity, transform) in &mut query {
         let distance = transform.translation.distance(player.translation);
         if distance > config.despawn_range {
