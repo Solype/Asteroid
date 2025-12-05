@@ -33,13 +33,6 @@ pub struct BoomSounds {
     pub booms: Vec<Handle<AudioSource>>,
 }
 
-#[derive(Resource)]
-pub struct AsteroidConfig {
-    max_asteroid: usize,
-    size_range: (f32, f32),
-    spawn_range: f32,
-    despawn_range: f32,
-}
 const ASTEROID_SIZE_TYPES_LEN: usize = 6;
 const ASTEROID_SIZE_TYPES: [&str; ASTEROID_SIZE_TYPES_LEN] = ["XS", "S", "M", "L", "XL", "XXL"];
 
@@ -76,13 +69,7 @@ impl Plugin for AsteroidPlugin {
                     spawn::clear_asteroid,
                 )
                     .run_if(in_state(GameState::Game)),
-            )
-            .insert_resource(AsteroidConfig {
-                max_asteroid: 50,
-                size_range: (1.0, 10.0),
-                spawn_range: 300.0,
-                despawn_range: 350.0,
-            });
+            );
     }
 }
 

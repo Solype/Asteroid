@@ -8,7 +8,19 @@ pub struct GameConfig {
     pub main_cam: MainCamConfig,
     pub ui: UIConfig,
     pub ship: ShipConfig,
+    pub asteroids: AsteroidConfig,
 }
+
+#[derive(Debug, Clone, Default)]
+pub struct AsteroidConfig {
+    pub max_asteroid: usize,
+    pub size_range: (f32, f32),
+    pub spawn_range: f32,
+    pub despawn_range: f32,
+    pub speed: f32,
+    pub rotationnal_speed: f32
+}
+
 
 #[derive(Debug, Clone, Default)]
 pub struct MainCamConfig {

@@ -14,6 +14,17 @@
 		</sounds>
 		<music><asset src="sounds/menu.wav"/></music>
 	</ui>
+	<asteroids>
+		<spawn_range><value value="150"/></spawn_range>
+		<despawn_range><value value="200"/></despawn_range>
+		<size_range>
+			<min><value value="1.0"/></min>
+			<max><value value="10.0"/></max>
+		</size_range>
+		<max_number><value value="100"/></max_number>
+		<speed><value value="1"/></speed>
+		<rotationnal_speed><value value="4"/></rotationnal_speed>
+	</asteroids>
 	<ship>
 		<music><asset src="sounds/game.wav"/></music>
 		<asset src="Spaceship.glb#Scene0"/>
