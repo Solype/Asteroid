@@ -12,7 +12,18 @@ impl Plugin for ParticlesPlugin {
     }
 }
 
-fn create_rocket_effect() -> EffectAsset {
+fn lerp(a: Vec4, b: Vec4, t: f32) -> Vec4 {
+    a + (b - a) * t
+}
+
+fn create_rocket_effect(
+    v3color_start: Vec3,
+    v3color_end: Vec3
+) -> EffectAsset {
+
+    let color_start = Vec4::new(v3color_start.x, v3color_start.y, v3color_start.z, 1.0);
+    let color_end = Vec4::new(v3color_end.x, v3color_end.y, v3color_end.z, 1.0);
+
     let writer = ExprWriter::new();
 
     
@@ -54,10 +65,10 @@ fn create_rocket_effect() -> EffectAsset {
     size_gradient.add_key(1.0, Vec3::splat(0.05));
 
     let mut color_gradient = bevy_hanabi::Gradient::new();
-    color_gradient.add_key(0.0, Vec4::new(0.2, 0.4, 1.0, 1.0)); // bleu
-    color_gradient.add_key(0.4, Vec4::new(0.6, 0.8, 1.0, 1.0)); // bleu clair
-    color_gradient.add_key(0.8, Vec4::new(1.0, 1.0, 1.0, 1.0)); // blanc chaud
-    color_gradient.add_key(1.0, Vec4::new(1.0, 1.0, 1.0, 0.0)); // blanc fade
+    color_gradient.add_key(0.0, color_start);
+    color_gradient.add_key(0.33, lerp(color_start, color_end, 0.33));
+    color_gradient.add_key(0.66, lerp(color_start, color_end, 0.66));
+    color_gradient.add_key(1.0, color_end);
 
     EffectAsset::new(3000, spawner, writer.finish())
         .with_name("rocket")
@@ -118,7 +129,7 @@ pub fn spawn_particles(
     mut commands: Commands,
     mut effects: ResMut<Assets<EffectAsset>>,
     gameconfig: Res<crate::config::structs::GameConfig>,
-    ship: Single<Entity, With<crate::controller::structs::Player>>
+    ship: Single<Entity, With<crate::controller::structs::Player>>,
 ) {
     let position1 = gameconfig.ship.thruster_left;
     let position2 = gameconfig.ship.thruster_right;
@@ -127,7 +138,7 @@ pub fn spawn_particles(
     props.set("direction", Value::Vector(VectorValue::new_vec3(Vec3::Y)));
     props.set("speed", Value::Scalar(ScalarValue::Float(10.0)));
 
-    let effect = effects.add(create_rocket_effect());
+    let effect = effects.add(create_rocket_effect(gameconfig.ship.color_particules.0, gameconfig.ship.color_particules.1));
     let particules1 = commands.spawn((
         Name::new("rocket1"),
         Transform::from_translation(position1),

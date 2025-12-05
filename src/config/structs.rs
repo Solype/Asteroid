@@ -68,6 +68,7 @@ pub struct ShipConfig {
     pub screen_right: ScreenQuad,
     pub screen_center: ScreenQuad,
     pub screen_left: ScreenQuad,
+    pub color_particules: (Vec3, Vec3)
 }
 
 #[derive(Debug, Clone, Default)]

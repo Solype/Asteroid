@@ -30,8 +30,8 @@
 		<asset src="Spaceship.glb#Scene0"/>
 		<speed><value value="10."/></speed>
 		<backcamera>
-			<position><vec3 x="0.0" y="1.1" z="4.0"/></position>
-			<look_at><vec3 x="0.0" y="1.1" z="5.0"/></look_at>
+			<position><vec3 x="0.0" y="1.1" z="2.0"/></position>
+			<look_at><vec3 x="0.0" y="1.1" z="3.0"/></look_at>
 		</backcamera>
 		<camera>
 			<transition><value value="3.0"/></transition>
@@ -53,6 +53,10 @@
 			<left>
 				<vec3 x="-0.328276" z="1.51121" y="1.00635"/>
 			</left>
+			<particules_color>
+				<from><vec3 x="1.0" y="0.0" z="0.0"/></from>
+				<to><vec3 x="1.0" y="1.0" z="1.0"/></to>
+			</particules_color>
 		</thruster>
 
 		<gun>

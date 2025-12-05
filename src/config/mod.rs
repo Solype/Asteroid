@@ -62,6 +62,9 @@ pub fn load_game_config(path: &str) -> structs::GameConfig {
                             "game/ship/backcamera/position/vec3" => cfg.ship.backcamera_position = v,
                             "game/ship/backcamera/look_at/vec3" => cfg.ship.backcamera_look_at = v,
 
+                            "game/ship/thruster/particules_color/from/vec3" => cfg.ship.color_particules.0 = v,
+                            "game/ship/thruster/particules_color/to/vec3" => cfg.ship.color_particules.1 = v,
+
                             "game/ship/thruster/right/vec3" => cfg.ship.thruster_right = v,
                             "game/ship/thruster/left/vec3" => cfg.ship.thruster_left = v,
 
