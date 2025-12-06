@@ -184,7 +184,7 @@ pub fn rotate_spaceship(
     time: Res<Time>,
 ) {
     // --- Configurable values ---
-    let dead_radius = 24.0; // No rotation inside this radius
+    let dead_radius = 12.0; // No rotation inside this radius
     let max_radius = 150.0; // Where rotation reaches full speed
     let base_speed = 1.0;
 
