@@ -237,7 +237,7 @@ pub fn create_options_menu_scene(
                     content.spawn((
                         Node {
                             width: Val::Px(450.0),
-                            height: Val::Px(40.0),
+                            height: Val::Px(100.0),
                             justify_content: JustifyContent::SpaceBetween,
                             align_items: AlignItems::Center,
                             border: UiRect::all(Val::Px(2.0)),
@@ -288,7 +288,7 @@ pub fn create_options_menu_scene(
                         content.spawn((
                             Node {
                                 width: Val::Px(450.0),
-                                height: Val::Px(40.0),
+                                height: Val::Px(100.0),
                                 justify_content: JustifyContent::SpaceBetween,
                                 align_items: AlignItems::Center,
                                 border: UiRect::all(Val::Px(2.0)),
