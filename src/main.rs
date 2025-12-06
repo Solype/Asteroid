@@ -8,44 +8,54 @@ use bevy::{
 mod asteroids;
 mod back_camera;
 mod background_musics;
+mod config;
 mod controller;
+mod distancemetric;
+mod game_over;
 mod game_states;
 mod globals_structs;
 mod helpers;
 mod menu;
 mod particules;
+mod physics;
 mod player;
 mod score_display;
 mod skybox;
 mod spritesheet;
-mod game_over;
-mod config;
-mod distancemetric;
 
 use bevy_hanabi::HanabiPlugin;
 use bevy_sprite3d::Sprite3dPlugin;
 use game_states::GameState;
 use globals_structs::*;
 
-use crate::asteroids::Velocity;
+use crate::physics::{RotationVelocity, Velocity};
 use crate::player::PlayerHitBox;
-
 
 fn main() {
     let gameconfig = config::load_game_config("assets/manifest.xml");
 
-    let width = if gameconfig.window.x > 0.0 { gameconfig.window.x as u32 } else { 1280 };
-    let height = if gameconfig.window.y > 0.0 { gameconfig.window.y as u32 } else { 720 };
+    let width = if gameconfig.window.x > 0.0 {
+        gameconfig.window.x as u32
+    } else {
+        1280
+    };
+    let height = if gameconfig.window.y > 0.0 {
+        gameconfig.window.y as u32
+    } else {
+        720
+    };
 
     let mut app = App::new();
 
     app.insert_resource(gameconfig.clone());
 
-    app.add_plugins(DefaultPlugins.set(AssetPlugin {
-            watch_for_changes_override: Some(true),
-            ..default()
-        }).set(
-            WindowPlugin {
+    app.add_plugins(
+        DefaultPlugins
+            .set(AssetPlugin {
+                watch_for_changes_override: Some(true),
+                ..default()
+            })
+            .set(WindowPlugin {
                 primary_window: Some(Window {
                     title: gameconfig.window_title.into(),
                     name: Some(gameconfig.window_name.into()),
@@ -53,40 +63,41 @@ fn main() {
                     ..default()
                 }),
                 ..default()
-            } ))
-        .add_systems(Startup, (setup, setup_ui_ressource))
-        .add_plugins((
-            HanabiPlugin,
-            Sprite3dPlugin,
-            menu::menu_plugin,
-            skybox::plugin,
-            controller::plugin,
-            asteroids::AsteroidPlugin,
-            score_display::score_display_plugin,
-            player::PlayerPlugin,
-            back_camera::back_cam_plugin,
-            helpers::CameraControllerPlugin,
-            particules::ParticlesPlugin,
-            spritesheet::SpriteSheetPlugin,
-            background_musics::BackgroundMusicPlugin,
-            game_over::GameOverPlugin,
-            distancemetric::plugin,
-        ))
-        .init_state::<GameState>()
-        .insert_resource(MusicVolume { volume: 100.0_f32 })
-        .insert_resource(Keybinds::default())
-        .insert_resource(Score::default())
-        .add_systems(
-            Update,
-            (start_after_startup).run_if(in_state(GameState::Startup)),
-        )
-        .run();
+            }),
+    )
+    .add_systems(Startup, (setup, setup_ui_ressource))
+    .add_plugins((HanabiPlugin, Sprite3dPlugin))
+    .add_plugins((
+        menu::menu_plugin,
+        skybox::plugin,
+        controller::plugin,
+        distancemetric::plugin,
+        score_display::score_display_plugin,
+        back_camera::back_cam_plugin,
+        asteroids::AsteroidPlugin,
+        player::PlayerPlugin,
+        helpers::CameraControllerPlugin,
+        particules::ParticlesPlugin,
+        spritesheet::SpriteSheetPlugin,
+        background_musics::BackgroundMusicPlugin,
+        game_over::GameOverPlugin,
+        physics::PhysicsPlugin,
+    ))
+    .init_state::<GameState>()
+    .insert_resource(MusicVolume { volume: 100.0_f32 })
+    .insert_resource(Keybinds::default())
+    .insert_resource(Score::default())
+    .add_systems(
+        Update,
+        (start_after_startup).run_if(in_state(GameState::Startup)),
+    )
+    .run();
 }
 
 fn setup_ui_ressource(
     mut command: Commands,
     asset_server: Res<AssetServer>,
-    gameconfig: Res<crate::config::structs::GameConfig>
+    gameconfig: Res<crate::config::structs::GameConfig>,
 ) {
     let font = asset_server.load(gameconfig.ui.font.clone());
     let background = asset_server.load(gameconfig.ui.background.clone());
@@ -97,18 +108,14 @@ fn setup_ui_ressource(
     });
 }
 
-
-fn start_after_startup(
-    mut next_state: ResMut<NextState<GameState>>,
-    mut frame_count: Local<u32>,
-) {
+fn start_after_startup(mut next_state: ResMut<NextState<GameState>>, mut frame_count: Local<u32>) {
     *frame_count += 1;
-    if *frame_count < 10 { // wait one frame
+    if *frame_count < 10 {
+        // wait one frame
         return;
     }
     next_state.set(GameState::Menu);
 }
-
 
 fn create_quad(
     top_left: Vec3,
@@ -163,7 +170,6 @@ fn setup_left_screen(
     gameconfig: Res<config::structs::GameConfig>,
     mut meshes: ResMut<Assets<Mesh>>,
 ) -> (Entity, Entity, Entity) {
-
     let left_points: Vec<Vec3> = vec![
         gameconfig.ship.screen_left.tl,
         gameconfig.ship.screen_left.tr,
@@ -237,25 +243,24 @@ fn setup(
             SceneRoot(asset_server.load(gameconfig.ship.asset.clone())),
             controller::structs::Player,
             Velocity(Vec3::default()),
-            controller::structs::RotationalVelocity::default(),
+            RotationVelocity(Vec3::default()),
             Transform::default(),
             children![
                 (
-                    PlayerHitBox { radius: 1.0 },
-                    Transform::from_xyz(0.0, 0.5, -2.0),
+                    PlayerHitBox { radius: 0.4 },
+                    Transform::from_xyz(0.0, 0.75, -0.85),
                 ),
                 (
-                    PlayerHitBox { radius: 1.5 },
-                    Transform::from_xyz(0.0, 1.0, 0.5),
+                    PlayerHitBox { radius: 0.7 },
+                    Transform::from_xyz(0.0, 0.9, 0.1),
                 ),
                 (
-                    PlayerHitBox { radius: 1.25 },
-                    Transform::from_xyz(0.0, 0.5, 3.5),
+                    PlayerHitBox { radius: 0.4 },
+                    Transform::from_xyz(0.0, 1.0, 1.3),
                 ),
             ],
         ))
         .id();
-
 
     let camera_entity = commands
         .spawn((
@@ -270,11 +275,13 @@ fn setup(
             Transform::from_xyz(0.0, 1.1, 0.3)
                 .looking_at(Vec3::new(-0.216544, 0.777080, -0.318808), Vec3::Y),
             controller::structs::PlayerCam,
+            // helpers::camera_controller::CameraController::default(),
             controller::structs::CameraSensitivity::default(),
         ))
         .id();
 
-    let (left_screen, middle_screen, right_screen) = setup_left_screen(&mut commands, gameconfig, meshes);
+    let (left_screen, middle_screen, right_screen) =
+        setup_left_screen(&mut commands, gameconfig, meshes);
     commands.entity(player_entity).add_children(&[
         camera_entity,
         left_screen,

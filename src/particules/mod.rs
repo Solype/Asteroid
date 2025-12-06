@@ -1,7 +1,7 @@
 use bevy::{prelude::*};
 use bevy_hanabi::prelude::*;
 
-use crate::game_states::GameState;
+use crate::{game_states::GameState, physics::Velocity};
 
 pub struct ParticlesPlugin;
 
@@ -100,7 +100,7 @@ pub fn enable_disable_rockets_particules(
     keybinds: Res<crate::globals_structs::Keybinds>,
     mut query: ParamSet<(
             Query<(&mut EffectSpawner, &mut EffectProperties, &GlobalTransform), With<ParticleEffect>>,
-            Single<&crate::asteroids::Velocity, With<crate::controller::structs::Player>>
+            Single<&Velocity, With<crate::controller::structs::Player>>
     )>
 ) {
     let enabled = keybinds.forward.pressed(&keyboard, &mouse);
