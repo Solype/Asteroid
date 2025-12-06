@@ -1,10 +1,11 @@
+use crate::config::structs::GameConfig;
 use crate::controller::structs::{CameraSensitivity, PlayerCam};
-use crate::controller::structs::{ControllerState, Player, RotationalVelocity, VirtualMouse};
+use crate::controller::structs::{ControllerState, Player, VirtualMouse};
 use crate::controller::DrivingUI;
 use crate::game_states::GameState;
 use crate::globals_structs::Keybinds;
 use crate::menu::structs::SmoothCamMove;
-use crate::config::structs::GameConfig;
+use crate::physics::{RotationVelocity, Velocity};
 use bevy::asset::{AssetServer, Handle};
 use bevy::input::mouse::AccumulatedMouseMotion;
 use bevy::input::ButtonInput;
@@ -92,22 +93,13 @@ pub fn free_look_system(
     vm.pos = vm.pos.lerp(Vec2::ZERO, decay_speed * time.delta_secs());
 }
 
-pub fn move_player(
-    time: Res<Time>,
-    player: Single<(&mut Transform, &crate::asteroids::Velocity), With<Player>>,
-) {
-    let (mut transform, velocity) = player.into_inner();
-
-    transform.translation += **velocity * time.delta_secs();
-}
-
 pub fn move_player_system(
     time: Res<Time>,
     keybinds: Res<Keybinds>,
     keyboard: Res<ButtonInput<KeyCode>>,
     mouse: Res<ButtonInput<MouseButton>>,
     gameconfig: Res<GameConfig>,
-    player: Single<(&Transform, &mut crate::asteroids::Velocity), With<Player>>,
+    player: Single<(&Transform, &mut Velocity), With<Player>>,
 ) {
     let mut speed_to_add = Vec3::default();
     let (transform, mut velocity) = player.into_inner();
@@ -221,12 +213,11 @@ pub fn rotate_spaceship(
 
 pub fn roll_spaceship(
     time: Res<Time>,
-    player: Single<(&mut Transform, &mut RotationalVelocity), With<Player>>,
+    mut player_rot: Single<&mut RotationVelocity, With<Player>>,
     keybinds: Res<Keybinds>,
     keyboard: Res<ButtonInput<KeyCode>>,
     mouse: Res<ButtonInput<MouseButton>>,
 ) {
-    let (mut transform, mut rota_velocity) = player.into_inner();
 
     let base_speed = 200.0_f32.to_radians(); // ≈3.49 rad/s
     let dt = time.delta_secs();
@@ -241,20 +232,14 @@ pub fn roll_spaceship(
     }
 
     // Apply input acceleration to angular velocity
-    rota_velocity.z += accel_roll * dt;
+    player_rot.z += accel_roll * dt;
 
     const DAMPING: f32 = 0.99f32; // 1.0 = no damping
-    if rota_velocity.z.abs() < 2.0 {
-        rota_velocity.z *= DAMPING;
+    if player_rot.z.abs() < 2.0 {
+        player_rot.z *= DAMPING;
     }
 
-    rota_velocity.z = rota_velocity.z.clamp(-5.0, 5.0);
-
-    let delta_roll = rota_velocity.z * dt;
-
-    // Build a small rotation from the angular increments
-    let delta_rot = Quat::from_euler(EulerRot::YXZ, 0.0, 0.0, delta_roll);
-    transform.rotation *= delta_rot;
+    player_rot.z = player_rot.z.clamp(-5.0, 5.0);
 }
 
 pub fn setup_ui(

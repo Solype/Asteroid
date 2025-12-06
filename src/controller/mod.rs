@@ -4,6 +4,7 @@ mod systems;
 
 use crate::controller::structs::ControllerState;
 use crate::controller::systems::free_look_system;
+use crate::game_over::GameOverState;
 use crate::game_states::GameState;
 use bevy::prelude::*;
 use bevy::state::state::OnExit;
@@ -41,7 +42,9 @@ pub fn plugin(app: &mut App) {
 
     app.add_systems(
         Update,
-        systems::player_system.run_if(in_state(GameState::Game)),
+        systems::player_system
+            .run_if(in_state(GameState::Game))
+            .run_if(not(in_state(GameOverState::Drift))),
     );
 
     app.add_systems(
@@ -64,7 +67,6 @@ pub fn plugin(app: &mut App) {
             systems::rotate_spaceship,
             systems::roll_spaceship,
             systems::move_player_system,
-            systems::move_player
         )
             .run_if(in_state(GameState::Game)),
     );
