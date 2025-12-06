@@ -23,7 +23,7 @@
 		</size_range>
 		<max_number><value value="100"/></max_number>
 		<speed><value value="1"/></speed>
-		<rotationnal_speed><value value="4"/></rotationnal_speed>
+		<rotationnal_speed><value value="0.3"/></rotationnal_speed>
 	</asteroids>
 	<ship>
 		<music><asset src="sounds/game.wav"/></music>

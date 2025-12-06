@@ -84,7 +84,6 @@ pub fn setup_sound_effect_and_music(
     let mut resource = MenuSounds::default();
 
     for path in gameconfig.ui.sounds.iter() {
-        info!("path: {}", path);
         resource.button_bips.push(asset_server.load(path));
     }
     commands.insert_resource(resource);

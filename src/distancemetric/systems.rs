@@ -69,7 +69,6 @@ pub fn get_distance_of_object(
         let radius = asteroid.size;
         let t = hit_sphere(obj_pos, radius, ray_origin, ray_dir);
 
-        info!("{}", t);
         if t > 0.0 {
             if let Some(closest_val) = closest {
                 if closest_val > t {
