@@ -5,7 +5,6 @@ use bevy_sprite3d::Sprite3d;
 use crate::game_states::GameState;
 
 pub mod collision;
-pub mod movement;
 pub mod spawn;
 pub mod utils;
 
@@ -13,12 +12,6 @@ pub mod utils;
 pub struct Asteroid {
     pub size: f32, // 1.0 - 10.0
 }
-
-#[derive(Component, Deref, DerefMut)]
-pub struct Velocity(pub Vec3);
-
-#[derive(Component, Deref, DerefMut)]
-pub struct RotationVelocity(Vec3);
 
 #[derive(Resource)]
 pub struct AsteroidAssets {
@@ -58,8 +51,6 @@ impl Plugin for AsteroidPlugin {
             .add_systems(
                 Update,
                 (
-                    movement::move_asteroids,
-                    movement::rotate_asteroids,
                     collision::asteroid_asteroid_collision,
                     collision::asteroid_player_collision,
                     collision::asteroid_ammo_collision,

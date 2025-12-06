@@ -1,6 +1,7 @@
 use crate::asteroids::utils::*;
 use crate::asteroids::*;
 use crate::controller::structs::Player;
+use crate::physics::{RotationVelocity, Velocity};
 use rand::Rng;
 
 pub fn asteroid_wave(

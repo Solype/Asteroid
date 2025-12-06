@@ -2,9 +2,9 @@ use bevy::audio::Volume;
 use rand::seq::IndexedRandom;
 
 use crate::config::structs::GameConfig;
-use crate::controller::structs::RotationalVelocity;
 use crate::globals_structs::{Keybinds, MusicVolume};
-use crate::{asteroids::Velocity, controller::structs::Player, player::*};
+use crate::physics::{RotationVelocity, Velocity};
+use crate::{controller::structs::Player, player::*};
 
 pub fn shoot_ammo(
     game_config: Res<GameConfig>,
@@ -13,7 +13,7 @@ pub fn shoot_ammo(
     keyboard: Res<ButtonInput<KeyCode>>,
     mouse: Res<ButtonInput<MouseButton>>,
     mut shoot_side: ResMut<ShootSide>,
-    player: Single<(&Transform, &Velocity, &RotationalVelocity), With<Player>>,
+    player: Single<(&Transform, &Velocity, &RotationVelocity), With<Player>>,
     assets: Res<AmmoAssets>,
     audio: Res<ShootSounds>,
     master_volume: Res<MusicVolume>,
@@ -80,12 +80,6 @@ pub fn shoot_ammo(
                 )
             ],
         ));
-    }
-}
-
-pub fn move_ammos(time: Res<Time>, mut query: Query<(&mut Transform, &Velocity), With<Ammo>>) {
-    for (mut transform, velocity) in &mut query {
-        transform.translation += **velocity * time.delta_secs();
     }
 }
 

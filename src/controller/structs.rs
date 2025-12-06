@@ -16,9 +16,6 @@ impl CameraSensitivity {
     }
 }
 
-#[derive(Component, Deref, DerefMut, Default)]
-pub struct RotationalVelocity(Vec3);
-
 #[derive(Component, Default)]
 pub struct VirtualMouse {
     pub pos: Vec2

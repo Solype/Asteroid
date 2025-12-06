@@ -35,8 +35,7 @@ impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, setup).add_systems(
             Update,
-            (ammo::shoot_ammo, ammo::move_ammos, ammo::clear_ammos)
-                .run_if(in_state(GameState::Game)),
+            (ammo::shoot_ammo, ammo::clear_ammos).run_if(in_state(GameState::Game)),
         );
     }
 }
@@ -46,7 +45,7 @@ pub fn setup(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
     asset_server: Res<AssetServer>,
-    gameconfig: Res<GameConfig>
+    gameconfig: Res<GameConfig>,
 ) {
     let material = materials.add(StandardMaterial {
         base_color: Color::hsl(280.0, 0.8, 0.6), // vivid purple
