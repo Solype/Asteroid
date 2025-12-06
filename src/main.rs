@@ -20,6 +20,7 @@ mod skybox;
 mod spritesheet;
 mod game_over;
 mod config;
+mod distancemetric;
 
 use bevy_hanabi::HanabiPlugin;
 use bevy_sprite3d::Sprite3dPlugin;
@@ -68,7 +69,8 @@ fn main() {
             particules::ParticlesPlugin,
             spritesheet::SpriteSheetPlugin,
             background_musics::BackgroundMusicPlugin,
-            game_over::GameOverPlugin
+            game_over::GameOverPlugin,
+            distancemetric::plugin,
         ))
         .init_state::<GameState>()
         .insert_resource(MusicVolume { volume: 100.0_f32 })
@@ -201,7 +203,10 @@ fn setup_left_screen(
     );
 
     let left_id = commands
-        .spawn((Mesh3d(meshes.add(Mesh::from(left_mesh))),))
+        .spawn((
+            Mesh3d(meshes.add(Mesh::from(left_mesh))),
+            distancemetric::structs::MetricPlane,
+        ))
         .id();
 
     let middle_id = commands
