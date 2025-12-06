@@ -71,8 +71,6 @@ fn setup_back_cam(
 
     let image_handle: Handle<Image> = images.add(image);
 
-    info!("IMPORTANT {} {}", config.ship.backcamera_position, config.ship.backcamera_look_at);
-
     let back_cam = commands.spawn((
         Projection::from(PerspectiveProjection::default()),
         Camera3d::default(),
