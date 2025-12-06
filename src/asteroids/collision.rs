@@ -276,7 +276,7 @@ pub fn asteroid_ammo_collision(
                     Transform {
                         translation: ammo_transform.translation,
                         rotation: ammo_transform.rotation,
-                        scale: asteroid_transform.scale,
+                        scale: asteroid_transform.scale * 5.0,
                         ..Default::default()
                     },
                     children![(
