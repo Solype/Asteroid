@@ -1,13 +1,10 @@
 use bevy::{
     asset::LoadState,
     core_pipeline::Skybox,
-    prelude::*,
-    render::{
-        render_resource::TextureViewDimension,
-    },
     image::{ImageSampler, ImageSamplerDescriptor},
+    prelude::*,
+    render::render_resource::TextureViewDimension,
 };
-
 
 #[derive(Resource)]
 pub struct SkyCubeMap {
@@ -15,15 +12,12 @@ pub struct SkyCubeMap {
     pub loaded: bool,
 }
 
-pub fn plugin(app: &mut App)
-{
-    app
-        .add_systems(Startup, setup)
+pub fn plugin(app: &mut App) {
+    app.add_systems(Startup, setup)
         .add_systems(Update, reinterpret_cubemap);
 }
 
-fn setup(mut commands: Commands, asset_server: Res<AssetServer>)
-{
+fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     let sky_image = asset_server.load("skybox.png");
 
     commands.insert_resource(SkyCubeMap {
@@ -31,7 +25,6 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>)
         loaded: false,
     });
 }
-
 
 fn reinterpret_cubemap(
     asset_server: Res<AssetServer>,
@@ -54,10 +47,11 @@ fn reinterpret_cubemap(
         if layers == 6 {
             image.reinterpret_stacked_2d_as_array(layers);
             image.sampler = ImageSampler::Descriptor(ImageSamplerDescriptor::nearest());
-            image.texture_view_descriptor = Some(bevy::render::render_resource::TextureViewDescriptor {
-                dimension: Some(TextureViewDimension::Cube),
-                ..Default::default()
-            });
+            image.texture_view_descriptor =
+                Some(bevy::render::render_resource::TextureViewDescriptor {
+                    dimension: Some(TextureViewDimension::Cube),
+                    ..Default::default()
+                });
 
             for entity in cameras {
                 commands.entity(entity).insert(Skybox {
@@ -67,13 +61,7 @@ fn reinterpret_cubemap(
                 });
             }
         } else {
-            warn!(
-                "Skybox image must be 6xN pixels. Got {} layers.",
-                layers
-            );
+            warn!("Skybox image must be 6xN pixels. Got {} layers.", layers);
         }
     }
 }
-
-
-

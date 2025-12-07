@@ -1,26 +1,30 @@
-use bevy::prelude::*;
 use bevy::camera::RenderTarget;
+use bevy::prelude::*;
 use bevy::render::render_resource::{
-    Extent3d, TextureDescriptor, TextureDimension, TextureFormat, TextureUsages
+    Extent3d, TextureDescriptor, TextureDimension, TextureFormat, TextureUsages,
 };
-
-
 
 use crate::menu::structs::*;
 
-static SCREEN_WIDTH : u32 = 1280;
-static SCREEN_HEIGHT : u32 = 512;
+static SCREEN_WIDTH: u32 = 1280;
+static SCREEN_HEIGHT: u32 = 512;
 
-pub fn apply_texture_to_quad(mut commands: Commands, screens: Query<(&MenuPlane, Entity)>, menu_texture: Res<MenuCameraTarget>)
-{
+pub fn apply_texture_to_quad(
+    mut commands: Commands,
+    screens: Query<(&MenuPlane, Entity)>,
+    menu_texture: Res<MenuCameraTarget>,
+) {
     for (_, entity) in screens.iter() {
-        commands.entity(entity).insert(MeshMaterial3d(menu_texture.material.clone()));
+        commands
+            .entity(entity)
+            .insert(MeshMaterial3d(menu_texture.material.clone()));
         return;
     }
 }
 
 pub fn setup_texture_camera(
-    mut commands: Commands, mut images: ResMut<Assets<Image>>,
+    mut commands: Commands,
+    mut images: ResMut<Assets<Image>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
     config: Res<crate::config::structs::GameConfig>,
 ) {
@@ -41,7 +45,11 @@ pub fn setup_texture_camera(
     let mut image = Image {
         texture_descriptor: TextureDescriptor {
             label: Some("menu_camera_target"),
-            size: Extent3d { width: SCREEN_WIDTH, height: screen_height_scaled as u32, depth_or_array_layers: 1 },
+            size: Extent3d {
+                width: SCREEN_WIDTH,
+                height: screen_height_scaled as u32,
+                depth_or_array_layers: 1,
+            },
             dimension: TextureDimension::D2,
             format: TextureFormat::Bgra8UnormSrgb,
             mip_level_count: 1,
@@ -54,7 +62,11 @@ pub fn setup_texture_camera(
         ..default()
     };
 
-    image.resize(Extent3d { width: SCREEN_WIDTH, height: screen_height_scaled as u32, depth_or_array_layers: 1 });
+    image.resize(Extent3d {
+        width: SCREEN_WIDTH,
+        height: screen_height_scaled as u32,
+        depth_or_array_layers: 1,
+    });
     let handler = images.add(image);
 
     let mat_handler = materials.add(StandardMaterial {
@@ -64,7 +76,9 @@ pub fn setup_texture_camera(
         ..default()
     });
 
-    commands.insert_resource(MenuCameraTarget { /* image: handler.clone(), */ material: mat_handler });
+    commands.insert_resource(MenuCameraTarget {
+        /* image: handler.clone(), */ material: mat_handler,
+    });
 
     commands.spawn((
         Camera2d::default(),
@@ -79,7 +93,7 @@ pub fn setup_texture_camera(
 pub fn setup_sound_effect_and_music(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    gameconfig: Res<crate::config::structs::GameConfig>
+    gameconfig: Res<crate::config::structs::GameConfig>,
 ) {
     let mut resource = MenuSounds::default();
 

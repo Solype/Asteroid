@@ -1,6 +1,5 @@
 use bevy::prelude::*;
 
-
 #[derive(Component, Default)]
 pub struct ScorePlane;
 
@@ -14,7 +13,7 @@ pub struct ScoreCameraTarget {
 
 #[derive(Component)]
 pub struct ScoreCamTimer {
-    pub timer: Timer
+    pub timer: Timer,
 }
 
 #[derive(Component)]

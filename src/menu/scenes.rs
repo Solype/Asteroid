@@ -26,7 +26,6 @@ static BORDER_RADIUS_SQUARE: BorderRadius = BorderRadius {
     bottom_right: Val::Px(4.0),
 };
 
-
 fn default_node() -> Node {
     Node {
         width: Val::Percent(60.),

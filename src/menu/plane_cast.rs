@@ -1,5 +1,5 @@
 use bevy::{
-    asset::{uuid::Uuid},
+    asset::uuid::Uuid,
     input::ButtonState,
     picking::{
         backend::ray::RayMap,
@@ -9,13 +9,11 @@ use bevy::{
     window::{PrimaryWindow, WindowEvent},
 };
 
-// use crate::controller::PlayerCam;
 use crate::menu::structs::*;
 
 const CUBE_POINTER_ID: PointerId = PointerId::Custom(Uuid::from_u128(90870987));
 
-pub fn setup_cube_ptr(mut commands: Commands)
-{
+pub fn setup_cube_ptr(mut commands: Commands) {
     commands.spawn(CUBE_POINTER_ID);
 }
 
