@@ -100,29 +100,40 @@ pub fn move_player_system(
     mouse: Res<ButtonInput<MouseButton>>,
     gameconfig: Res<GameConfig>,
     player: Single<(&Transform, &mut Velocity), With<Player>>,
+    player_cam: Single<&mut Projection, With<PlayerCam>>
 ) {
-    let mut speed_to_add = Vec3::default();
     let (transform, mut velocity) = player.into_inner();
+    let is_boosting = keybinds.boost.pressed(&keyboard, &mouse);
+    let goes_forward = keybinds.forward.pressed(&keyboard, &mouse);
+    let dt = time.delta_secs();
+    let mut cam = player_cam.into_inner();
+    
+    if let Projection::Perspective(proj) = cam.as_mut() {
+        let target_fov = if goes_forward { if is_boosting { gameconfig.main_cam.maxfov } else {
+                (gameconfig.main_cam.maxfov + gameconfig.main_cam.driving.fov) / 2.
+            }
+        } else { gameconfig.main_cam.driving.fov }.to_radians();
 
-    let base_speed = 1.0_f32;
-    let mut thrust_modifier = 2.0_f32;
-    let mut is_boosting = false;
-
-    if keybinds.boost.pressed(&keyboard, &mouse) {
-        thrust_modifier = 5.0_f32;
-        is_boosting = true;
+        if proj.fov != target_fov {
+            proj.fov = proj.fov.lerp(target_fov, dt);
+        }
     }
+
+    let mut speed_to_add = Vec3::default();
+    let base_speed = 1.0_f32;
+
+
     if keybinds.right.pressed(&keyboard, &mouse) {
         speed_to_add.x += base_speed;
     }
     if keybinds.left.pressed(&keyboard, &mouse) {
         speed_to_add.x += -base_speed;
     }
-    if keybinds.forward.pressed(&keyboard, &mouse) {
-        speed_to_add.z += -(thrust_modifier * base_speed);
+    if goes_forward {
+        speed_to_add.z += -base_speed;
     }
     if keybinds.backward.pressed(&keyboard, &mouse) {
-        speed_to_add.z += thrust_modifier * base_speed;
+        speed_to_add.z += base_speed;
     }
     if keybinds.up.pressed(&keyboard, &mouse) {
         speed_to_add.y += base_speed;
@@ -136,23 +147,22 @@ pub fn move_player_system(
     }
 
     speed_to_add = transform.rotation * speed_to_add;
-    speed_to_add = speed_to_add.normalize() * time.delta_secs() * gameconfig.ship.speed;
-    velocity.0 += speed_to_add;
+    speed_to_add = speed_to_add.normalize() * dt * gameconfig.ship.speed;
+
     if is_boosting {
-        return;
+        if goes_forward {
+            speed_to_add += transform.forward().as_vec3().normalize() * dt * gameconfig.ship.thurst_modifier;
+        }
+        velocity.0 = (velocity.0 + speed_to_add).clamp_length_max(20.);
+    } else {
+        if velocity.0.length_squared() > 100. {
+            if velocity.0.length_squared() > (velocity.0 + speed_to_add).length_squared() {
+                velocity.0 += speed_to_add;
+            }
+        } else {
+            velocity.0 = (velocity.0 + speed_to_add).clamp_length_max(10.);
+        }
     }
-    velocity.0 = velocity.0.clamp(
-        Vec3 {
-            x: -10.,
-            y: -10.,
-            z: -10.,
-        },
-        Vec3 {
-            x: 10.,
-            y: 10.,
-            z: 10.,
-        },
-    );
 }
 
 pub fn mouse_system(
@@ -161,6 +171,7 @@ pub fn mouse_system(
         Single<&Window, With<PrimaryWindow>>,
     )>,
     accumulated_mouse_motion: Res<AccumulatedMouseMotion>,
+    gameconfig: Res<GameConfig>,
 ) {
     let win_dim: Vec2 = Vec2 {
         x: params.p1().width(),
@@ -172,7 +183,7 @@ pub fn mouse_system(
 
     let (mut node, mut virtual_mouse) = params.p0().into_inner();
 
-    virtual_mouse.pos += accumulated_mouse_motion.delta;
+    virtual_mouse.pos += accumulated_mouse_motion.delta * gameconfig.ship.virtual_mouse_sensitivity;
 
     // Clamp the virtual_mouse.pos to the circle
     let pos_from_center = virtual_mouse.pos;
@@ -193,11 +204,12 @@ pub fn rotate_spaceship(
     mut transform: Single<&mut Transform, With<Player>>,
     mut vm: Single<&mut VirtualMouse>,
     time: Res<Time>,
+    gameconfig: Res<GameConfig>,
 ) {
     // --- Configurable values ---
     let dead_radius = 12.0; // No rotation inside this radius
     let max_radius = 150.0; // Where rotation reaches full speed
-    let base_speed = 1.0;
+    let base_speed = gameconfig.ship.rotation_speed;
 
     let offset = vm.pos;
     let dist = offset.length();

@@ -1,8 +1,8 @@
 use bevy::{prelude::*};
 use crate::{
     asteroids::Asteroid, controller::structs::{
-        PlayerCam, VirtualMouse
-    }, distancemetric::structs::{MetricText}
+        Player, PlayerCam, VirtualMouse
+    }, distancemetric::structs::MetricText, physics::Velocity
 };
 use bevy::window::PrimaryWindow;
 use crate::distancemetric::structs::*;
@@ -32,7 +32,11 @@ pub fn get_distance_of_object(
         Single<&mut Camera, With<MetricCamComponent>>,
     )>,
     mouse: Single<&VirtualMouse>,
-    mut text: Single<&mut Text, With<MetricText>>,
+    mut text: ParamSet<(
+        Single<&mut Text, With<MetricText>>,
+        Single<&mut Text, With<SpeedText>>
+    )>,
+    speed: Single<&Velocity, With<Player>>,
     window: Single<&Window, With<PrimaryWindow>>,
     time: Res<Time>,
     mut timer: ResMut<DistanceTimer>,
@@ -44,6 +48,11 @@ pub fn get_distance_of_object(
     }
     cameras.p1().into_inner().is_active = true;
 
+    {
+        let speed = speed.into_inner().length();
+        text.p1().0 = format!("{:.1}v", speed);
+    }
+
     let (cam_transform, camera) = cameras.p0().into_inner();
     let window_dimension = Vec2::new(
         window.width() / 2., window.height() / 2.
@@ -51,8 +60,8 @@ pub fn get_distance_of_object(
 
     let Ok(ray) = camera.viewport_to_world(cam_transform,
          mouse.pos +  window_dimension) else {
-        if text.0 != "--m" {
-            text.0 = "--m".to_string();
+        if text.p0().0 != "--m" {
+            text.p0().0 = "--m".to_string();
         }
         return;
     };
@@ -80,7 +89,7 @@ pub fn get_distance_of_object(
         }
     }
 
-    text.0 = match closest {
+    text.p0().0 = match closest {
         Some(d) => format!("{:.0}m", d),
         None => "--m".into(),
     };
