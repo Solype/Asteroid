@@ -113,6 +113,7 @@ pub enum Action {
     FreeLook,
     Shoot,
     Menu,
+    Boost
 }
 
 #[derive(Resource, Default)]
