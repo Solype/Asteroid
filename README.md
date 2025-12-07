@@ -40,20 +40,10 @@ To install the project, please satisfy the following dependencies:
 
 ---
 
-## ⚙️ Compilation
-
-Build the project using:
-
-```bash
-cargo build
-```
-
----
-
 ## 🚀 Launch the game
 
 ```bash
-cargo run
+cargo run --release
 ```
 
 ---
