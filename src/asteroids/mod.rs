@@ -2,7 +2,9 @@ use bevy::platform::collections::HashMap;
 use bevy::prelude::*;
 use bevy_sprite3d::Sprite3d;
 
+use crate::game_over::GameOverState;
 use crate::game_states::GameState;
+use crate::physics::Velocity;
 
 pub mod collision;
 pub mod spawn;
@@ -12,6 +14,10 @@ pub mod utils;
 pub struct Asteroid {
     pub size: f32, // 1.0 - 10.0
 }
+#[derive(Component)]
+pub struct Sun {
+    pub size: f32, // 1.0
+}
 
 #[derive(Resource)]
 pub struct AsteroidAssets {
@@ -19,6 +25,8 @@ pub struct AsteroidAssets {
     materials: HashMap<String, Handle<StandardMaterial>>,
     explosion_sheet: Handle<Image>,
     explosion_layout: Handle<TextureAtlasLayout>,
+    sun_meshes: [Handle<Mesh>; 2],
+    sun_materials: [Handle<StandardMaterial>; 3],
 }
 
 #[derive(Resource)]
@@ -31,7 +39,7 @@ const ASTEROID_SIZE_TYPES: [&str; ASTEROID_SIZE_TYPES_LEN] = ["XS", "S", "M", "L
 
 const ANIMATION_DURATION: f32 = 0.5;
 
-const SUN_SCALE: f32 = 500.0;
+const SUN_SIZE: f32 = 500.0;
 
 #[derive(Component)]
 pub struct SpawnAnimation {
@@ -51,15 +59,29 @@ impl Plugin for AsteroidPlugin {
             .add_systems(
                 Update,
                 (
-                    collision::asteroid_asteroid_collision,
-                    collision::asteroid_player_collision,
-                    collision::asteroid_ammo_collision,
-                    spawn::asteroid_wave,
                     spawn::animate_spawn,
                     spawn::animate_despawn,
+                    spawn::animate_despawn_sun,
+                ),
+            )
+            .add_systems(
+                Update,
+                (
+                    collision::asteroid_asteroid_collision,
+                    collision::asteroid_ammo_collision,
+                    spawn::asteroid_wave,
                     spawn::clear_asteroid,
                 )
                     .run_if(in_state(GameState::Game)),
+            )
+            .add_systems(
+                Update,
+                (
+                    collision::asteroid_player_collision,
+                    collision::sun_player_collision,
+                )
+                    .run_if(in_state(GameState::Game))
+                    .run_if(in_state(GameOverState::None)),
             );
     }
 }
@@ -106,6 +128,68 @@ pub fn setup(
         asteroid_materials.insert(asteroid_type.to_string(), material);
     }
 
+    let sun_translation = Vec3::new(-1000.0, 1000.0, 0.0);
+    let sun_scale = Vec3::new(SUN_SIZE, SUN_SIZE, SUN_SIZE);
+
+    let sun_mesh = asset_server.load("Sun.glb#Mesh0/Primitive0");
+    let sun_material = materials.add(StandardMaterial {
+        base_color: Color::srgb(0.988, 0.482, 0.0667),
+        emissive: Color::srgb(0.988, 0.482, 0.0667).to_linear() * 2.0,
+        unlit: false,
+        ..Default::default()
+    });
+    let sun_aura_material = materials.add(StandardMaterial {
+        base_color: Color::srgba(1.0, 0.8, 0.2, 0.2), // faint orange glow
+        emissive: Color::srgb(1.0, 0.7, 0.2).to_linear() * 5.0,
+        unlit: true,
+        alpha_mode: AlphaMode::Add, // additive blending for glow effect
+        ..Default::default()
+    });
+
+    let wireframe_mesh = asset_server.load("sun_wireframe.glb#Mesh0/Primitive0");
+    let wireframe_material = materials.add(StandardMaterial {
+        base_color: Color::srgb(1.0, 0.5, 0.1),
+        unlit: true,
+        ..Default::default()
+    });
+    commands.spawn((
+        Sun { size: SUN_SIZE },
+        Mesh3d(sun_mesh.clone()),
+        Transform {
+            translation: sun_translation,
+            scale: sun_scale,
+            ..default()
+        },
+        Velocity(Vec3::ZERO),
+        MeshMaterial3d(sun_material.clone()),
+        children![
+            (PointLight {
+                intensity: 2. * SUN_SIZE * 1_000_000_000.0,
+                range: SUN_SIZE * 100.0,
+                radius: SUN_SIZE,
+                color: Color::WHITE,
+                shadows_enabled: true,
+                ..default()
+            },),
+            (
+                Mesh3d(wireframe_mesh.clone()), // wireframe
+                Transform {
+                    scale: Vec3::new(1.001, 1.001, 1.001),
+                    ..default()
+                },
+                MeshMaterial3d(wireframe_material.clone()),
+            ),
+            (
+                Mesh3d(sun_mesh.clone()), // slightly larger
+                Transform {
+                    scale: Vec3::new(1.1, 1.1, 1.1),
+                    ..default()
+                },
+                MeshMaterial3d(sun_aura_material.clone()),
+            )
+        ],
+    ));
+
     commands.insert_resource(AsteroidAssets {
         meshes: asteroid_meshes,
         materials: asteroid_materials,
@@ -117,63 +201,9 @@ pub fn setup(
             None,
             None,
         )),
+        sun_meshes: [sun_mesh, wireframe_mesh],
+        sun_materials: [sun_material, sun_aura_material, wireframe_material],
     });
-
-    let sun_translation = Vec3::new(-1000.0, 1000.0, 0.0);
-    let sun_scale = Vec3::new(SUN_SCALE, SUN_SCALE, SUN_SCALE);
-    let sun_material = materials.add(StandardMaterial {
-        base_color: Color::srgb(0.988, 0.482, 0.0667),
-        emissive: Color::srgb(0.988, 0.482, 0.0667).to_linear() * 2.0,
-        unlit: false,
-        ..Default::default()
-    });
-    let wireframe_material = materials.add(StandardMaterial {
-        base_color: Color::srgb(1.0, 0.5, 0.1),
-        unlit: true,
-        ..Default::default()
-    });
-    commands.spawn((
-        Mesh3d(asset_server.load("Sun.glb#Mesh0/Primitive0")),
-        Transform {
-            translation: sun_translation,
-            scale: sun_scale,
-            ..default()
-        },
-        MeshMaterial3d(sun_material),
-        children![(PointLight {
-            intensity: 1_000_000_000_000.0,
-            range: 50000.0,
-            radius: 500.0,
-            color: Color::WHITE,
-            shadows_enabled: true,
-            ..default()
-        },)],
-    ));
-    commands.spawn((
-        Mesh3d(asset_server.load("sun_wireframe.glb#Mesh0/Primitive0")), // wireframe
-        Transform {
-            translation: sun_translation,
-            scale: sun_scale * 1.001,
-            ..default()
-        },
-        MeshMaterial3d(wireframe_material),
-    ));
-    commands.spawn((
-        Mesh3d(asset_server.load("Sun.glb#Mesh0/Primitive0")), // slightly larger
-        Transform {
-            translation: sun_translation,
-            scale: sun_scale * 1.1,
-            ..default()
-        },
-        MeshMaterial3d(materials.add(StandardMaterial {
-            base_color: Color::srgba(1.0, 0.8, 0.2, 0.2), // faint orange glow
-            emissive: Color::srgb(1.0, 0.7, 0.2).to_linear() * 5.0,
-            unlit: true,
-            alpha_mode: AlphaMode::Add, // additive blending for glow effect
-            ..Default::default()
-        })),
-    ));
-
     commands.insert_resource(BoomSounds {
         booms: vec![
             asset_server.load("sounds/boom1.wav"),
