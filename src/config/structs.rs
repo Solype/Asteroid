@@ -57,6 +57,10 @@ pub struct AmmoConfig {
 pub struct ShipConfig {
     pub music: String,
     pub speed: f32,
+    pub virtual_mouse_sensitivity: f32,
+    pub base_rotation_speed: f32,
+    pub base_translation_speed: f32,
+    pub thurst_modifier: f32,
     pub asset: String,
     pub backcamera_position: Vec3,
     pub backcamera_look_at: Vec3,

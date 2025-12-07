@@ -34,6 +34,10 @@ pub fn load_game_config(path: &str) -> structs::GameConfig {
                             "game/asteroids/rotationnal_speed/value" => cfg.asteroids.rotationnal_speed = v,
                             "game/asteroids/size_range/min/value" => cfg.asteroids.size_range.0 = v,
                             "game/asteroids/size_range/max/value" => cfg.asteroids.size_range.1 = v,
+                            "game/ship/virtual_mouse_sensitivity/value" => cfg.ship.virtual_mouse_sensitivity = v,
+                            "game/ship/base_rotation_speed/value" => cfg.ship.base_rotation_speed = v,
+                            "game/ship/base_translation_speed/value" => cfg.ship.base_translation_speed = v,
+                            "game/ship/thurst_modifier/value" => cfg.ship.thurst_modifier = v,
                             _ => {}
                         }
                     }
