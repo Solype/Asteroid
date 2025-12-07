@@ -56,6 +56,7 @@ pub struct AmmoConfig {
 #[derive(Debug, Clone, Default)]
 pub struct ShipConfig {
     pub music: String,
+    pub alarm: String,
     pub speed: f32,
     pub asset: String,
     pub backcamera_position: Vec3,
