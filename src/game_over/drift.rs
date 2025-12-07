@@ -9,7 +9,7 @@ pub fn setup_drift(player: Single<(&mut Velocity, &mut RotationVelocity), With<P
 
     let mut rng = rand::rng();
 
-    **vel *= 20.;
+    **vel *= 10.;
     *rot = RotationVelocity(Vec3::new(
         rng.random_range(-2.0..2.0),
         rng.random_range(-2.0..2.0),
