@@ -106,6 +106,7 @@ pub fn load_game_config(path: &str) -> structs::GameConfig {
                                 "game/ui/sounds/asset" => cfg.ui.sounds.push(path),
                                 "game/ship/gun/ammo/sounds/asset" => cfg.ship.ammo.sounds.push(path),
                                 "game/ship/music/asset" => cfg.ship.music = path, 
+                                "game/ship/alarm/asset" => cfg.ship.alarm = path,
                                 "game/ui/music/asset" => cfg.ui.music = path, 
                                 _ => {}
                             }

@@ -27,6 +27,7 @@
 	</asteroids>
 	<ship>
 		<music><asset src="sounds/menu.wav"/></music>
+    <alarm><asset src="sounds/alarm.wav"/></alarm>
 		<asset src="Spaceship.glb#Scene0"/>
 		<speed><value value="10."/></speed>
 		<rotation_speed><value value="1.5"/></rotation_speed>

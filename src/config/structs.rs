@@ -57,6 +57,7 @@ pub struct AmmoConfig {
 #[derive(Debug, Clone, Default)]
 pub struct ShipConfig {
     pub music: String,
+    pub alarm: String,
     pub speed: f32,
     pub rotation_speed: f32,
     pub virtual_mouse_sensitivity: f32,

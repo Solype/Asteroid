@@ -10,7 +10,8 @@ pub struct BackgroundMusicPlugin;
 #[derive(Resource, Default)]
 struct MusicResources {
     pub menu_music: Handle<AudioSource>,
-    pub game_music: Handle<AudioSource>
+    pub game_music: Handle<AudioSource>,
+    pub gameover_music: Handle<AudioSource>
 }
 
 impl Plugin for BackgroundMusicPlugin {
@@ -30,8 +31,9 @@ fn setup(
     commands.spawn((BackgroundMusic,));
     let mut resource = MusicResources::default();
 
-    resource.game_music = asset_server.load(gameconfig.ship.music.clone());
     resource.menu_music = asset_server.load(gameconfig.ui.music.clone());
+    resource.game_music = asset_server.load(gameconfig.ship.music.clone());
+    resource.gameover_music = asset_server.load(gameconfig.ship.alarm.clone());
     commands.insert_resource(resource);
 }
 
@@ -73,7 +75,7 @@ fn start_game_music(
 
 fn start_gameover_music(
     mut commands: Commands,
-    asset_server: Res<AssetServer>,
+    music_resource: Res<MusicResources>,
     music: Single<(Entity, Option<&AudioSink>), With<BackgroundMusic>>,
     master_volume: Res<MusicVolume>,
 ) {
@@ -82,5 +84,9 @@ fn start_gameover_music(
     }
     commands.entity(music.0).despawn();
 
-    commands.spawn((BackgroundMusic,));
+    commands.spawn((
+        BackgroundMusic,
+        AudioPlayer::new(music_resource.gameover_music.clone()),
+        PlaybackSettings::LOOP.with_volume(Volume::Linear(master_volume.volume / 100.0_f32)),
+    ));
 }
