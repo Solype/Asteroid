@@ -73,6 +73,7 @@ pub struct Keybinds
     pub menu: InputButton,
     pub free_look: InputButton,
     pub shoot: InputButton,
+    pub boost: InputButton,
 }
 
 impl Default for Keybinds {
@@ -84,16 +85,17 @@ impl Default for Keybinds {
             backward: InputButton::Key(KeyCode::KeyS),
 
             up: InputButton::Key(KeyCode::Space),
-            down: InputButton::Key(KeyCode::ShiftLeft),
+            down: InputButton::Key(KeyCode::ControlLeft),
 
 
             rotate_left: InputButton::Key(KeyCode::KeyA),
             rotate_right: InputButton::Key(KeyCode::KeyE),
 
-            // Autres actions
+            // Other actions
             menu: InputButton::Key(KeyCode::Escape),
             free_look: InputButton::Mouse(MouseButton::Right),
-            shoot: InputButton::Mouse(MouseButton::Left)
+            shoot: InputButton::Mouse(MouseButton::Left),
+            boost: InputButton::Key(KeyCode::ShiftLeft)
         }
     }
 }
@@ -111,6 +113,7 @@ pub enum Action {
     FreeLook,
     Shoot,
     Menu,
+    Boost
 }
 
 #[derive(Resource, Default)]

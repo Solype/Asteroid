@@ -276,6 +276,7 @@ pub fn create_options_menu_scene(
                         ("Free look", keybinds.free_look, Action::FreeLook),
                         ("Shoot", keybinds.shoot, Action::Shoot),
                         ("Menu", keybinds.menu, Action::Menu),
+                        ("Boost", keybinds.boost, Action::Boost),
                     ];
 
                     for (label, key, action) in binds {
