@@ -1,12 +1,9 @@
 use bevy::prelude::*;
 
-
 #[derive(Resource)]
-pub struct MusicVolume
-{
-    pub volume: f32
+pub struct MusicVolume {
+    pub volume: f32,
 }
-
 
 #[derive(Clone, Copy)]
 pub enum InputButton {
@@ -57,17 +54,16 @@ impl InputButton {
 }
 
 #[derive(Resource)]
-pub struct Keybinds
-{
+pub struct Keybinds {
     // translation
-    pub up: InputButton, // z
-    pub down: InputButton, // -z
-    pub right: InputButton, // -y
-    pub left: InputButton, // y
-    pub forward: InputButton, // x
+    pub up: InputButton,       // z
+    pub down: InputButton,     // -z
+    pub right: InputButton,    // -y
+    pub left: InputButton,     // y
+    pub forward: InputButton,  // x
     pub backward: InputButton, // -x
     // rotation
-    pub rotate_left: InputButton, // roll
+    pub rotate_left: InputButton,  // roll
     pub rotate_right: InputButton, // -roll
     // other
     pub menu: InputButton,
@@ -87,7 +83,6 @@ impl Default for Keybinds {
             up: InputButton::Key(KeyCode::Space),
             down: InputButton::Key(KeyCode::ControlLeft),
 
-
             rotate_left: InputButton::Key(KeyCode::KeyA),
             rotate_right: InputButton::Key(KeyCode::KeyE),
 
@@ -95,7 +90,7 @@ impl Default for Keybinds {
             menu: InputButton::Key(KeyCode::Escape),
             free_look: InputButton::Mouse(MouseButton::Right),
             shoot: InputButton::Mouse(MouseButton::Left),
-            boost: InputButton::Key(KeyCode::ShiftLeft)
+            boost: InputButton::Key(KeyCode::ShiftLeft),
         }
     }
 }
@@ -113,17 +108,16 @@ pub enum Action {
     FreeLook,
     Shoot,
     Menu,
-    Boost
+    Boost,
 }
 
 #[derive(Resource, Default)]
-pub struct Score
-{
-    pub value: u32
+pub struct Score {
+    pub value: u32,
 }
 
 #[derive(Resource)]
 pub struct UIRessources {
-    pub bg : Handle<Image>,
-    pub font : Handle<Font>,
+    pub bg: Handle<Image>,
+    pub font: Handle<Font>,
 }

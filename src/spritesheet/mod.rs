@@ -1,24 +1,11 @@
 use bevy::prelude::*;
 
-// const SPRITE_COLUMNS: usize = 4;
-// const SPRITE_ROWS: usize = 4;
-// const TOTAL_FRAMES: usize = SPRITE_COLUMNS * SPRITE_ROWS;
-// const FRAME_TIME: f32 = 0.1;
-
-// #[derive(Component)]
-// struct SpriteAnimation {
-//     timer: Timer,
-//     frame: usize,
-// }
-
-// #[derive(Component)]
-// struct AnimatedSprite;
 #[derive(Component, Deref, DerefMut)]
 pub struct AnimationTimer(pub Timer);
 
 #[derive(Component, Deref, DerefMut)]
 pub struct AnimationDuration {
-    pub frame_left: u16 // 0 for infinite
+    pub frame_left: u16, // 0 for infinite
 }
 
 pub struct SpriteSheetPlugin;

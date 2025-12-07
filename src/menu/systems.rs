@@ -50,7 +50,7 @@ pub fn release_mouse(mut options: Single<&mut CursorOptions, With<PrimaryWindow>
 pub fn focus_main_screen(
     mut command: Commands,
     gameconfig: Res<crate::config::structs::GameConfig>,
-    player_entity: Single<Entity, With<PlayerCam>>
+    player_entity: Single<Entity, With<PlayerCam>>,
 ) {
     let player = player_entity.into_inner();
 
@@ -236,7 +236,7 @@ fn set_bind(binds: &mut Keybinds, action: Action, button: InputButton) {
         Action::FreeLook => binds.free_look = button,
         Action::Shoot => binds.shoot = button,
         Action::Menu => binds.menu = button,
-        Action::Boost => binds.boost = button
+        Action::Boost => binds.boost = button,
     }
 }
 

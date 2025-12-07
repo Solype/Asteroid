@@ -1,5 +1,5 @@
-use rand_distr::{Normal, Distribution};
 use rand::Rng;
+use rand_distr::{Distribution, Normal};
 
 pub fn sample_truncated_norm(
     mean: f32,
@@ -18,5 +18,5 @@ pub fn sample_truncated_norm(
 }
 
 pub fn f(x: f32) -> f32 {
-    2.0 * (- (x / 2.0 - 2.5).tanh() + 2.0)
+    2.0 * (-(x / 2.0 - 2.5).tanh() + 2.0)
 }

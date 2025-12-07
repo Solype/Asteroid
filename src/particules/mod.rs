@@ -1,4 +1,4 @@
-use bevy::{prelude::*};
+use bevy::prelude::*;
 use bevy_hanabi::prelude::*;
 
 use crate::{game_states::GameState, physics::Velocity};
@@ -8,7 +8,10 @@ pub struct ParticlesPlugin;
 impl Plugin for ParticlesPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(PostStartup, spawn_particles);
-        app.add_systems(Update, enable_disable_rockets_particules.run_if(in_state(GameState::Game)));
+        app.add_systems(
+            Update,
+            enable_disable_rockets_particules.run_if(in_state(GameState::Game)),
+        );
     }
 }
 
@@ -16,23 +19,17 @@ fn lerp(a: Vec4, b: Vec4, t: f32) -> Vec4 {
     a + (b - a) * t
 }
 
-fn create_rocket_effect(
-    v3color_start: Vec3,
-    v3color_end: Vec3
-) -> EffectAsset {
-
+fn create_rocket_effect(v3color_start: Vec3, v3color_end: Vec3) -> EffectAsset {
     let color_start = Vec4::new(v3color_start.x, v3color_start.y, v3color_start.z, 1.0);
     let color_end = Vec4::new(v3color_end.x, v3color_end.y, v3color_end.z, 1.0);
 
     let writer = ExprWriter::new();
 
-    
     let direction_handle = writer.add_property("direction", Vec3::Y.into());
     let speed_handle = writer.add_property("speed", 100.0.into());
 
     let direction = writer.prop(direction_handle);
     let speed = writer.prop(speed_handle);
-
 
     let velocity = (direction * speed).expr();
     let init_vel = SetAttributeModifier::new(Attribute::VELOCITY, velocity);
@@ -43,7 +40,7 @@ fn create_rocket_effect(
         radius: writer.lit(0.5).expr(),
         dimension: ShapeDimension::Volume,
     };
-    
+
     let age = writer.lit(0.).expr();
     let init_age = SetAttributeModifier::new(Attribute::AGE, age);
 
@@ -60,8 +57,8 @@ fn create_rocket_effect(
     let spawner = SpawnerSettings::rate((100., 300.).into());
 
     let mut size_gradient = bevy_hanabi::Gradient::new();
-    size_gradient.add_key(0.0, Vec3::splat(0.7));   // gros au début
-    size_gradient.add_key(0.2, Vec3::splat(0.15));  // shrink rapide au début
+    size_gradient.add_key(0.0, Vec3::splat(0.7)); // gros au début
+    size_gradient.add_key(0.2, Vec3::splat(0.15)); // shrink rapide au début
     size_gradient.add_key(1.0, Vec3::splat(0.05));
 
     let mut color_gradient = bevy_hanabi::Gradient::new();
@@ -99,23 +96,27 @@ pub fn enable_disable_rockets_particules(
     mouse: Res<ButtonInput<MouseButton>>,
     keybinds: Res<crate::globals_structs::Keybinds>,
     mut query: ParamSet<(
-            Query<(&mut EffectSpawner, &mut EffectProperties, &GlobalTransform), With<ParticleEffect>>,
-            Single<&Velocity, With<crate::controller::structs::Player>>
-    )>
+        Query<(&mut EffectSpawner, &mut EffectProperties, &GlobalTransform), With<ParticleEffect>>,
+        Single<&Velocity, With<crate::controller::structs::Player>>,
+    )>,
 ) {
     let enabled = keybinds.forward.pressed(&keyboard, &mouse);
-    let vel : Vec3;
+    let vel: Vec3;
     {
         vel = query.p1().0;
     }
-    let speed : f32 = vel.length();
+    let speed: f32 = vel.length();
 
     if enabled {
         for (mut spawner, mut effect, transform) in &mut query.p0() {
             spawner.active = enabled;
             let forward: Vec3 = transform.forward().into();
             let dot = forward.dot(vel);
-            let new_speed = if dot > 0.0_f32 {Vec3::ZERO} else {(-forward).normalize() * speed * 0.7};
+            let new_speed = if dot > 0.0_f32 {
+                Vec3::ZERO
+            } else {
+                (-forward).normalize() * speed * 0.7
+            };
             (*effect).set("direction", Value::Vector(VectorValue::new_vec3(new_speed)));
         }
     } else {
@@ -138,21 +139,27 @@ pub fn spawn_particles(
     props.set("direction", Value::Vector(VectorValue::new_vec3(Vec3::Y)));
     props.set("speed", Value::Scalar(ScalarValue::Float(10.0)));
 
-    let effect = effects.add(create_rocket_effect(gameconfig.ship.color_particules.0, gameconfig.ship.color_particules.1));
-    let particules1 = commands.spawn((
-        Name::new("rocket1"),
-        Transform::from_translation(position1),
-        ParticleEffect::new(effect.clone()),
-        props.clone()
-    )).id();
+    let effect = effects.add(create_rocket_effect(
+        gameconfig.ship.color_particules.0,
+        gameconfig.ship.color_particules.1,
+    ));
+    let particules1 = commands
+        .spawn((
+            Name::new("rocket1"),
+            Transform::from_translation(position1),
+            ParticleEffect::new(effect.clone()),
+            props.clone(),
+        ))
+        .id();
 
-
-    let particules2 = commands.spawn((
-        Name::new("rocket2"),
-        Transform::from_translation(position2),
-        ParticleEffect::new(effect.clone()),
-        props.clone()
-    )).id();
+    let particules2 = commands
+        .spawn((
+            Name::new("rocket2"),
+            Transform::from_translation(position2),
+            ParticleEffect::new(effect.clone()),
+            props.clone(),
+        ))
+        .id();
 
     let e = ship.into_inner();
     commands.entity(e).add_child(particules1);
