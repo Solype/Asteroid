@@ -26,6 +26,18 @@ static BORDER_RADIUS_SQUARE: BorderRadius = BorderRadius {
     bottom_right: Val::Px(4.0),
 };
 
+
+fn default_node() -> Node {
+    Node {
+        width: Val::Percent(60.),
+        height: Val::Px(100.),
+        justify_content: JustifyContent::Center,
+        align_items: AlignItems::Center,
+        border: UiRect::all(Val::Px(2.0)),
+        ..default()
+    }
+}
+
 pub fn create_main_menu_scene(
     mut commands: Commands,
     camera_components: Single<(Entity, &mut Camera), With<MenuCameraComponent>>,
@@ -36,15 +48,6 @@ pub fn create_main_menu_scene(
 
     let font: Handle<Font> = menu_ressources.font.clone();
     let background: Handle<Image> = menu_ressources.bg.clone();
-
-    let node = Node {
-        width: Val::Px(300.0),
-        height: Val::Px(60.0),
-        justify_content: JustifyContent::Center,
-        align_items: AlignItems::Center,
-        border: UiRect::all(Val::Px(2.0)),
-        ..default()
-    };
 
     commands
         .spawn((
@@ -79,7 +82,7 @@ pub fn create_main_menu_scene(
             ));
             parent
                 .spawn((Node {
-                    width: Val::Px(300.0),
+                    width: Val::Percent(100.),
                     height: Val::Auto,
                     justify_content: JustifyContent::Center,
                     align_items: AlignItems::Center,
@@ -90,49 +93,49 @@ pub fn create_main_menu_scene(
                 },))
                 .with_children(|parent| {
                     parent.spawn((
-                node.clone(),
-                BORDER_NORMAL,
-                BackgroundColor(Color::srgba(0.0, 0.2, 0.4, 0.8)), // dark blue transparent
-                children![(
-                    Text::new("LAUNCH MISSION"),
-                    TextFont { font: font.clone(), font_size: 28.0, ..default() },
-                    TextColor(Color::srgb(0.0, 1.0, 1.0)),
-                )],
-            )).observe(|over: On<Pointer<Over>>, mut colors: Query<&mut BorderColor>| {
-                *(colors.get_mut(over.entity).unwrap()) = BORDER_HOVER;
-            }).observe(|out: On<Pointer<Out>>, mut colors: Query<&mut BorderColor>| {
-                *(colors.get_mut(out.entity).unwrap()) = BORDER_NORMAL;
-            }).observe(|_: On<Pointer<Click>>, mut next_state: ResMut<NextState<GameState>>| {
-                next_state.set(GameState::Game);
-            });
+                        default_node(),
+                        BORDER_NORMAL,
+                        BackgroundColor(Color::srgba(0.0, 0.2, 0.4, 0.8)), // dark blue transparent
+                        children![(
+                            Text::new("LAUNCH MISSION"),
+                            TextFont { font: font.clone(), font_size: 32.0, ..default() },
+                            TextColor(Color::srgb(0.0, 1.0, 1.0)),
+                        )],
+                    )).observe(|over: On<Pointer<Over>>, mut colors: Query<&mut BorderColor>| {
+                        *(colors.get_mut(over.entity).unwrap()) = BORDER_HOVER;
+                    }).observe(|out: On<Pointer<Out>>, mut colors: Query<&mut BorderColor>| {
+                        *(colors.get_mut(out.entity).unwrap()) = BORDER_NORMAL;
+                    }).observe(|_: On<Pointer<Click>>, mut next_state: ResMut<NextState<GameState>>| {
+                        next_state.set(GameState::Game);
+                    });
 
                     parent.spawn((
-                node.clone(),
-                BORDER_NORMAL,
-                BackgroundColor(Color::srgba(0.0, 0.2, 0.0, 0.8)), // dark green transparent
-                children![(
-                    Text::new("SYSTEM SETTINGS"),
-                    TextFont { font: font.clone(), font_size: 28.0, ..default() },
-                    TextColor(Color::srgb(0.0, 1.0, 0.0)),
-                )],
-            )).observe(|over: On<Pointer<Over>>, mut colors: Query<&mut BorderColor>| {
-                *(colors.get_mut(over.entity).unwrap()) = BORDER_HOVER;
-            }).observe(|out: On<Pointer<Out>>, mut colors: Query<&mut BorderColor>| {
-                *(colors.get_mut(out.entity).unwrap()) = BORDER_NORMAL;
-            }).observe(|_: On<Pointer<Click>>, mut next_state: ResMut<NextState<MenuState>>| {
-                next_state.set(MenuState::Options);
-            });
+                        default_node(),
+                        BORDER_NORMAL,
+                        BackgroundColor(Color::srgba(0.0, 0.2, 0.0, 0.8)), // dark green transparent
+                        children![(
+                            Text::new("SYSTEM SETTINGS"),
+                            TextFont { font: font.clone(), font_size: 32.0, ..default() },
+                            TextColor(Color::srgb(0.0, 1.0, 0.0)),
+                        )],
+                    )).observe(|over: On<Pointer<Over>>, mut colors: Query<&mut BorderColor>| {
+                        *(colors.get_mut(over.entity).unwrap()) = BORDER_HOVER;
+                    }).observe(|out: On<Pointer<Out>>, mut colors: Query<&mut BorderColor>| {
+                        *(colors.get_mut(out.entity).unwrap()) = BORDER_NORMAL;
+                    }).observe(|_: On<Pointer<Click>>, mut next_state: ResMut<NextState<MenuState>>| {
+                        next_state.set(MenuState::Options);
+                    });
 
                     parent
                         .spawn((
-                            node.clone(),
+                            default_node(),
                             BORDER_NORMAL,
                             BackgroundColor(Color::srgba(0.4, 0.0, 0.0, 0.8)), // dark red transparent
                             children![(
                                 Text::new("EJECT"),
                                 TextFont {
                                     font: font.clone(),
-                                    font_size: 28.0,
+                                    font_size: 32.0,
                                     ..default()
                                 },
                                 TextColor(Color::srgb(1.0, 0.0, 0.0)),
@@ -167,15 +170,6 @@ pub fn create_options_menu_scene(
 
     let font = menu_ressources.font.clone();
     let background = menu_ressources.bg.clone();
-
-    let node = Node {
-        width: Val::Px(300.0),
-        height: Val::Px(60.0),
-        justify_content: JustifyContent::Center,
-        align_items: AlignItems::Center,
-        border: UiRect::all(Val::Px(2.0)),
-        ..default()
-    };
 
     // === Racine du menu ===
     commands.spawn((
@@ -227,7 +221,7 @@ pub fn create_options_menu_scene(
                         flex_direction: FlexDirection::Column,
                         justify_content: JustifyContent::Start,
                         align_items: AlignItems::Center,
-                        row_gap: Val::Px(15.0),
+                        row_gap: Val::Px(30.0),
                         padding: UiRect::all(Val::Px(20.0)),
                         ..default()
                     },
@@ -236,8 +230,8 @@ pub fn create_options_menu_scene(
                     // === Master Volume ===
                     content.spawn((
                         Node {
-                            width: Val::Px(450.0),
-                            height: Val::Px(100.0),
+                            width: Val::Percent(90.),
+                            height: Val::Px(150.),
                             justify_content: JustifyContent::SpaceBetween,
                             align_items: AlignItems::Center,
                             border: UiRect::all(Val::Px(2.0)),
@@ -249,12 +243,12 @@ pub fn create_options_menu_scene(
                         children![
                             (
                                 Text::new("Master Volume"),
-                                TextFont { font: font.clone(), font_size: 26.0, ..default() },
+                                TextFont { font: font.clone(), font_size: 52.0, ..default() },
                                 TextColor(Color::WHITE),
                             ),
                             (
                                 Text::new(format!("{}%", master_volume.volume as i32)),
-                                TextFont { font: font.clone(), font_size: 24.0, ..default() },
+                                TextFont { font: font.clone(), font_size: 52.0, ..default() },
                                 TextColor(Color::srgb(0.0, 1.0, 0.0)),
                                 VolumeText
                             )
@@ -287,8 +281,8 @@ pub fn create_options_menu_scene(
                     for (label, key, action) in binds {
                         content.spawn((
                             Node {
-                                width: Val::Px(450.0),
-                                height: Val::Px(100.0),
+                                width: Val::Percent(90.),
+                                height: Val::Px(150.),
                                 justify_content: JustifyContent::SpaceBetween,
                                 align_items: AlignItems::Center,
                                 border: UiRect::all(Val::Px(2.0)),
@@ -301,13 +295,13 @@ pub fn create_options_menu_scene(
                         )).with_children(|parent|{
                             parent.spawn((
                                 Text::new(label),
-                                TextFont { font: font.clone(), font_size: 26.0, ..default() },
+                                TextFont { font: font.clone(), font_size: 52.0, ..default() },
                                 TextColor(Color::WHITE),
                             ));
 
                             parent.spawn((
                                 Text::new(key.to_str()),
-                                TextFont { font: font.clone(), font_size: 24.0, ..default() },
+                                TextFont { font: font.clone(), font_size: 52.0, ..default() },
                                 TextColor(Color::srgb(0.0, 1.0, 1.0)),
                                 action
                             ));
@@ -326,12 +320,12 @@ pub fn create_options_menu_scene(
         // === Bouton "Back" ===
         parent
             .spawn((
-                node.clone(),
+                default_node(),
                 BORDER_NORMAL,
                 BackgroundColor(Color::srgba(0.0, 0.2, 0.4, 0.8)),
                 children![(
                     Text::new("BACK"),
-                    TextFont { font: font.clone(), font_size: 28.0, ..default() },
+                    TextFont { font: font.clone(), font_size: 32.0, ..default() },
                     TextColor(Color::srgb(0.0, 1.0, 1.0)),
                 )],
             ))
@@ -358,15 +352,6 @@ pub fn create_gameover_menu_scene(
 
     let font: Handle<Font> = menu_ressources.font.clone();
     let background: Handle<Image> = menu_ressources.bg.clone();
-
-    let node = Node {
-        width: Val::Px(300.0),
-        height: Val::Px(60.0),
-        justify_content: JustifyContent::Center,
-        align_items: AlignItems::Center,
-        border: UiRect::all(Val::Px(2.0)),
-        ..default()
-    };
 
     commands
         .spawn((
@@ -414,7 +399,7 @@ pub fn create_gameover_menu_scene(
             ));
             parent
                 .spawn((Node {
-                    width: Val::Px(300.0),
+                    width: Val::Percent(90.0),
                     height: Val::Auto,
                     justify_content: JustifyContent::Center,
                     align_items: AlignItems::Center,
@@ -425,32 +410,32 @@ pub fn create_gameover_menu_scene(
                 },))
                 .with_children(|parent| {
                     parent.spawn((
-                node.clone(),
-                BORDER_NORMAL,
-                BackgroundColor(Color::srgba(0.0, 0.2, 0.4, 0.8)), // dark blue transparent
-                children![(
-                    Text::new("MAIN MENU"),
-                    TextFont { font: font.clone(), font_size: 28.0, ..default() },
-                    TextColor(Color::srgb(0.0, 1.0, 1.0)),
-                )],
-            )).observe(|over: On<Pointer<Over>>, mut colors: Query<&mut BorderColor>| {
-                *(colors.get_mut(over.entity).unwrap()) = BORDER_HOVER;
-            }).observe(|out: On<Pointer<Out>>, mut colors: Query<&mut BorderColor>| {
-                *(colors.get_mut(out.entity).unwrap()) = BORDER_NORMAL;
-            }).observe(|_: On<Pointer<Click>>, mut next_state: ResMut<NextState<MenuState>>| {
-                next_state.set(MenuState::Main);
-            });
+                        default_node(),
+                        BORDER_NORMAL,
+                        BackgroundColor(Color::srgba(0.0, 0.2, 0.4, 0.8)), // dark blue transparent
+                        children![(
+                            Text::new("MAIN MENU"),
+                            TextFont { font: font.clone(), font_size: 32.0, ..default() },
+                            TextColor(Color::srgb(0.0, 1.0, 1.0)),
+                        )],
+                    )).observe(|over: On<Pointer<Over>>, mut colors: Query<&mut BorderColor>| {
+                        *(colors.get_mut(over.entity).unwrap()) = BORDER_HOVER;
+                    }).observe(|out: On<Pointer<Out>>, mut colors: Query<&mut BorderColor>| {
+                        *(colors.get_mut(out.entity).unwrap()) = BORDER_NORMAL;
+                    }).observe(|_: On<Pointer<Click>>, mut next_state: ResMut<NextState<MenuState>>| {
+                        next_state.set(MenuState::Main);
+                    });
 
                     parent
                         .spawn((
-                            node.clone(),
+                            default_node(),
                             BORDER_NORMAL,
                             BackgroundColor(Color::srgba(0.4, 0.0, 0.0, 0.8)), // dark red transparent
                             children![(
                                 Text::new("EJECT"),
                                 TextFont {
                                     font: font.clone(),
-                                    font_size: 28.0,
+                                    font_size: 32.0,
                                     ..default()
                                 },
                                 TextColor(Color::srgb(1.0, 0.0, 0.0)),
