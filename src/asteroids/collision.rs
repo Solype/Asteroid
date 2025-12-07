@@ -319,9 +319,16 @@ pub fn sun_player_collision(
 
             **player.1 = a_body.vel;
 
+            next_state.set(GameOverState::Drift);
+            if sun.size <= SUN_SIZE / 8.0 + 0.1 {
+                // max 3 splits -> 2³ = 8 sun max
+                return;
+            }
+
             commands.entity(sun_entity).insert(DespawnAnimation {
                 timer: Timer::from_seconds(ANIMATION_DURATION, TimerMode::Once),
             });
+            let new_sun_size = sun.size / 2.0;
 
             let fw = (sun_transform.translation - player.0.translation).normalize();
             let helper = if fw.abs().z < 0.9 { Vec3::Z } else { Vec3::Y };
@@ -331,19 +338,18 @@ pub fn sun_player_collision(
 
             let angle = rand::random::<f32>() * core::f32::consts::TAU;
             let new_dir = (u * angle.cos() + v * angle.sin()).normalize();
-            let new_velocity = (new_dir * 0.3).normalize();
-            let new_velocity_neg = (-new_dir * 0.3).normalize();
+            let new_velocity = new_dir * f(new_sun_size);
+            let new_velocity_neg = -new_dir * f(new_sun_size);
 
             let [sun_mesh, wireframe_mesh] = assets.sun_meshes.clone();
             let [sun_material, sun_aura_material, wireframe_material] =
                 assets.sun_materials.clone();
-            let new_sun_size = sun.size / 2.0;
             let new_sun_scale = Vec3::new(new_sun_size, new_sun_size, new_sun_size);
             commands.spawn((
                 Sun { size: new_sun_size },
                 Mesh3d(sun_mesh.clone()),
                 Transform {
-                    translation: sun_transform.translation + new_velocity * 250.,
+                    translation: sun_transform.translation + new_dir * new_sun_size,
                     scale: new_sun_scale,
                     ..default()
                 },
@@ -380,7 +386,7 @@ pub fn sun_player_collision(
                 Sun { size: new_sun_size },
                 Mesh3d(sun_mesh.clone()),
                 Transform {
-                    translation: sun_transform.translation + new_velocity_neg * 250.,
+                    translation: sun_transform.translation - new_dir * new_sun_size,
                     scale: new_sun_scale,
                     ..default()
                 },
@@ -413,8 +419,6 @@ pub fn sun_player_collision(
                     )
                 ],
             ));
-
-            next_state.set(GameOverState::Drift);
             return;
         }
     }
