@@ -236,6 +236,7 @@ fn set_bind(binds: &mut Keybinds, action: Action, button: InputButton) {
         Action::FreeLook => binds.free_look = button,
         Action::Shoot => binds.shoot = button,
         Action::Menu => binds.menu = button,
+        Action::Boost => binds.boost = button
     }
 }
 

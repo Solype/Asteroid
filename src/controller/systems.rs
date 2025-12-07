@@ -104,32 +104,43 @@ pub fn move_player_system(
     let mut speed_to_add = Vec3::default();
     let (transform, mut velocity) = player.into_inner();
 
+    let base_speed = 1.0_f32;
+    let mut thrust_modifier = 2.0_f32;
+    let mut is_boosting = false;
+
+    if keybinds.boost.pressed(&keyboard, &mouse) {
+        thrust_modifier = 5.0_f32;
+        is_boosting = true;
+    }
     if keybinds.right.pressed(&keyboard, &mouse) {
-        speed_to_add.x += 1.0_f32;
+        speed_to_add.x += base_speed;
     }
     if keybinds.left.pressed(&keyboard, &mouse) {
-        speed_to_add.x += -1.0_f32;
+        speed_to_add.x += -base_speed;
     }
     if keybinds.forward.pressed(&keyboard, &mouse) {
-        speed_to_add.z += -1.0_f32;
+        speed_to_add.z += -(thrust_modifier * base_speed);
     }
     if keybinds.backward.pressed(&keyboard, &mouse) {
-        speed_to_add.z += 1.0_f32;
+        speed_to_add.z += thrust_modifier * base_speed;
     }
     if keybinds.up.pressed(&keyboard, &mouse) {
-        speed_to_add.y += 1.0_f32;
+        speed_to_add.y += base_speed;
     }
-
     if keybinds.down.pressed(&keyboard, &mouse) {
-        speed_to_add.y += -1.0_f32;
+        speed_to_add.y += -base_speed;
     }
 
     if speed_to_add.length_squared() == 0.0 {
         return;
     }
+
     speed_to_add = transform.rotation * speed_to_add;
     speed_to_add = speed_to_add.normalize() * time.delta_secs() * gameconfig.ship.speed;
     velocity.0 += speed_to_add;
+    if is_boosting {
+        return;
+    }
     velocity.0 = velocity.0.clamp(
         Vec3 {
             x: -10.,
@@ -219,7 +230,7 @@ pub fn roll_spaceship(
     mouse: Res<ButtonInput<MouseButton>>,
 ) {
 
-    let base_speed = 200.0_f32.to_radians(); // ≈3.49 rad/s
+    let base_speed = 100.0_f32.to_radians(); // ≈3.49 rad/s
     let dt = time.delta_secs();
 
     let mut accel_roll = 0.0;
