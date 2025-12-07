@@ -25,6 +25,7 @@ pub fn load_game_config(path: &str) -> structs::GameConfig {
                             "game/ship/gun/ammo/speed/value" => cfg.ship.ammo.speed = v,
                             "game/ship/gun/ammo/despawn_distance/value" => cfg.ship.ammo.distance_despawn = v,
                             "game/ship/camera/transition/value" => cfg.main_cam.speed_transition = v,
+                            "game/ship/camera/maxfov/value" => cfg.main_cam.maxfov = v,
                             "game/ship/camera/menu/fov/value" => cfg.main_cam.menu.fov = v,
                             "game/ship/camera/driving/fov/value" => cfg.main_cam.driving.fov = v,
                             "game/asteroids/spawn_range/value" => cfg.asteroids.spawn_range = v,

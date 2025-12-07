@@ -25,6 +25,7 @@ pub struct AsteroidConfig {
 #[derive(Debug, Clone, Default)]
 pub struct MainCamConfig {
     pub speed_transition: f32,
+    pub maxfov: f32,
     pub driving: CamConfig,
     pub menu: CamConfig
 }

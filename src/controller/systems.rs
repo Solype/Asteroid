@@ -100,29 +100,41 @@ pub fn move_player_system(
     mouse: Res<ButtonInput<MouseButton>>,
     gameconfig: Res<GameConfig>,
     player: Single<(&Transform, &mut Velocity), With<Player>>,
+    player_cam: Single<&mut Projection, With<PlayerCam>>
 ) {
-    let mut speed_to_add = Vec3::default();
     let (transform, mut velocity) = player.into_inner();
+    let is_boosting = keybinds.boost.pressed(&keyboard, &mouse);
+    let goes_forward = keybinds.forward.pressed(&keyboard, &mouse);
+    let dt = time.delta_secs();
+    let mut cam = player_cam.into_inner();
 
-    let base_speed = 1.0_f32;
-    let mut thrust_modifier = 2.0_f32;
-    let mut is_boosting = false;
+    
+    if let Projection::Perspective(proj) = cam.as_mut() {
+        let target_fov = if goes_forward { if is_boosting { gameconfig.main_cam.maxfov } else {
+                (gameconfig.main_cam.maxfov + gameconfig.main_cam.driving.fov) / 2.
+            }
+        } else { gameconfig.main_cam.driving.fov }.to_radians();
 
-    if keybinds.boost.pressed(&keyboard, &mouse) {
-        thrust_modifier = 5.0_f32;
-        is_boosting = true;
+        if proj.fov != target_fov {
+            proj.fov = proj.fov.lerp(target_fov, dt);
+        }
     }
+
+    let mut speed_to_add = Vec3::default();
+    let base_speed = 1.0_f32;
+
+
     if keybinds.right.pressed(&keyboard, &mouse) {
         speed_to_add.x += base_speed;
     }
     if keybinds.left.pressed(&keyboard, &mouse) {
         speed_to_add.x += -base_speed;
     }
-    if keybinds.forward.pressed(&keyboard, &mouse) {
-        speed_to_add.z += -(thrust_modifier * base_speed);
+    if goes_forward {
+        speed_to_add.z += -base_speed;
     }
     if keybinds.backward.pressed(&keyboard, &mouse) {
-        speed_to_add.z += thrust_modifier * base_speed;
+        speed_to_add.z += base_speed;
     }
     if keybinds.up.pressed(&keyboard, &mouse) {
         speed_to_add.y += base_speed;
@@ -136,23 +148,19 @@ pub fn move_player_system(
     }
 
     speed_to_add = transform.rotation * speed_to_add;
-    speed_to_add = speed_to_add.normalize() * time.delta_secs() * gameconfig.ship.speed;
-    velocity.0 += speed_to_add;
+    speed_to_add = speed_to_add.normalize() * dt * gameconfig.ship.speed;
+
     if is_boosting {
-        return;
+        velocity.0 = (velocity.0 + speed_to_add).clamp_length_max(20.);
+    } else {
+        if velocity.0.length_squared() > 100. {
+            if velocity.0.length_squared() > (velocity.0 + speed_to_add).length_squared() {
+                velocity.0 += speed_to_add;
+            }
+        } else {
+            velocity.0 = (velocity.0 + speed_to_add).clamp_length_max(10.);
+        }
     }
-    velocity.0 = velocity.0.clamp(
-        Vec3 {
-            x: -10.,
-            y: -10.,
-            z: -10.,
-        },
-        Vec3 {
-            x: 10.,
-            y: 10.,
-            z: 10.,
-        },
-    );
 }
 
 pub fn mouse_system(
