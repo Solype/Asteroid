@@ -25,6 +25,7 @@ pub struct AsteroidConfig {
 #[derive(Debug, Clone, Default)]
 pub struct MainCamConfig {
     pub speed_transition: f32,
+    pub maxfov: f32,
     pub driving: CamConfig,
     pub menu: CamConfig
 }
@@ -57,9 +58,8 @@ pub struct AmmoConfig {
 pub struct ShipConfig {
     pub music: String,
     pub speed: f32,
+    pub rotation_speed: f32,
     pub virtual_mouse_sensitivity: f32,
-    pub base_rotation_speed: f32,
-    pub base_translation_speed: f32,
     pub thurst_modifier: f32,
     pub asset: String,
     pub backcamera_position: Vec3,
