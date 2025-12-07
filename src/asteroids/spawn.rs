@@ -50,7 +50,8 @@ pub fn asteroid_wave(
 
         let rounded_size = size.round();
 
-        let velocity = -(position.normalize() + random_dir * 0.3).normalize() * f(size) * config.speed;
+        let velocity =
+            -(position.normalize() + random_dir * 0.3).normalize() * f(size) * config.speed;
         let rotation_velocity = Vec3::new(
             rng.random_range(-1.0..1.0),
             rng.random_range(-1.0..1.0),
@@ -108,11 +109,27 @@ pub fn animate_despawn(
     }
 }
 
+pub fn animate_despawn_sun(
+    time: Res<Time>,
+    mut commands: Commands,
+    mut query: Query<(Entity, &mut Transform, &mut DespawnAnimation, &mut Sun)>,
+) {
+    for (entity, mut transform, mut anim, sun) in &mut query {
+        anim.timer.tick(time.delta());
+        let t = 1.0 - anim.timer.fraction();
+        transform.scale = Vec3::splat(t * sun.size);
+        if anim.timer.is_finished() {
+            commands.entity(entity).despawn();
+        }
+    }
+}
+
 pub fn clear_asteroid(
     mut commands: Commands,
     gameconfig: Res<crate::config::structs::GameConfig>,
     player: Single<&Transform, With<Player>>,
     mut query: Query<(Entity, &Transform), (With<Asteroid>, Without<DespawnAnimation>)>,
+    sun_query: Query<(&Sun, &Transform), (Without<DespawnAnimation>, Without<Asteroid>)>,
 ) {
     let config = gameconfig.asteroids.clone();
     for (entity, transform) in &mut query {
@@ -121,6 +138,14 @@ pub fn clear_asteroid(
             commands.entity(entity).insert(DespawnAnimation {
                 timer: Timer::from_seconds(ANIMATION_DURATION, TimerMode::Once),
             });
+        }
+        for (sun, sun_tr) in sun_query {
+            let sun_distance = transform.translation.distance(sun_tr.translation);
+            if sun_distance < sun.size {
+                commands.entity(entity).insert(DespawnAnimation {
+                    timer: Timer::from_seconds(ANIMATION_DURATION, TimerMode::Once),
+                });
+            }
         }
     }
 }
