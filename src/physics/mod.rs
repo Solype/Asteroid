@@ -19,20 +19,13 @@ impl Plugin for PhysicsPlugin {
     }
 }
 
-
-fn move_body(
-    time: Res<Time>,
-    mut query: Query<(&mut Transform, &Velocity)>,
-) {
+fn move_body(time: Res<Time>, mut query: Query<(&mut Transform, &Velocity)>) {
     for (mut transform, velocity) in &mut query {
         transform.translation += **velocity * time.delta_secs();
     }
 }
 
-fn rotate_body(
-    time: Res<Time>,
-    mut query: Query<(&mut Transform , &RotationVelocity)>,
-) {
+fn rotate_body(time: Res<Time>, mut query: Query<(&mut Transform, &RotationVelocity)>) {
     for (mut transform, rotation_velocity) in &mut query {
         let delta_rotation = Quat::from_euler(
             EulerRot::XYZ,
