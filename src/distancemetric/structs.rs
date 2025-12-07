@@ -15,5 +15,8 @@ pub struct MetricCameraTarget {
 #[derive(Component)]
 pub struct MetricText;
 
+#[derive(Component)]
+pub struct SpeedText;
+
 #[derive(Resource)]
 pub struct DistanceTimer(pub Timer);
