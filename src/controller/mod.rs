@@ -42,7 +42,12 @@ pub fn plugin(app: &mut App) {
 
     app.add_systems(
         Update,
-        systems::player_system
+        (
+            systems::player_system,
+            systems::rotate_spaceship,
+            systems::roll_spaceship,
+            systems::move_player_system,
+        )
             .run_if(in_state(GameState::Game))
             .run_if(not(in_state(GameOverState::Drift))),
     );
@@ -59,15 +64,5 @@ pub fn plugin(app: &mut App) {
     app.add_systems(
         Update,
         systems::mouse_system.run_if(in_state(ControllerState::Driving)),
-    );
-
-    app.add_systems(
-        Update,
-        (
-            systems::rotate_spaceship,
-            systems::roll_spaceship,
-            systems::move_player_system,
-        )
-            .run_if(in_state(GameState::Game)),
     );
 }
