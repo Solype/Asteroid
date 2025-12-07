@@ -1,5 +1,5 @@
-use bevy::prelude::*;
 use crate::menu::structs::*;
+use bevy::prelude::*;
 
 pub fn smooth_look_at_system(
     time: Res<Time>,
@@ -11,7 +11,7 @@ pub fn smooth_look_at_system(
     for (entity, mut transform, mut params, mut projection) in q.iter_mut() {
         let up = params.up.unwrap_or(Vec3::Y);
         let speed = params.speed.unwrap_or(1.0);
-            let t = 1.0 - (-speed * dt).exp();
+        let t = 1.0 - (-speed * dt).exp();
 
         if end_of_camera_movement(&params) {
             commands.entity(entity).remove::<SmoothCamMove>();
@@ -20,12 +20,11 @@ pub fn smooth_look_at_system(
         compute_change_look_at(&mut params.look_at, &mut transform, up, t);
         compute_change_pos(&mut params.position, &mut transform, t);
         if let Projection::Perspective(proj) = projection.as_mut() {
-            compute_change_fov(&mut params.fov,  proj, t);
-            compute_change_aspect_ratio(&mut params.aspect_ratio,  proj, t);
+            compute_change_fov(&mut params.fov, proj, t);
+            compute_change_aspect_ratio(&mut params.aspect_ratio, proj, t);
         }
     }
 }
-
 
 ////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////
@@ -33,11 +32,7 @@ pub fn smooth_look_at_system(
 ////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////
 
-fn compute_change_fov(
-    fov: &mut Option<f32>,
-    proj: &mut PerspectiveProjection,
-    t: f32,
-) {
+fn compute_change_fov(fov: &mut Option<f32>, proj: &mut PerspectiveProjection, t: f32) {
     let current_fov = proj.fov;
 
     if let Some(target_fov) = fov {
@@ -58,7 +53,8 @@ fn compute_change_aspect_ratio(
     let current_aspect_ratio = proj.aspect_ratio;
 
     if let Some(target_aspect_ratio) = aspect_ratio {
-        let new_aspect_ratio = current_aspect_ratio + (*target_aspect_ratio - current_aspect_ratio) * t;
+        let new_aspect_ratio =
+            current_aspect_ratio + (*target_aspect_ratio - current_aspect_ratio) * t;
 
         if (new_aspect_ratio - *target_aspect_ratio).abs() < 1e-5 {
             *aspect_ratio = None;
@@ -80,8 +76,7 @@ fn compute_change_pos(param: &mut Option<Vec3>, transform: &mut Transform, t: f3
     transform.translation = transform.translation.lerp(target, t);
 }
 
-fn compute_change_look_at(param : &mut Option<Vec3>, transform : &mut Transform, up : Vec3, t : f32)
-{
+fn compute_change_look_at(param: &mut Option<Vec3>, transform: &mut Transform, up: Vec3, t: f32) {
     let look_at = match param {
         Some(target) => target,
         None => return,
@@ -98,12 +93,12 @@ fn compute_change_look_at(param : &mut Option<Vec3>, transform : &mut Transform,
     transform.rotation = transform.rotation.slerp(look_at_rot, t);
 }
 
-fn end_of_camera_movement(target : &SmoothCamMove) -> bool
-{
-    if target.fov == None 
-    && target.aspect_ratio == None
-    && target.look_at == None
-    && target.position == None {
+fn end_of_camera_movement(target: &SmoothCamMove) -> bool {
+    if target.fov == None
+        && target.aspect_ratio == None
+        && target.look_at == None
+        && target.position == None
+    {
         return true;
     }
     return false;

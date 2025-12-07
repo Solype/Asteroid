@@ -1,11 +1,11 @@
-use bevy::{prelude::*};
 use crate::{globals_structs::Score, score_display::structs::*};
+use bevy::prelude::*;
 
 pub fn toggle_screenshot_camera(
     time: Res<Time>,
     score: Res<Score>,
     mut query: Query<(&mut Camera, &mut ScoreCamTimer)>,
-    mut query_score: Query<(&mut Text, &ScoreText)>
+    mut query_score: Query<(&mut Text, &ScoreText)>,
 ) {
     for (mut camera, mut sc) in &mut query {
         sc.timer.tick(time.delta());

@@ -1,4 +1,3 @@
-mod setup;
 pub(crate) mod structs;
 mod systems;
 

@@ -1,6 +1,9 @@
 use bevy::{audio::Volume, prelude::*};
 
-use crate::{game_over::GameOverState, game_states::GameState, globals_structs::MusicVolume, menu::structs::MenuState};
+use crate::{
+    game_over::GameOverState, game_states::GameState, globals_structs::MusicVolume,
+    menu::structs::MenuState,
+};
 
 #[derive(Component)]
 pub struct BackgroundMusic;
@@ -11,7 +14,7 @@ pub struct BackgroundMusicPlugin;
 struct MusicResources {
     pub menu_music: Handle<AudioSource>,
     pub game_music: Handle<AudioSource>,
-    pub gameover_music: Handle<AudioSource>
+    pub gameover_music: Handle<AudioSource>,
 }
 
 impl Plugin for BackgroundMusicPlugin {
@@ -26,7 +29,7 @@ impl Plugin for BackgroundMusicPlugin {
 fn setup(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    gameconfig: Res<crate::config::structs::GameConfig>
+    gameconfig: Res<crate::config::structs::GameConfig>,
 ) {
     commands.spawn((BackgroundMusic,));
     let mut resource = MusicResources::default();

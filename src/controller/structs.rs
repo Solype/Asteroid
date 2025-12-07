@@ -18,7 +18,7 @@ impl CameraSensitivity {
 
 #[derive(Component, Default)]
 pub struct VirtualMouse {
-    pub pos: Vec2
+    pub pos: Vec2,
 }
 
 #[derive(Clone, Copy, Default, Eq, PartialEq, Debug, Hash, States)]

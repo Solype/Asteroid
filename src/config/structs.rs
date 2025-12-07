@@ -1,4 +1,4 @@
-use bevy::{prelude::{Resource, Vec2, Vec3}};
+use bevy::prelude::{Resource, Vec2, Vec3};
 
 #[derive(Debug, Clone, Default, Resource)]
 pub struct GameConfig {
@@ -18,23 +18,22 @@ pub struct AsteroidConfig {
     pub spawn_range: f32,
     pub despawn_range: f32,
     pub speed: f32,
-    pub rotationnal_speed: f32
+    pub rotationnal_speed: f32,
 }
-
 
 #[derive(Debug, Clone, Default)]
 pub struct MainCamConfig {
     pub speed_transition: f32,
     pub maxfov: f32,
     pub driving: CamConfig,
-    pub menu: CamConfig
+    pub menu: CamConfig,
 }
 
 #[derive(Debug, Clone, Default)]
 pub struct CamConfig {
     pub position: Vec3,
     pub look_at: Vec3,
-    pub fov: f32
+    pub fov: f32,
 }
 
 #[derive(Debug, Clone, Default)]
@@ -73,7 +72,7 @@ pub struct ShipConfig {
     pub screen_right: ScreenQuad,
     pub screen_center: ScreenQuad,
     pub screen_left: ScreenQuad,
-    pub color_particules: (Vec3, Vec3)
+    pub color_particules: (Vec3, Vec3),
 }
 
 #[derive(Debug, Clone, Default)]
