@@ -41,7 +41,7 @@ fn display_renter_target(
 }
 
 
-static SCREEN_WIDTH : u32 = 384;
+static SCREEN_WIDTH : u32 = 128;
 static SCREEN_HEIGHT : u32 = 128;
 
 fn setup_back_cam(

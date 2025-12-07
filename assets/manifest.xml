@@ -26,16 +26,20 @@
 		<rotationnal_speed><value value="0.3"/></rotationnal_speed>
 	</asteroids>
 	<ship>
-		<music><asset src="sounds/game.wav"/></music>
-		<alarm><asset src="sounds/alarm.wav"/></alarm>
+		<music><asset src="sounds/menu.wav"/></music>
+    <alarm><asset src="sounds/alarm.wav"/></alarm>
 		<asset src="Spaceship.glb#Scene0"/>
 		<speed><value value="10."/></speed>
+		<rotation_speed><value value="1.5"/></rotation_speed>
+		<virtual_mouse_sensitivity><value value="0.5"/></virtual_mouse_sensitivity>
+		<thurst_modifier><value value="5.0"/></thurst_modifier>
 		<backcamera>
 			<position><vec3 x="0.0" y="1.1" z="2.0"/></position>
 			<look_at><vec3 x="0.0" y="1.1" z="3.0"/></look_at>
 		</backcamera>
 		<camera>
 			<transition><value value="3.0"/></transition>
+			<maxfov><value value="120.0"/></maxfov>
 			<menu>
 				<look><vec3 x="0.0" y="0.75" z="-0.29"/></look>
 				<position><vec3 x="0.0" y="1.05" z="0.27"/></position>

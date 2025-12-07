@@ -34,6 +34,7 @@ pub fn setup_metric_screen(
             height: Val::Percent(100.0),
             justify_content: JustifyContent::Center,
             align_items: AlignItems::Center,
+            flex_direction: FlexDirection::Column,
             ..default()
         },
         UiTargetCamera(cam_entity),
@@ -41,9 +42,20 @@ pub fn setup_metric_screen(
 
         parent.spawn((
             Text::new("--m"),
-            TextFont { font: font.clone(), font_size: 200.0, ..default() },
+            TextFont { font: font.clone(), font_size: 150.0, ..default() },
             TextColor(Color::srgb(0.0, 1.0, 1.0)),
             MetricText,
+            Node {
+                margin: UiRect::all(Val::Px(30.0)),
+                ..default()
+            },
+        ));
+
+        parent.spawn((
+            Text::new("00v"),
+            TextFont { font: font.clone(), font_size: 150.0, ..default() },
+            TextColor(Color::srgb(0.0, 1.0, 1.0)),
+            SpeedText,
             Node {
                 margin: UiRect::all(Val::Px(30.0)),
                 ..default()
