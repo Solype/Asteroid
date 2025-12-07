@@ -151,6 +151,9 @@ pub fn move_player_system(
     speed_to_add = speed_to_add.normalize() * dt * gameconfig.ship.speed;
 
     if is_boosting {
+        if goes_forward {
+            speed_to_add += transform.forward().as_vec3().normalize();
+        }
         velocity.0 = (velocity.0 + speed_to_add).clamp_length_max(20.);
     } else {
         if velocity.0.length_squared() > 100. {
