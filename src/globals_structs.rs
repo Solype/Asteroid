@@ -1,0 +1,123 @@
+use bevy::prelude::*;
+
+#[derive(Resource)]
+pub struct MusicVolume {
+    pub volume: f32,
+}
+
+#[derive(Clone, Copy)]
+pub enum InputButton {
+    Key(KeyCode),
+    Mouse(MouseButton),
+}
+
+impl InputButton {
+    pub fn to_str(&self) -> String {
+        match self {
+            InputButton::Key(k) => format!("{:?}", k),
+            InputButton::Mouse(b) => format!("Mouse {:?}", b),
+        }
+    }
+
+    pub fn pressed(
+        &self,
+        keyboard: &ButtonInput<KeyCode>,
+        mouse: &ButtonInput<MouseButton>,
+    ) -> bool {
+        match self {
+            InputButton::Key(code) => keyboard.pressed(*code),
+            InputButton::Mouse(code) => mouse.pressed(*code),
+        }
+    }
+
+    pub fn just_pressed(
+        &self,
+        keyboard: &ButtonInput<KeyCode>,
+        mouse: &ButtonInput<MouseButton>,
+    ) -> bool {
+        match self {
+            InputButton::Key(code) => keyboard.just_pressed(*code),
+            InputButton::Mouse(code) => mouse.just_pressed(*code),
+        }
+    }
+
+    pub fn just_released(
+        &self,
+        keyboard: &ButtonInput<KeyCode>,
+        mouse: &ButtonInput<MouseButton>,
+    ) -> bool {
+        match self {
+            InputButton::Key(code) => keyboard.just_released(*code),
+            InputButton::Mouse(code) => mouse.just_released(*code),
+        }
+    }
+}
+
+#[derive(Resource)]
+pub struct Keybinds {
+    // translation
+    pub up: InputButton,       // z
+    pub down: InputButton,     // -z
+    pub right: InputButton,    // -y
+    pub left: InputButton,     // y
+    pub forward: InputButton,  // x
+    pub backward: InputButton, // -x
+    // rotation
+    pub rotate_left: InputButton,  // roll
+    pub rotate_right: InputButton, // -roll
+    // other
+    pub menu: InputButton,
+    pub free_look: InputButton,
+    pub shoot: InputButton,
+    pub boost: InputButton,
+}
+
+impl Default for Keybinds {
+    fn default() -> Self {
+        Self {
+            left: InputButton::Key(KeyCode::KeyQ),
+            right: InputButton::Key(KeyCode::KeyD),
+            forward: InputButton::Key(KeyCode::KeyZ),
+            backward: InputButton::Key(KeyCode::KeyS),
+
+            up: InputButton::Key(KeyCode::Space),
+            down: InputButton::Key(KeyCode::ControlLeft),
+
+            rotate_left: InputButton::Key(KeyCode::KeyA),
+            rotate_right: InputButton::Key(KeyCode::KeyE),
+
+            // Other actions
+            menu: InputButton::Key(KeyCode::Escape),
+            free_look: InputButton::Mouse(MouseButton::Right),
+            shoot: InputButton::Mouse(MouseButton::Left),
+            boost: InputButton::Key(KeyCode::ShiftLeft),
+        }
+    }
+}
+
+#[derive(Component, Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub enum Action {
+    Up,
+    Down,
+    Left,
+    Right,
+    Forward,
+    Backward,
+    RotateLeft,
+    RotateRight,
+    FreeLook,
+    Shoot,
+    Menu,
+    Boost,
+}
+
+#[derive(Resource, Default)]
+pub struct Score {
+    pub value: u32,
+}
+
+#[derive(Resource)]
+pub struct UIRessources {
+    pub bg: Handle<Image>,
+    pub font: Handle<Font>,
+}

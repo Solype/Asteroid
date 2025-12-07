@@ -1,0 +1,110 @@
+<game>
+	<window>
+		<vec2 x="1280.0" y="720.0"/>
+		<title>Ast3roiD</title>
+		<name>Ast3roiD</name>
+	</window>
+	<ui>
+		<background><asset src="menu_bg.jpg"/></background>
+		<font><asset src="font.ttf"/></font>
+		<dimension><vec2 x="90" y="90"/></dimension>
+		<sounds>
+			<asset src="sounds/menu_bip1.wav"/>
+			<asset src="sounds/menu_bip2.wav"/>
+		</sounds>
+		<music><asset src="sounds/menu.wav"/></music>
+	</ui>
+	<asteroids>
+		<spawn_range><value value="150"/></spawn_range>
+		<despawn_range><value value="200"/></despawn_range>
+		<size_range>
+			<min><value value="1.0"/></min>
+			<max><value value="10.0"/></max>
+		</size_range>
+		<max_number><value value="100"/></max_number>
+		<speed><value value="1"/></speed>
+		<rotationnal_speed><value value="0.3"/></rotationnal_speed>
+	</asteroids>
+	<ship>
+		<music><asset src="sounds/menu.wav"/></music>
+    <alarm><asset src="sounds/alarm.wav"/></alarm>
+		<asset src="Spaceship.glb#Scene0"/>
+		<speed><value value="10."/></speed>
+		<rotation_speed><value value="1.5"/></rotation_speed>
+		<virtual_mouse_sensitivity><value value="0.5"/></virtual_mouse_sensitivity>
+		<thurst_modifier><value value="5.0"/></thurst_modifier>
+		<backcamera>
+			<position><vec3 x="0.0" y="1.1" z="2.0"/></position>
+			<look_at><vec3 x="0.0" y="1.1" z="3.0"/></look_at>
+		</backcamera>
+		<camera>
+			<transition><value value="3.0"/></transition>
+			<maxfov><value value="120.0"/></maxfov>
+			<menu>
+				<look><vec3 x="0.0" y="0.75" z="-0.29"/></look>
+				<position><vec3 x="0.0" y="1.05" z="0.27"/></position>
+				<fov><value value="15.0"/></fov>
+			</menu>
+			<driving>
+				<position><vec3 x="0.0" y="1.2" z="0.3"/></position>
+				<look><vec3 x="0.0" y="1.2" z="0.0"/></look>
+				<fov><value value="80.0"/></fov>
+			</driving>
+		</camera>
+		<thruster>
+			<right>
+				<vec3 x="0.328276" z="1.51121" y="1.00635"/>
+			</right>
+			<left>
+				<vec3 x="-0.328276" z="1.51121" y="1.00635"/>
+			</left>
+			<particules_color>
+				<from><vec3 x="1.0" y="0.0" z="0.0"/></from>
+				<to><vec3 x="0.0" y="0.0" z="1.0"/></to>
+			</particules_color>
+		</thruster>
+
+		<gun>
+			<ammo>
+				<speed><value value="50"/></speed>
+				<color><vec3 x="1.0" y="0.0" z="0.0"/></color>
+				<despawn_distance><value value="100"/></despawn_distance>
+				<sounds>
+					<asset src="sounds/pew1.wav"/>
+					<asset src="sounds/pew2.wav"/>
+					<asset src="sounds/pew3.wav"/>
+					<asset src="sounds/pew4.wav"/>
+				</sounds>
+			</ammo>
+			<right>
+				<vec3 x="0.715" y="0.895" z="-0.06"/>
+			</right>
+			<left>
+				<vec3 x="-0.715" y="0.895" z="-0.06"/>
+			</left>
+		</gun>
+
+		<screens>
+			<right>
+				<tr><vec3 x="0.3396" z="-0.458" y="0.988"/></tr>
+				<tl><vec3 x="0.119" z="-0.458" y="0.988"/></tl>
+				<br><vec3 x="0.3396" z="-0.39" y="0.83"/></br>
+				<bl><vec3 x="0.119" z="-0.39" y="0.83"/></bl>
+			</right>
+
+			<center>
+				<tr><vec3 x="0.073" z="-0.363" y="0.78"/></tr>
+				<tl><vec3 x="-0.073" z="-0.363" y="0.78"/></tl>
+				<br><vec3 x="0.074" z="-0.239" y="0.69"/></br>
+				<bl><vec3 x="-0.074" z="-0.239" y="0.69"/></bl>
+			</center>
+
+			<left>
+				<tr><vec3 x="-0.119" z="-0.458" y="0.988"/></tr>
+				<tl><vec3 x="-0.3396" z="-0.458" y="0.988"/></tl>
+				<br><vec3 x="-0.119" z="-0.39" y="0.83"/></br>
+				<bl><vec3 x="-0.3396" z="-0.39" y="0.83"/></bl>
+			</left>
+		</screens>
+	</ship>
+</game>
