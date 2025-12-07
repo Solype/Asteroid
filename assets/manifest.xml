@@ -26,7 +26,7 @@
 		<rotationnal_speed><value value="0.3"/></rotationnal_speed>
 	</asteroids>
 	<ship>
-		<music><asset src="sounds/menu.wav"/></music>
+		<music><asset src="sounds/game.wav"/></music>
 		<asset src="Spaceship.glb#Scene0"/>
 		<speed><value value="10."/></speed>
 		<rotation_speed><value value="1.5"/></rotation_speed>
