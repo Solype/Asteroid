@@ -125,34 +125,34 @@ pub fn move_player_system(
         }
     }
 
-    let mut speed_to_add = Vec3::default();
+    let mut speed_direction = Vec3::default();
     let base_speed = 1.0_f32;
 
     if keybinds.right.pressed(&keyboard, &mouse) {
-        speed_to_add.x += base_speed;
+        speed_direction.x += base_speed;
     }
     if keybinds.left.pressed(&keyboard, &mouse) {
-        speed_to_add.x += -base_speed;
+        speed_direction.x += -base_speed;
     }
     if goes_forward {
-        speed_to_add.z += -base_speed;
+        speed_direction.z += -base_speed;
     }
     if keybinds.backward.pressed(&keyboard, &mouse) {
-        speed_to_add.z += base_speed;
+        speed_direction.z += base_speed;
     }
     if keybinds.up.pressed(&keyboard, &mouse) {
-        speed_to_add.y += base_speed;
+        speed_direction.y += base_speed;
     }
     if keybinds.down.pressed(&keyboard, &mouse) {
-        speed_to_add.y += -base_speed;
+        speed_direction.y += -base_speed;
     }
 
-    if speed_to_add.length_squared() == 0.0 {
+    if speed_direction.length_squared() == 0.0 {
         return;
     }
 
-    speed_to_add = transform.rotation * speed_to_add;
-    speed_to_add = speed_to_add.normalize() * dt * gameconfig.ship.speed;
+    speed_direction = (transform.rotation * speed_direction).normalize();
+    let mut speed_to_add = speed_direction * dt * gameconfig.ship.speed;
 
     if is_boosting {
         if goes_forward {
@@ -161,9 +161,16 @@ pub fn move_player_system(
         }
         velocity.0 = (velocity.0 + speed_to_add).clamp_length_max(20.);
     } else {
+        
         if velocity.0.length_squared() > 100. {
             if velocity.0.length_squared() > (velocity.0 + speed_to_add).length_squared() {
                 velocity.0 += speed_to_add;
+            } else {
+                let current_vel = velocity.0.length();
+                let overspeed = current_vel - 10.;
+                let current_speed_dir = velocity.0.normalize();
+                let dot = Vec3::dot(current_speed_dir, speed_direction);
+                velocity.0 = (velocity.0 + speed_to_add).clamp_length_max(10. + overspeed * dot);
             }
         } else {
             velocity.0 = (velocity.0 + speed_to_add).clamp_length_max(10.);
