@@ -107,7 +107,6 @@ pub fn move_player_system(
     let goes_forward = keybinds.forward.pressed(&keyboard, &mouse);
     let dt = time.delta_secs();
     let mut cam = player_cam.into_inner();
-
     
     if let Projection::Perspective(proj) = cam.as_mut() {
         let target_fov = if goes_forward { if is_boosting { gameconfig.main_cam.maxfov } else {
@@ -172,6 +171,7 @@ pub fn mouse_system(
         Single<&Window, With<PrimaryWindow>>,
     )>,
     accumulated_mouse_motion: Res<AccumulatedMouseMotion>,
+    gameconfig: Res<GameConfig>,
 ) {
     let win_dim: Vec2 = Vec2 {
         x: params.p1().width(),
@@ -183,7 +183,7 @@ pub fn mouse_system(
 
     let (mut node, mut virtual_mouse) = params.p0().into_inner();
 
-    virtual_mouse.pos += accumulated_mouse_motion.delta;
+    virtual_mouse.pos += accumulated_mouse_motion.delta * gameconfig.ship.virtual_mouse_sensitivity;
 
     // Clamp the virtual_mouse.pos to the circle
     let pos_from_center = virtual_mouse.pos;
@@ -204,11 +204,12 @@ pub fn rotate_spaceship(
     mut transform: Single<&mut Transform, With<Player>>,
     mut vm: Single<&mut VirtualMouse>,
     time: Res<Time>,
+    gameconfig: Res<GameConfig>,
 ) {
     // --- Configurable values ---
     let dead_radius = 12.0; // No rotation inside this radius
     let max_radius = 150.0; // Where rotation reaches full speed
-    let base_speed = 1.0;
+    let base_speed = gameconfig.ship.base_rotation_speed;
 
     let offset = vm.pos;
     let dist = offset.length();

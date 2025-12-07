@@ -283,7 +283,7 @@ pub fn asteroid_ammo_collision(
                         AudioPlayer::new(handle.clone()),
                         PlaybackSettings {
                             mode: bevy::audio::PlaybackMode::Despawn,
-                            volume: Volume::Linear(master_volume.volume / 100.0_f32),
+                            volume: Volume::Linear(master_volume.volume),
                             spatial: true,
                             ..Default::default()
                         },
