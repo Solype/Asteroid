@@ -151,7 +151,7 @@ pub fn move_player_system(
 
     if is_boosting {
         if goes_forward {
-            speed_to_add += transform.forward().as_vec3().normalize();
+            speed_to_add += transform.forward().as_vec3().normalize() * dt * gameconfig.ship.thurst_modifier;
         }
         velocity.0 = (velocity.0 + speed_to_add).clamp_length_max(20.);
     } else {
@@ -209,7 +209,7 @@ pub fn rotate_spaceship(
     // --- Configurable values ---
     let dead_radius = 12.0; // No rotation inside this radius
     let max_radius = 150.0; // Where rotation reaches full speed
-    let base_speed = gameconfig.ship.base_rotation_speed;
+    let base_speed = gameconfig.ship.rotation_speed;
 
     let offset = vm.pos;
     let dist = offset.length();
