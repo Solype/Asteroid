@@ -15,6 +15,7 @@ jobs:
     name: Build ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         include:
           - os: ubuntu-latest
@@ -35,12 +36,17 @@ jobs:
         with:
           targets: ${{ matrix.target }}
 
-      # Linux-specific dependencies for Bevy (ALSA, UDEV)
+      - name: Rust Cache
+        uses: swatinem/rust-cache@v2
+        with:
+          prefix-key: "v1-rust"
+
+      # Linux-specific dependencies for Bevy (ALSA, UDEV, WAYLAND)
       - name: Install Linux Dependencies
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y libasound2-dev libudev-dev pkg-config
+          sudo apt-get install -y libasound2-dev libudev-dev pkg-config libwayland-dev libxkbcommon-dev
 
       - name: Build Release
         run: cargo build --release --target ${{ matrix.target }}
