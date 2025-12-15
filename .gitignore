@@ -30,3 +30,4 @@ AST3ROID
 .vscode/
 
 Cargo.lock
+.DS_Store
