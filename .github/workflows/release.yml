@@ -1,0 +1,83 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - "main"
+    tags:
+      - "v*" # Triggers when you push a tag like v0.1.0
+
+env:
+  BINARY_NAME: AST3ROID
+
+jobs:
+  build:
+    name: Build ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            archive_name: UNX-AST3ROID-x64-${{ github.ref_name }}.tar.gz
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            archive_name: WIN-AST3ROID-x64-${{ github.ref_name }}.zip
+          - os: macos-latest
+            target: aarch64-apple-darwin
+            archive_name: MAC-AST3ROID-arm64-${{ github.ref_name }}.zip
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Install Rust Toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - name: Rust Cache
+        uses: swatinem/rust-cache@v2
+        with:
+          prefix-key: "v1-rust"
+
+      # Linux-specific dependencies for Bevy (ALSA, UDEV, WAYLAND)
+      - name: Install Linux Dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libasound2-dev libudev-dev pkg-config libwayland-dev libxkbcommon-dev
+
+      - name: Build Release
+        run: cargo build --release --target ${{ matrix.target }}
+
+      - name: Bundle Assets and Binary (Unix)
+        if: runner.os != 'Windows'
+        run: |
+          mkdir distribution
+          cp target/${{ matrix.target }}/release/${{ env.BINARY_NAME }} distribution/
+          cp -r assets distribution/
+          cd distribution
+          if [ "${{ runner.os }}" = "Linux" ]; then
+            tar -czvf ../${{ matrix.archive_name }} *
+          else
+            # macOS uses zip
+            zip -r ../${{ matrix.archive_name }} *
+          fi
+
+      - name: Bundle Assets and Binary (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path distribution
+          Copy-Item -Path "target\${{ matrix.target }}\release\${{ env.BINARY_NAME }}.exe" -Destination distribution\
+          Copy-Item -Path "assets" -Destination distribution\ -Recurse
+          Compress-Archive -Path "distribution\*" -DestinationPath ${{ matrix.archive_name }}
+
+      - name: Upload Release Artifact
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: ${{ matrix.archive_name }}
