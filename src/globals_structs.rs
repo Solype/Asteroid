@@ -75,15 +75,15 @@ pub struct Keybinds {
 impl Default for Keybinds {
     fn default() -> Self {
         Self {
-            left: InputButton::Key(KeyCode::KeyQ),
+            left: InputButton::Key(KeyCode::KeyA),
             right: InputButton::Key(KeyCode::KeyD),
-            forward: InputButton::Key(KeyCode::KeyZ),
+            forward: InputButton::Key(KeyCode::KeyW),
             backward: InputButton::Key(KeyCode::KeyS),
 
             up: InputButton::Key(KeyCode::Space),
             down: InputButton::Key(KeyCode::ControlLeft),
 
-            rotate_left: InputButton::Key(KeyCode::KeyA),
+            rotate_left: InputButton::Key(KeyCode::KeyQ),
             rotate_right: InputButton::Key(KeyCode::KeyE),
 
             // Other actions
