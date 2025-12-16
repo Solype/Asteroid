@@ -2,10 +2,10 @@ name: Release
 
 on:
   push:
+    branches:
+      - "main"
     tags:
       - "v*" # Triggers when you push a tag like v0.1.0
-
-# on: [push, workflow_dispatch]
 
 env:
   BINARY_NAME: AST3ROID
