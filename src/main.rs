@@ -31,8 +31,10 @@ use globals_structs::*;
 use crate::physics::{RotationVelocity, Velocity};
 use crate::player::PlayerHitBox;
 
+const MANIFEST_XML: &str = include_str!("../manifest.xml");
 fn main() {
-    let gameconfig = config::load_game_config("assets/manifest.xml");
+
+    let gameconfig = config::load_game_config(MANIFEST_XML);
 
     let width = if gameconfig.window.x > 0.0 {
         gameconfig.window.x as u32

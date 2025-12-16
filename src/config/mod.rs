@@ -1,12 +1,10 @@
 use bevy::prelude::{Vec2, Vec3};
-use std::fs::File;
 use xml::reader::{EventReader, XmlEvent};
 
 pub mod structs;
 
-pub fn load_game_config(path: &str) -> structs::GameConfig {
-    let file = File::open(path).expect("Cannot open XML file");
-    let parser = EventReader::new(file);
+pub fn load_game_config(xml_str: &str) -> structs::GameConfig {
+    let parser = EventReader::from_str(xml_str);
 
     let mut cfg = structs::GameConfig::default();
     let mut scope: Vec<String> = vec![];
