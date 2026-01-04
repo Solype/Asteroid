@@ -6,6 +6,7 @@ on:
       - "main"
     tags:
       - "v*" # Triggers when you push a tag like v0.1.0
+  workflow_dispatch:
 
 env:
   BINARY_NAME: AST3ROID
@@ -43,7 +44,6 @@ jobs:
         with:
           prefix-key: "v1-rust"
 
-      # Linux-specific dependencies for Bevy (ALSA, UDEV, WAYLAND)
       - name: Install Linux Dependencies
         if: runner.os == 'Linux'
         run: |
@@ -53,20 +53,55 @@ jobs:
       - name: Build Release
         run: cargo build --release --target ${{ matrix.target }}
 
-      - name: Bundle Assets and Binary (Unix)
-        if: runner.os != 'Windows'
+      # --- Linux Bundling (Standard Tarball) ---
+      - name: Bundle Assets and Binary (Linux)
+        if: runner.os == 'Linux'
         run: |
           mkdir distribution
           cp target/${{ matrix.target }}/release/${{ env.BINARY_NAME }} distribution/
           cp -r assets distribution/
           cd distribution
-          if [ "${{ runner.os }}" = "Linux" ]; then
-            tar -czvf ../${{ matrix.archive_name }} *
-          else
-            # macOS uses zip
-            zip -r ../${{ matrix.archive_name }} *
-          fi
+          tar -czvf ../${{ matrix.archive_name }} *
 
+      # --- macOS Bundling (.app Bundle) ---
+      - name: Bundle Assets and Binary (macOS App)
+        if: runner.os == 'macOS'
+        run: |
+          # 1. Create the .app structure
+          APP_DIR="${{ env.BINARY_NAME }}.app"
+          mkdir -p "$APP_DIR/Contents/MacOS"
+          mkdir -p "$APP_DIR/Contents/Resources"
+          
+          # 2. Create a basic Info.plist (Required for the OS to recognize it as an App)
+          cat <<EOF > "$APP_DIR/Contents/Info.plist"
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+              <key>CFBundleExecutable</key>
+              <string>${{ env.BINARY_NAME }}</string>
+              <key>CFBundleIdentifier</key>
+              <string>com.github.${{ github.repository_owner }}.${{ env.BINARY_NAME }}</string>
+              <key>CFBundleName</key>
+              <string>${{ env.APP_NAME }}</string>
+              <key>CFBundleVersion</key>
+              <string>1.0</string>
+              <key>CFBundlePackageType</key>
+              <string>APPL</string>
+          </dict>
+          </plist>
+          EOF
+          
+          # 3. Copy the binary
+          cp "target/${{ matrix.target }}/release/${{ env.BINARY_NAME }}" "$APP_DIR/Contents/MacOS/"
+          
+          # 4. Copy assets (Put them in MacOS folder so Bevy finds them relative to binary)
+          cp -r assets "$APP_DIR/Contents/MacOS/"
+          
+          # 5. Zip the .app bundle
+          zip -r ${{ matrix.archive_name }} "$APP_DIR"
+
+      # --- Windows Bundling (Zip) ---
       - name: Bundle Assets and Binary (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
