@@ -1,0 +1,118 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - "main"
+    tags:
+      - "v*" # Triggers when you push a tag like v0.1.0
+  workflow_dispatch:
+
+env:
+  BINARY_NAME: AST3ROID
+
+jobs:
+  build:
+    name: Build ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            archive_name: UNX-AST3ROID-x64-${{ github.ref_name }}.tar.gz
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            archive_name: WIN-AST3ROID-x64-${{ github.ref_name }}.zip
+          - os: macos-latest
+            target: aarch64-apple-darwin
+            archive_name: MAC-AST3ROID-arm64-${{ github.ref_name }}.zip
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Install Rust Toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - name: Rust Cache
+        uses: swatinem/rust-cache@v2
+        with:
+          prefix-key: "v1-rust"
+
+      - name: Install Linux Dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libasound2-dev libudev-dev pkg-config libwayland-dev libxkbcommon-dev
+
+      - name: Build Release
+        run: cargo build --release --target ${{ matrix.target }}
+
+      # --- Linux Bundling (Standard Tarball) ---
+      - name: Bundle Assets and Binary (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          mkdir distribution
+          cp target/${{ matrix.target }}/release/${{ env.BINARY_NAME }} distribution/
+          cp -r assets distribution/
+          cd distribution
+          tar -czvf ../${{ matrix.archive_name }} *
+
+      # --- macOS Bundling (.app Bundle) ---
+      - name: Bundle Assets and Binary (macOS App)
+        if: runner.os == 'macOS'
+        run: |
+          # 1. Create the .app structure
+          APP_DIR="${{ env.BINARY_NAME }}.app"
+          mkdir -p "$APP_DIR/Contents/MacOS"
+          mkdir -p "$APP_DIR/Contents/Resources"
+          
+          # 2. Create a basic Info.plist (Required for the OS to recognize it as an App)
+          cat <<EOF > "$APP_DIR/Contents/Info.plist"
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+              <key>CFBundleExecutable</key>
+              <string>${{ env.BINARY_NAME }}</string>
+              <key>CFBundleIdentifier</key>
+              <string>com.github.${{ github.repository_owner }}.${{ env.BINARY_NAME }}</string>
+              <key>CFBundleName</key>
+              <string>${{ env.APP_NAME }}</string>
+              <key>CFBundleVersion</key>
+              <string>1.0</string>
+              <key>CFBundlePackageType</key>
+              <string>APPL</string>
+          </dict>
+          </plist>
+          EOF
+          
+          # 3. Copy the binary
+          cp "target/${{ matrix.target }}/release/${{ env.BINARY_NAME }}" "$APP_DIR/Contents/MacOS/"
+          
+          # 4. Copy assets (Put them in MacOS folder so Bevy finds them relative to binary)
+          cp -r assets "$APP_DIR/Contents/MacOS/"
+          
+          # 5. Zip the .app bundle
+          zip -r ${{ matrix.archive_name }} "$APP_DIR"
+
+      # --- Windows Bundling (Zip) ---
+      - name: Bundle Assets and Binary (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path distribution
+          Copy-Item -Path "target\${{ matrix.target }}\release\${{ env.BINARY_NAME }}.exe" -Destination distribution\
+          Copy-Item -Path "assets" -Destination distribution\ -Recurse
+          Compress-Archive -Path "distribution\*" -DestinationPath ${{ matrix.archive_name }}
+
+      - name: Upload Release Artifact
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: ${{ matrix.archive_name }}
